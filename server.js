@@ -189,9 +189,15 @@ const handleSignup = (req, res) => {
     const note = cleanStr(body.note, 300);
     const igHandle = cleanStr(body.igHandle, 60);
     const igFollowed = body.igFollowed === true;
+    const agreedPayment = body.agreedPayment === true;
+    const agreedAttend = body.agreedAttend === true;
     const eventId = cleanStr(body.eventId, 60); // 空字串 = 先加入名單、開團通知
     if (!name || !contact) {
       sendJson(res, 400, { error: "暱稱和聯絡方式都要填喔" });
+      return;
+    }
+    if (!agreedPayment || !agreedAttend) {
+      sendJson(res, 400, { error: "要先同意報名須知（費用與準時出席）才能報名喔" });
       return;
     }
     const events = readJsonFile(EVENTS_PATH, []);
@@ -220,6 +226,9 @@ const handleSignup = (req, res) => {
       note,
       igHandle,
       igFollowed,
+      agreedPayment,
+      agreedAttend,
+      paid: false,
       createdAt: new Date().toISOString(),
     };
     writeJsonAtomic(SIGNUPS_PATH, [...signups, entry], (err) => {
@@ -270,6 +279,24 @@ const handleAdmin = (req, res, pathname) => {
         return;
       }
       writeJsonAtomic(EVENTS_PATH, body.events, (err) => {
+        if (err) sendJson(res, 500, { error: "write failed" });
+        else sendJson(res, 200, { success: true });
+      });
+    });
+    return;
+  }
+
+  // 標記已匯款：PATCH /api/admin/signups/{id} {paid: true|false}
+  const m = pathname.match(/^\/api\/admin\/signups\/([a-f0-9]{16})$/);
+  if (req.method === "PATCH" && m) {
+    readJsonBody(req, res, (body) => {
+      const signups = readJsonFile(SIGNUPS_PATH, []);
+      if (!signups.some((s) => s.id === m[1])) {
+        sendJson(res, 404, { error: "signup not found" });
+        return;
+      }
+      const next = signups.map((s) => (s.id === m[1] ? { ...s, paid: body.paid === true } : s));
+      writeJsonAtomic(SIGNUPS_PATH, next, (err) => {
         if (err) sendJson(res, 500, { error: "write failed" });
         else sendJson(res, 200, { success: true });
       });

@@ -66,6 +66,12 @@
     .quiz-msg.err { color: var(--fizz); }
     .done { text-align: center; padding: 1.5rem 0 0.5rem; }
     .done .big { font-size: 3rem; }
+    .fee-box {
+      text-align: center; background: #fff7f2; border: 1.5px solid var(--fizz);
+      border-radius: 14px; padding: 1rem; margin-bottom: 1.2rem;
+    }
+    .fee-box .fee-num { display: block; font-family: var(--font-display); font-size: 1.6rem; color: var(--fizz); }
+    .fee-box .fee-sub { font-size: 0.88rem; color: var(--cola-soft); }
     .done h2 { text-align: center; margin: 0.6rem 0; }
     .done p { color: var(--cola-soft); margin-bottom: 1.4rem; }
   </style>
@@ -83,7 +89,7 @@
 <div class="quiz-wrap">
   <div class="quiz-card">
     <div class="quiz-progress" id="progress" aria-hidden="true">
-      <span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span>
     </div>
 
     <!-- Step 1：選場次 -->
@@ -110,8 +116,28 @@
       </label>
     </section>
 
-    <!-- Step 3：追蹤 IG -->
+    <!-- Step 3：報名須知（費用 + 出席承諾） -->
     <section class="step" data-step="2">
+      <h2>報名須知 📋</h2>
+      <p class="hint">場地和座位都是先訂好的，所以我們收一點點費用，確保大家都會出現。</p>
+      <div class="fee-box">
+        <span class="fee-num">報名費 $50</span>
+        <span class="fee-sub">先匯款完成，名額才算你的</span>
+      </div>
+      <div class="choice">
+        <label>
+          <input type="checkbox" id="f-agree-pay">
+          <span class="t">我了解報名費 50 元要先匯款，完成匯款才算報名成功</span>
+        </label>
+        <label>
+          <input type="checkbox" id="f-agree-attend">
+          <span class="t">我會準時出席，不無故缺席、不遲到</span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Step 4：追蹤 IG -->
+    <section class="step" data-step="3">
       <h2>順手追蹤一下 IG 🙌</h2>
       <p class="hint">活動照片、下一場預告都會發在這裡，追蹤才不會漏接。</p>
       <div class="ig-box">
@@ -129,8 +155,8 @@
       </label>
     </section>
 
-    <!-- Step 4：想說的話 -->
-    <section class="step" data-step="3">
+    <!-- Step 5：想說的話 -->
+    <section class="step" data-step="4">
       <h2>最後，想說點什麼嗎?</h2>
       <p class="hint">選填。第一次參加？想聊的話題？都可以寫。</p>
       <label class="field">
@@ -141,10 +167,10 @@
     <!-- 完成畫面 -->
     <section class="step" data-step="done">
       <div class="done">
-        <div class="big">🥤🎉</div>
-        <h2>報名成功！</h2>
-        <p>我們會盡快用 LINE／電話跟你確認細節。<br>先去 IG 逛逛，看看之前的小聚長什麼樣子吧。</p>
-        <a class="btn btn-primary" href="https://www.instagram.com/we_i_meet" target="_blank" rel="noopener">追蹤 @we_i_meet</a>
+        <div class="big">🥤✨</div>
+        <h2>還差最後一步！</h2>
+        <p>資料收到了。現在<strong>私訊我們的 IG</strong>，跟我們說你報名了，<br>我們會把匯款帳號給你——<strong>完成匯款，名額就是你的</strong>。</p>
+        <a class="btn btn-primary" href="https://ig.me/m/we_i_meet" target="_blank" rel="noopener">私訊 @we_i_meet 完成報名 →</a>
         <p style="margin-top:1rem"><a href="/">回官網首頁</a></p>
       </div>
     </section>

@@ -1,6 +1,6 @@
 // 報名問卷：一題一步，最後送 POST /api/signup
 const WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"];
-const STEP_COUNT = 4;
+const STEP_COUNT = 5;
 let current = 0;
 
 const $ = (id) => document.getElementById(id);
@@ -79,6 +79,9 @@ const validate = (step) => {
     if (!$("f-name").value.trim()) return "暱稱要填喔，不然不知道怎麼叫你";
     if (!$("f-contact").value.trim()) return "留個 LINE ID 或電話，才通知得到你";
   }
+  if (step === 2) {
+    if (!$("f-agree-pay").checked || !$("f-agree-attend").checked) return "兩個都勾一下，我們才能幫你留位子";
+  }
   return "";
 };
 
@@ -97,6 +100,8 @@ const submit = async () => {
         note: $("f-note").value.trim(),
         igHandle: $("f-ig").value.trim(),
         igFollowed: $("f-followed").checked,
+        agreedPayment: $("f-agree-pay").checked,
+        agreedAttend: $("f-agree-attend").checked,
       }),
     });
     const data = await res.json();

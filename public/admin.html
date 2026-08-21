@@ -48,7 +48,7 @@
     </div>
     <div class="table-scroll">
       <table>
-        <thead><tr><th>時間</th><th>活動</th><th>暱稱</th><th>LINE/電話</th><th>IG</th><th>想說的話</th></tr></thead>
+        <thead><tr><th>💰</th><th>時間</th><th>活動</th><th>暱稱</th><th>LINE/電話</th><th>IG</th><th>想說的話</th></tr></thead>
         <tbody id="signup-rows"></tbody>
       </table>
     </div>
@@ -101,6 +101,23 @@ const render = (data) => {
   tbody.textContent = "";
   signups.forEach((s) => {
     const tr = document.createElement("tr");
+
+    const paidTd = document.createElement("td");
+    const paidCb = document.createElement("input");
+    paidCb.type = "checkbox";
+    paidCb.checked = !!s.paid;
+    paidCb.title = "已匯款";
+    paidCb.addEventListener("change", async () => {
+      try {
+        await api("/api/admin/signups/" + s.id, { method: "PATCH", body: JSON.stringify({ paid: paidCb.checked }) });
+      } catch (err) {
+        paidCb.checked = !paidCb.checked;
+        alert("更新失敗：" + err.message);
+      }
+    });
+    paidTd.appendChild(paidCb);
+    tr.appendChild(paidTd);
+
     const ig = (s.igHandle || "") + (s.igFollowed ? "（已追蹤 ✓）" : "");
     [new Date(s.createdAt).toLocaleString("zh-TW"), eventTitle(s.eventId), s.name, s.contact, ig, s.note || ""].forEach((v) => {
       const td = document.createElement("td");
@@ -138,9 +155,13 @@ $("save-events").addEventListener("click", async () => {
 });
 
 $("copy-csv").addEventListener("click", async () => {
-  const rows = [["time", "event", "name", "contact", "ig", "note"]];
+  const rows = [["paid", "time", "event", "name", "contact", "ig", "note"]];
   document.querySelectorAll("#signup-rows tr").forEach((tr) => {
-    rows.push([...tr.children].map((td) => '"' + td.textContent.replace(/"/g, '""') + '"'));
+    rows.push([...tr.children].map((td) => {
+      const cb = td.querySelector("input[type=checkbox]");
+      const v = cb ? (cb.checked ? "paid" : "") : td.textContent;
+      return '"' + v.replace(/"/g, '""') + '"';
+    }));
   });
   await navigator.clipboard.writeText(rows.map((r) => r.join(",")).join("\n"));
   setMsg("copy-msg", "已複製 ✓", true);
