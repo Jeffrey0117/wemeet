@@ -138,29 +138,88 @@ const ensureData = () => {
   if (!fs.existsSync(MEMBERS_PATH)) fs.writeFileSync(MEMBERS_PATH, "{}", "utf8");
 };
 
-/* ---------- LetMeUse JWT（HS256 驗簽，零依賴） ---------- */
+/* ---------- LetMeUse JWT 驗簽（ES256 via JWKS，HS256 過渡期相容） ---------- */
 
-const b64url = (buf) => buf.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+// JWKS 公鑰快取：背景抓、同步讀（照 quickky jwks-cache 模式）
+const LMU_BASE_URL = (ENV.LETMEUSE_BASE_URL || "").replace(/\/$/, "");
+const JWKS_URL = ENV.LETMEUSE_JWKS_URL || (LMU_BASE_URL ? LMU_BASE_URL + "/api/jwks" : "");
+let jwksKeys = new Map();
+let jwksLastFetch = 0;
+let jwksFetching = false;
+
+const refreshJwks = async () => {
+  if (jwksFetching || !JWKS_URL) return;
+  jwksFetching = true;
+  try {
+    const res = await fetch(JWKS_URL);
+    if (!res.ok) return;
+    const data = await res.json();
+    const m = new Map();
+    for (const jwk of data.keys || []) {
+      try {
+        if (jwk.kid) m.set(jwk.kid, crypto.createPublicKey({ key: jwk, format: "jwk" }));
+      } catch (err) {}
+    }
+    if (m.size) {
+      jwksKeys = m;
+      jwksLastFetch = Date.now();
+    }
+  } catch (err) {
+  } finally {
+    jwksFetching = false;
+  }
+};
+
+const getJwksKey = (kid) => {
+  const key = jwksKeys.get(kid);
+  if (!key && Date.now() - jwksLastFetch > 60 * 1000) void refreshJwks();
+  return key || null;
+};
 
 const verifyLmuToken = (token) => {
-  if (!LMU_SECRET || !token) return null;
-  const parts = token.split(".");
-  if (parts.length !== 3) return null;
-  const expected = b64url(crypto.createHmac("sha256", LMU_SECRET).update(parts[0] + "." + parts[1]).digest());
-  if (!timingSafeEqual(expected, parts[2])) return null;
-  let payload;
+  if (!token) return null;
   try {
-    payload = JSON.parse(Buffer.from(parts[1], "base64url").toString("utf8"));
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    const [h, p, s] = parts;
+    const header = JSON.parse(Buffer.from(h, "base64url").toString("utf8"));
+
+    if (header.alg === "ES256") {
+      const pub = getJwksKey(header.kid);
+      if (!pub) return null;
+      const ok = crypto.verify(
+        "sha256",
+        Buffer.from(h + "." + p),
+        { key: pub, dsaEncoding: "ieee-p1363" },
+        Buffer.from(s, "base64url")
+      );
+      if (!ok) return null;
+    } else if (header.alg === "HS256") {
+      if (!LMU_SECRET) return null;
+      const expected = crypto.createHmac("sha256", LMU_SECRET).update(h + "." + p).digest();
+      const actual = Buffer.from(s, "base64url");
+      if (actual.length !== expected.length || !crypto.timingSafeEqual(actual, expected)) return null;
+    } else {
+      return null;
+    }
+
+    const payload = JSON.parse(Buffer.from(p, "base64url").toString("utf8"));
+    if (!payload) return null;
+    payload.sub = payload.sub || payload.userId;
+    if (!payload.sub) return null;
+    if (payload.app && LMU_APP_ID && payload.app !== LMU_APP_ID) return null;
+    if (payload.exp && payload.exp * 1000 < Date.now()) return null;
+    return payload;
   } catch (err) {
     return null;
   }
-  if (!payload || !payload.sub) return null;
-  if (payload.app && LMU_APP_ID && payload.app !== LMU_APP_ID) return null;
-  if (payload.exp && payload.exp * 1000 < Date.now()) return null;
-  return payload;
 };
 
 const lmuUser = (req) => verifyLmuToken(bearerToken(req));
+
+void refreshJwks();
+const jwksTimer = setInterval(() => void refreshJwks(), 60 * 60 * 1000);
+if (jwksTimer.unref) jwksTimer.unref();
 
 /* ---------- 簡易 IP rate limit（POST /api/signup） ---------- */
 
