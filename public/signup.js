@@ -92,7 +92,7 @@ const submit = async () => {
   try {
     const res = await fetch("/api/signup", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...lmuAuthHeaders() },
       body: JSON.stringify({
         eventId: (document.querySelector('input[name="eventId"]:checked') || {}).value || "",
         name: $("f-name").value.trim(),
@@ -136,5 +136,20 @@ $("btn-prev").addEventListener("click", () => {
   show(current);
 });
 
+// 已登入會員自動預填（欄位有值就不覆蓋）
+const prefillFromMember = async () => {
+  const sdk = await waitForLetMeUse();
+  if (!sdk || !sdk.user) return;
+  try {
+    const res = await fetch("/api/me", { headers: lmuAuthHeaders() });
+    if (!res.ok) return;
+    const { member } = await res.json();
+    if (member.nickname && !$("f-name").value) $("f-name").value = member.nickname;
+    if (member.contact && !$("f-contact").value) $("f-contact").value = member.contact;
+    if (member.igHandle && !$("f-ig").value) $("f-ig").value = member.igHandle;
+  } catch (err) {}
+};
+
 show(0);
 loadEvents();
+prefillFromMember();

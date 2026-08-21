@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>會員中心｜Chill Club 揪可樂</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥤</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css?v=__BUILD__">
+  <script src="https://letmeuse.isnowfriend.com/letmeuse.js"
+    data-app-id="app_pkd334f_"
+    data-theme="light"
+    data-accent="#e2572b"
+    data-locale="zh"
+    data-mode="modal">
+  </script>
+  <style>
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    .me-wrap { flex: 1; display: flex; justify-content: center; padding: 2.5rem 1.2rem 4rem; }
+    .me-card {
+      width: 100%; max-width: 520px; background: var(--card);
+      border-radius: var(--radius); box-shadow: var(--shadow);
+      padding: 2rem 1.8rem; height: fit-content;
+    }
+    .me-card h1 { font-size: 1.5rem; margin-bottom: 0.3rem; }
+    .me-sub { color: var(--cola-soft); font-size: 0.92rem; margin-bottom: 1.4rem; }
+    .field { display: grid; gap: 0.35rem; margin-bottom: 1rem; font-size: 0.95rem; font-weight: 500; }
+    .field input, .field textarea {
+      font-family: var(--font-body); font-size: 1rem;
+      padding: 0.65rem 0.85rem; border: 1.5px solid var(--cream-deep);
+      border-radius: 12px; background: #fff; color: var(--cola); width: 100%;
+    }
+    .field input:focus, .field textarea:focus { outline: none; border-color: var(--caramel); }
+    .guest { text-align: center; padding: 2rem 0 1rem; }
+    .guest .big { font-size: 3rem; margin-bottom: 0.6rem; }
+    .quickky-box {
+      border: 1.5px dashed var(--caramel); border-radius: 14px;
+      padding: 1.2rem 1rem; margin: 1.4rem 0; text-align: center;
+    }
+    .quickky-box h3 { font-size: 1.1rem; margin-bottom: 0.4rem; }
+    .quickky-box p { font-size: 0.88rem; color: var(--cola-soft); margin-bottom: 0.8rem; }
+    .me-msg { text-align: center; font-size: 0.95rem; min-height: 1.5em; margin-top: 0.7rem; }
+    .me-msg.ok { color: var(--mint); }
+    .me-msg.err { color: var(--fizz); }
+    .me-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+    .linklike { background: none; border: none; color: var(--cola-soft); cursor: pointer; font-size: 0.88rem; text-decoration: underline; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="nav-logo" href="/">🥤 揪可樂</a>
+  <div class="nav-links">
+    <a href="/#events">近期活動</a>
+    <a href="/signup" class="nav-cta">我要報名</a>
+  </div>
+</nav>
+
+<div class="me-wrap">
+  <div class="me-card">
+    <!-- 載入中 -->
+    <div id="state-loading" class="guest"><div class="big">🥤</div><p>載入中⋯</p></div>
+
+    <!-- 未登入 -->
+    <div id="state-guest" class="guest" hidden>
+      <div class="big">👋</div>
+      <h1>加入 Chill 會員</h1>
+      <p class="me-sub">登入後資料只填一次，之後報名免重填，<br>還能建立你的 Quickky 名片卡。</p>
+      <button class="btn btn-primary" id="btn-login">登入 / 註冊</button>
+    </div>
+
+    <!-- 已登入 -->
+    <div id="state-member" hidden>
+      <h1>會員中心</h1>
+      <p class="me-sub" id="member-hello">嗨！</p>
+
+      <label class="field">暱稱
+        <input type="text" id="m-nickname" maxlength="40" placeholder="小聚的時候怎麼叫你">
+      </label>
+      <label class="field">LINE ID 或電話
+        <input type="text" id="m-contact" maxlength="120" placeholder="活動通知用">
+      </label>
+      <label class="field">IG 帳號
+        <input type="text" id="m-ig" maxlength="60" placeholder="選填，讓我們回追你">
+      </label>
+      <label class="field">自我介紹
+        <textarea id="m-bio" maxlength="300" rows="3" placeholder="選填，讓大家先認識你一點點"></textarea>
+      </label>
+
+      <div class="quickky-box">
+        <h3>🃏 你的 Quickky 名片卡</h3>
+        <div id="quickky-none">
+          <p>把你的品味和想法做成一張卡，小聚現場用掃的交換，<br>不用尷尬地問「可以跟你要 IG 嗎」。</p>
+          <a class="btn btn-primary" href="https://quickky.isnowfriend.com" target="_blank" rel="noopener">去 Quickky 建立卡片 →</a>
+          <p style="margin-top:0.8rem">建好後把卡片連結貼回來：</p>
+        </div>
+        <div id="quickky-has" hidden>
+          <p>你的卡片已連結 ✓</p>
+          <a class="btn btn-ghost" id="quickky-view" href="#" target="_blank" rel="noopener">看我的卡片</a>
+        </div>
+        <label class="field" style="text-align:left; margin-top:0.8rem">
+          <input type="url" id="m-quickky" maxlength="200" placeholder="https://quickky.isnowfriend.com/你的卡片">
+        </label>
+      </div>
+
+      <button class="btn btn-primary btn-block" id="btn-save">儲存資料</button>
+      <p class="me-msg" id="me-msg" role="status"></p>
+      <div class="me-foot">
+        <a href="/signup">去報名小聚 →</a>
+        <button class="linklike" id="btn-logout">登出</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <p class="footer-tiny">© 2026 Chill Club 揪可樂｜台中輕鬆小聚</p>
+</footer>
+
+<script src="/lmu.js?v=__BUILD__"></script>
+<script src="/me.js?v=__BUILD__"></script>
+</body>
+</html>

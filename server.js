@@ -29,6 +29,9 @@ const loadEnv = () => {
 const ENV = { ...loadEnv(), ...process.env };
 const PORT = Number(ENV.PORT) || 4046;
 const ADMIN_TOKEN = ENV.ADMIN_TOKEN || "";
+const LMU_APP_ID = ENV.LETMEUSE_APP_ID || "";
+const LMU_SECRET = ENV.LETMEUSE_APP_SECRET || "";
+const MEMBERS_PATH = path.join(DATA_DIR, "members.json");
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -132,7 +135,32 @@ const ensureData = () => {
   fs.mkdirSync(DATA_DIR, { recursive: true });
   if (!fs.existsSync(EVENTS_PATH)) fs.writeFileSync(EVENTS_PATH, JSON.stringify(SEED_EVENTS, null, 2), "utf8");
   if (!fs.existsSync(SIGNUPS_PATH)) fs.writeFileSync(SIGNUPS_PATH, "[]", "utf8");
+  if (!fs.existsSync(MEMBERS_PATH)) fs.writeFileSync(MEMBERS_PATH, "{}", "utf8");
 };
+
+/* ---------- LetMeUse JWT（HS256 驗簽，零依賴） ---------- */
+
+const b64url = (buf) => buf.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+
+const verifyLmuToken = (token) => {
+  if (!LMU_SECRET || !token) return null;
+  const parts = token.split(".");
+  if (parts.length !== 3) return null;
+  const expected = b64url(crypto.createHmac("sha256", LMU_SECRET).update(parts[0] + "." + parts[1]).digest());
+  if (!timingSafeEqual(expected, parts[2])) return null;
+  let payload;
+  try {
+    payload = JSON.parse(Buffer.from(parts[1], "base64url").toString("utf8"));
+  } catch (err) {
+    return null;
+  }
+  if (!payload || !payload.sub) return null;
+  if (payload.app && LMU_APP_ID && payload.app !== LMU_APP_ID) return null;
+  if (payload.exp && payload.exp * 1000 < Date.now()) return null;
+  return payload;
+};
+
+const lmuUser = (req) => verifyLmuToken(bearerToken(req));
 
 /* ---------- 簡易 IP rate limit（POST /api/signup） ---------- */
 
@@ -229,12 +257,133 @@ const handleSignup = (req, res) => {
       agreedPayment,
       agreedAttend,
       paid: false,
+      memberSub: (lmuUser(req) || {}).sub || null,
       createdAt: new Date().toISOString(),
     };
     writeJsonAtomic(SIGNUPS_PATH, [...signups, entry], (err) => {
       if (err) sendJson(res, 500, { error: "寫入失敗，再試一次" });
       else sendJson(res, 200, { success: true });
     });
+  });
+};
+
+/* ---------- 會員 API（LetMeUse 登入） ---------- */
+
+const QUICKKY_URL_RE = /^https:\/\/quickky\.(isnowfriend\.com|pipee\.tw)\/\S*$/;
+
+const memberPublic = ({ sub, email, name, nickname, contact, igHandle, quickkyUrl, bio }) => ({
+  sub, email, name, nickname, contact, igHandle, quickkyUrl, bio,
+});
+
+const handleMe = (req, res) => {
+  const payload = lmuUser(req);
+  if (!payload) {
+    sendJson(res, 401, { error: "unauthorized" });
+    return;
+  }
+  const members = readJsonFile(MEMBERS_PATH, {});
+  const existing = members[payload.sub];
+
+  if (req.method === "GET") {
+    if (existing) {
+      sendJson(res, 200, { member: memberPublic(existing) });
+      return;
+    }
+    const fresh = {
+      sub: payload.sub,
+      email: cleanStr(payload.email, 120),
+      name: cleanStr(payload.name, 60),
+      nickname: cleanStr(payload.name, 40),
+      contact: "",
+      igHandle: "",
+      quickkyUrl: "",
+      bio: "",
+      createdAt: new Date().toISOString(),
+    };
+    writeJsonAtomic(MEMBERS_PATH, { ...members, [payload.sub]: fresh }, (err) => {
+      if (err) sendJson(res, 500, { error: "write failed" });
+      else sendJson(res, 200, { member: memberPublic(fresh) });
+    });
+    return;
+  }
+
+  if (req.method === "PUT") {
+    readJsonBody(req, res, (body) => {
+      const quickkyUrl = cleanStr(body.quickkyUrl, 200);
+      if (quickkyUrl && !QUICKKY_URL_RE.test(quickkyUrl)) {
+        sendJson(res, 400, { error: "Quickky 連結格式不對，貼你卡片頁的網址（quickky.isnowfriend.com 開頭）" });
+        return;
+      }
+      const base = existing || { sub: payload.sub, createdAt: new Date().toISOString() };
+      const next = {
+        ...base,
+        email: cleanStr(payload.email, 120),
+        name: cleanStr(payload.name, 60),
+        nickname: cleanStr(body.nickname, 40) || cleanStr(payload.name, 40),
+        contact: cleanStr(body.contact, 120),
+        igHandle: cleanStr(body.igHandle, 60),
+        quickkyUrl,
+        bio: cleanStr(body.bio, 300),
+        updatedAt: new Date().toISOString(),
+      };
+      writeJsonAtomic(MEMBERS_PATH, { ...members, [payload.sub]: next }, (err) => {
+        if (err) sendJson(res, 500, { error: "write failed" });
+        else sendJson(res, 200, { member: memberPublic(next) });
+      });
+    });
+    return;
+  }
+
+  sendJson(res, 405, { error: "method not allowed" });
+};
+
+/* ---------- LetMeUse webhook（HMAC-SHA256 用 app secret 驗） ---------- */
+
+const handleLmuWebhook = (req, res) => {
+  let body = "";
+  let tooLarge = false;
+  req.on("data", (chunk) => {
+    body += chunk;
+    if (body.length > MAX_BODY) {
+      tooLarge = true;
+      req.destroy();
+    }
+  });
+  req.on("end", () => {
+    if (tooLarge) return;
+    if (!LMU_SECRET) {
+      sendJson(res, 503, { error: "not configured" });
+      return;
+    }
+    const signature = req.headers["x-letmeuse-signature"] || "";
+    const expected = crypto.createHmac("sha256", LMU_SECRET).update(body).digest("hex");
+    if (!signature || !timingSafeEqual(signature, expected)) {
+      sendJson(res, 401, { error: "invalid signature" });
+      return;
+    }
+    let parsed;
+    try {
+      parsed = JSON.parse(body);
+    } catch (err) {
+      sendJson(res, 400, { error: "invalid JSON" });
+      return;
+    }
+    const sub = parsed.payload && parsed.payload.id;
+    const members = readJsonFile(MEMBERS_PATH, {});
+    if (sub && members[sub]) {
+      if (parsed.event === "user.deleted") {
+        const { [sub]: removed, ...rest } = members;
+        writeJsonAtomic(MEMBERS_PATH, rest, () => {});
+      } else if (parsed.event === "user.updated") {
+        const next = {
+          ...members[sub],
+          email: cleanStr(parsed.payload.email, 120) || members[sub].email,
+          name: cleanStr(parsed.payload.name, 60) || members[sub].name,
+        };
+        writeJsonAtomic(MEMBERS_PATH, { ...members, [sub]: next }, () => {});
+      }
+    }
+    sendJson(res, 200, { received: true });
   });
 };
 
@@ -363,6 +512,14 @@ const server = http.createServer((req, res) => {
     handleSignup(req, res);
     return;
   }
+  if (pathname === "/api/me") {
+    handleMe(req, res);
+    return;
+  }
+  if (req.method === "POST" && pathname === "/api/webhooks/letmeuse") {
+    handleLmuWebhook(req, res);
+    return;
+  }
   if (pathname.startsWith("/api/admin/")) {
     handleAdmin(req, res, pathname);
     return;
@@ -373,6 +530,10 @@ const server = http.createServer((req, res) => {
   }
   if (pathname === "/signup") {
     sendFile(res, path.join(PUBLIC_DIR, "signup.html"));
+    return;
+  }
+  if (pathname === "/me") {
+    sendFile(res, path.join(PUBLIC_DIR, "me.html"));
     return;
   }
   if (req.method !== "GET" && req.method !== "HEAD") {
