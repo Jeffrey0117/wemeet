@@ -282,12 +282,22 @@ const handleAdmin = (req, res, pathname) => {
 
 /* ---------- 靜態檔 ---------- */
 
+// CF 對 .js/.css 會蓋 4 小時瀏覽器快取（無視 origin header），
+// 所以 HTML 裡的資產網址帶 __BUILD__ 版本號，每次部署重啟自動換新
+const BUILD_ID = Date.now().toString(36);
+
 const sendFile = (res, filePath) => {
   if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
     res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" }).end("Not Found");
     return;
   }
   const ext = path.extname(filePath).toLowerCase();
+  if (ext === ".html") {
+    const html = fs.readFileSync(filePath, "utf8").replace(/__BUILD__/g, BUILD_ID);
+    res.writeHead(200, { "Content-Type": MIME[ext], "Cache-Control": "no-cache" });
+    res.end(html);
+    return;
+  }
   res.writeHead(200, {
     "Content-Type": MIME[ext] || "application/octet-stream",
     "Cache-Control": "no-cache",
