@@ -1,0 +1,11 @@
+{
+  "name": "wemeet",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "description": "Chill Club 揪可樂｜台中輕鬆小聚 官網 + 活動報名",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

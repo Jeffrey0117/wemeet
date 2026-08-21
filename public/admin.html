@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>揪可樂後台</title>
+  <meta name="robots" content="noindex">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: "Noto Sans TC", sans-serif; background: #faf3e7; color: #3a2318; padding: 2rem 1rem; line-height: 1.7; }
+    .wrap { max-width: 960px; margin: 0 auto; display: grid; gap: 1.5rem; }
+    h1 { font-size: 1.5rem; }
+    h2 { font-size: 1.15rem; margin-bottom: 0.6rem; }
+    .card { background: #fffdf8; border-radius: 14px; padding: 1.4rem; box-shadow: 0 6px 24px rgba(58,35,24,0.08); }
+    input, textarea, button, select { font: inherit; }
+    input[type=password] { padding: 0.5rem 0.7rem; border: 1.5px solid #f3e7d3; border-radius: 10px; width: 260px; }
+    button { background: #e2572b; color: #fff; border: none; border-radius: 999px; padding: 0.5rem 1.2rem; cursor: pointer; }
+    button:hover { background: #c74a22; }
+    button.ghost { background: transparent; color: #3a2318; border: 1.5px solid #6b4a38; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 0.45rem 0.6rem; border-bottom: 1px solid #f3e7d3; vertical-align: top; }
+    th { color: #6b4a38; font-weight: 500; white-space: nowrap; }
+    textarea { width: 100%; min-height: 260px; border: 1.5px solid #f3e7d3; border-radius: 10px; padding: 0.7rem; font-family: Consolas, monospace; font-size: 0.85rem; }
+    .row { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
+    .msg { font-size: 0.9rem; min-height: 1.4em; }
+    .msg.ok { color: #4d7d61; } .msg.err { color: #c74a22; }
+    .muted { color: #6b4a38; font-size: 0.85rem; }
+    .table-scroll { overflow-x: auto; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🥤 揪可樂後台</h1>
+
+  <div class="card">
+    <div class="row">
+      <input type="password" id="token" placeholder="Admin Token">
+      <button id="load-btn">載入資料</button>
+      <span class="msg" id="auth-msg"></span>
+    </div>
+  </div>
+
+  <div class="card" id="signups-card" hidden>
+    <h2>報名名單（<span id="signup-count">0</span>）</h2>
+    <div class="row" style="margin-bottom:0.6rem">
+      <button class="ghost" id="copy-csv">複製 CSV</button>
+      <span class="msg" id="copy-msg"></span>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>時間</th><th>活動</th><th>暱稱</th><th>聯絡方式</th><th>想說的話</th></tr></thead>
+        <tbody id="signup-rows"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" id="events-card" hidden>
+    <h2>活動清單（JSON 直接編輯）</h2>
+    <p class="muted">欄位：id、type、title、date（YYYY-MM-DD）、time、location、capacity、note、status（open / closed / hidden）</p>
+    <textarea id="events-json" spellcheck="false"></textarea>
+    <div class="row" style="margin-top:0.6rem">
+      <button id="save-events">儲存活動</button>
+      <span class="msg" id="save-msg"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let eventsCache = [];
+
+const token = () => $("token").value.trim();
+const setMsg = (id, text, ok) => {
+  const node = $(id);
+  node.textContent = text;
+  node.className = "msg " + (ok ? "ok" : "err");
+};
+
+const api = async (path, opts = {}) => {
+  const res = await fetch(path, {
+    ...opts,
+    headers: { "Content-Type": "application/json", Authorization: "Bearer " + token(), ...(opts.headers || {}) },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "HTTP " + res.status);
+  return data;
+};
+
+const eventTitle = (id) => {
+  if (!id) return "（先加入名單）";
+  const ev = eventsCache.find((e) => e.id === id);
+  return ev ? ev.title : id;
+};
+
+const render = (data) => {
+  eventsCache = data.events || [];
+  const signups = (data.signups || []).slice().reverse();
+
+  $("signup-count").textContent = signups.length;
+  const tbody = $("signup-rows");
+  tbody.textContent = "";
+  signups.forEach((s) => {
+    const tr = document.createElement("tr");
+    [new Date(s.createdAt).toLocaleString("zh-TW"), eventTitle(s.eventId), s.name, s.contact, s.note || ""].forEach((v) => {
+      const td = document.createElement("td");
+      td.textContent = v;
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+
+  $("events-json").value = JSON.stringify(eventsCache, null, 2);
+  $("signups-card").hidden = false;
+  $("events-card").hidden = false;
+};
+
+$("load-btn").addEventListener("click", async () => {
+  setMsg("auth-msg", "", true);
+  try {
+    const data = await api("/api/admin/overview");
+    localStorage.setItem("wemeet_admin_token", token());
+    render(data);
+    setMsg("auth-msg", "已載入 ✓", true);
+  } catch (err) {
+    setMsg("auth-msg", err.message, false);
+  }
+});
+
+$("save-events").addEventListener("click", async () => {
+  try {
+    const events = JSON.parse($("events-json").value);
+    await api("/api/admin/events", { method: "PUT", body: JSON.stringify({ events }) });
+    setMsg("save-msg", "已儲存 ✓", true);
+  } catch (err) {
+    setMsg("save-msg", err.message, false);
+  }
+});
+
+$("copy-csv").addEventListener("click", async () => {
+  const rows = [["time", "event", "name", "contact", "note"]];
+  document.querySelectorAll("#signup-rows tr").forEach((tr) => {
+    rows.push([...tr.children].map((td) => '"' + td.textContent.replace(/"/g, '""') + '"'));
+  });
+  await navigator.clipboard.writeText(rows.map((r) => r.join(",")).join("\n"));
+  setMsg("copy-msg", "已複製 ✓", true);
+});
+
+const saved = localStorage.getItem("wemeet_admin_token");
+if (saved) {
+  $("token").value = saved;
+  $("load-btn").click();
+}
+</script>
+</body>
+</html>
