@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>報名小聚｜Chill Club 揪可樂</title>
+  <meta name="description" content="報名 Chill Club 揪可樂的台中輕鬆小聚，一分鐘填完。">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥤</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    .quiz-wrap {
+      flex: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 2.5rem 1.2rem 4rem;
+    }
+    .quiz-card {
+      width: 100%;
+      max-width: 520px;
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 2rem 1.8rem 1.8rem;
+    }
+    .quiz-progress { display: flex; gap: 0.4rem; margin-bottom: 1.6rem; }
+    .quiz-progress span {
+      flex: 1; height: 6px; border-radius: 999px;
+      background: var(--cream-deep); transition: background 0.25s;
+    }
+    .quiz-progress span.on { background: var(--fizz); }
+    .step { display: none; }
+    .step.on { display: block; animation: fadein 0.25s ease; }
+    @keyframes fadein { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    .step h2 { font-size: 1.4rem; margin-bottom: 0.4rem; text-align: left; }
+    .step .hint { color: var(--cola-soft); font-size: 0.92rem; margin-bottom: 1.2rem; }
+    .choice { display: grid; gap: 0.7rem; }
+    .choice label {
+      display: flex; gap: 0.7rem; align-items: flex-start;
+      border: 1.5px solid var(--cream-deep); border-radius: 14px;
+      padding: 0.85rem 1rem; cursor: pointer; transition: border-color 0.15s, background 0.15s;
+    }
+    .choice label:has(input:checked) { border-color: var(--fizz); background: #fff7f2; }
+    .choice input { margin-top: 0.3rem; accent-color: var(--fizz); }
+    .choice .t { font-weight: 500; }
+    .choice .s { font-size: 0.85rem; color: var(--cola-soft); }
+    .field { display: grid; gap: 0.35rem; margin-bottom: 1rem; font-size: 0.95rem; font-weight: 500; }
+    .field input, .field textarea {
+      font-family: var(--font-body); font-size: 1rem;
+      padding: 0.65rem 0.85rem; border: 1.5px solid var(--cream-deep);
+      border-radius: 12px; background: #fff; color: var(--cola); width: 100%;
+    }
+    .field input:focus, .field textarea:focus { outline: none; border-color: var(--caramel); }
+    .ig-box {
+      text-align: center; border: 1.5px dashed var(--caramel);
+      border-radius: 14px; padding: 1.4rem 1rem; margin-bottom: 1.2rem;
+    }
+    .ig-box .handle { font-family: var(--font-display); font-size: 1.3rem; margin-bottom: 0.7rem; }
+    .quiz-nav { display: flex; gap: 0.7rem; margin-top: 1.6rem; }
+    .quiz-nav .btn { flex: 1; }
+    .quiz-msg { text-align: center; font-size: 0.95rem; min-height: 1.5em; margin-top: 0.8rem; }
+    .quiz-msg.err { color: var(--fizz); }
+    .done { text-align: center; padding: 1.5rem 0 0.5rem; }
+    .done .big { font-size: 3rem; }
+    .done h2 { text-align: center; margin: 0.6rem 0; }
+    .done p { color: var(--cola-soft); margin-bottom: 1.4rem; }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="nav-logo" href="/">🥤 揪可樂</a>
+  <div class="nav-links">
+    <a href="/#events">近期活動</a>
+    <a href="https://www.instagram.com/we_i_meet" target="_blank" rel="noopener">Instagram</a>
+  </div>
+</nav>
+
+<div class="quiz-wrap">
+  <div class="quiz-card">
+    <div class="quiz-progress" id="progress" aria-hidden="true">
+      <span></span><span></span><span></span><span></span>
+    </div>
+
+    <!-- Step 1：選場次 -->
+    <section class="step" data-step="0">
+      <h2>想參加哪一場？</h2>
+      <p class="hint">選一場來玩，或先加入名單，開新團第一個通知你。</p>
+      <div class="choice" id="event-choices">
+        <label>
+          <input type="radio" name="eventId" value="" checked>
+          <span><span class="t">先加入名單，開團通知我 💌</span><br><span class="s">還不確定時間？沒關係，下一場開團先告訴你。</span></span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Step 2：暱稱 + 聯絡 -->
+    <section class="step" data-step="1">
+      <h2>怎麼稱呼你？</h2>
+      <p class="hint">活動細節會用 LINE 或電話通知你。</p>
+      <label class="field">你的暱稱
+        <input type="text" id="f-name" maxlength="40" placeholder="叫你什麼好呢" autocomplete="nickname">
+      </label>
+      <label class="field">LINE ID 或電話
+        <input type="text" id="f-contact" maxlength="120" placeholder="例：line-id-123 或 0912345678" autocomplete="tel">
+      </label>
+    </section>
+
+    <!-- Step 3：追蹤 IG -->
+    <section class="step" data-step="2">
+      <h2>順手追蹤一下 IG 🙌</h2>
+      <p class="hint">活動照片、下一場預告都會發在這裡，追蹤才不會漏接。</p>
+      <div class="ig-box">
+        <div class="handle">📸 @we_i_meet</div>
+        <a class="btn btn-primary" href="https://www.instagram.com/we_i_meet" target="_blank" rel="noopener">去追蹤 Instagram →</a>
+      </div>
+      <div class="choice">
+        <label>
+          <input type="checkbox" id="f-followed">
+          <span class="t">我追蹤了！✓</span>
+        </label>
+      </div>
+      <label class="field" style="margin-top:1rem">你的 IG 帳號（選填）
+        <input type="text" id="f-ig" maxlength="60" placeholder="讓我們認出你，回追一波">
+      </label>
+    </section>
+
+    <!-- Step 4：想說的話 -->
+    <section class="step" data-step="3">
+      <h2>最後，想說點什麼嗎?</h2>
+      <p class="hint">選填。第一次參加？想聊的話題？都可以寫。</p>
+      <label class="field">
+        <textarea id="f-note" maxlength="300" rows="4" placeholder="嗨嗨，我是⋯"></textarea>
+      </label>
+    </section>
+
+    <!-- 完成畫面 -->
+    <section class="step" data-step="done">
+      <div class="done">
+        <div class="big">🥤🎉</div>
+        <h2>報名成功！</h2>
+        <p>我們會盡快用 LINE／電話跟你確認細節。<br>先去 IG 逛逛，看看之前的小聚長什麼樣子吧。</p>
+        <a class="btn btn-primary" href="https://www.instagram.com/we_i_meet" target="_blank" rel="noopener">追蹤 @we_i_meet</a>
+        <p style="margin-top:1rem"><a href="/">回官網首頁</a></p>
+      </div>
+    </section>
+
+    <div class="quiz-nav" id="quiz-nav">
+      <button type="button" class="btn btn-ghost" id="btn-prev" hidden>上一步</button>
+      <button type="button" class="btn btn-primary" id="btn-next">下一步 →</button>
+    </div>
+    <p class="quiz-msg" id="quiz-msg" role="status"></p>
+  </div>
+</div>
+
+<footer class="footer">
+  <p class="footer-tiny">© 2026 Chill Club 揪可樂｜台中輕鬆小聚</p>
+</footer>
+
+<script src="/signup.js"></script>
+</body>
+</html>

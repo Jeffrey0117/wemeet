@@ -1,4 +1,4 @@
-// 前台：載入活動清單 + 報名表單送出
+// 前台首頁：載入活動清單（報名走 /signup 問卷頁）
 const WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"];
 
 const fmtDate = (iso) => {
@@ -16,7 +16,6 @@ const el = (tag, className, text) => {
 
 const renderEvents = (events) => {
   const list = document.getElementById("event-list");
-  const select = document.getElementById("signup-event");
   list.textContent = "";
 
   if (!events.length) {
@@ -51,79 +50,24 @@ const renderEvents = (events) => {
     side.appendChild(slots);
     if (!isFull) {
       const btn = el("a", "btn btn-primary", "報名這場");
-      btn.href = "#signup";
-      btn.addEventListener("click", () => {
-        select.value = ev.id;
-      });
+      btn.href = "/signup?event=" + encodeURIComponent(ev.id);
       side.appendChild(btn);
     }
     card.appendChild(side);
     list.appendChild(card);
-
-    if (!isFull) {
-      const opt = el("option", null, `${md}（${w}）${ev.title}`);
-      opt.value = ev.id;
-      select.appendChild(opt);
-    }
   });
 };
 
 const loadEvents = async () => {
+  const list = document.getElementById("event-list");
   try {
     const res = await fetch("/api/events");
     const data = await res.json();
     renderEvents(data.events || []);
   } catch (err) {
-    document.getElementById("event-list").textContent = "";
-    document
-      .getElementById("event-list")
-      .appendChild(el("p", "event-empty", "活動載入失敗，重新整理一下試試 🙏"));
+    list.textContent = "";
+    list.appendChild(el("p", "event-empty", "活動載入失敗，重新整理一下試試 🙏"));
   }
 };
 
-const bindForm = () => {
-  const form = document.getElementById("signup-form");
-  const btn = document.getElementById("signup-btn");
-  const msg = document.getElementById("form-msg");
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    msg.className = "form-msg";
-    msg.textContent = "";
-    btn.disabled = true;
-
-    const fd = new FormData(form);
-    const payload = {
-      eventId: fd.get("eventId") || "",
-      name: (fd.get("name") || "").trim(),
-      contact: (fd.get("contact") || "").trim(),
-      note: (fd.get("note") || "").trim(),
-    };
-
-    try {
-      const res = await fetch("/api/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        msg.className = "form-msg ok";
-        msg.textContent = "報名成功！我們會盡快私訊你 🎉";
-        form.reset();
-        loadEvents();
-      } else {
-        msg.className = "form-msg err";
-        msg.textContent = data.error || "送出失敗，再試一次";
-      }
-    } catch (err) {
-      msg.className = "form-msg err";
-      msg.textContent = "連線失敗，再試一次 🙏";
-    } finally {
-      btn.disabled = false;
-    }
-  });
-};
-
 loadEvents();
-bindForm();

@@ -219,39 +219,8 @@ a { color: var(--fizz); }
 .event-slots { display: block; font-size: 0.85rem; color: var(--mint); margin-bottom: 0.4rem; }
 .event-slots.full { color: var(--fizz); }
 
-/* ---------- signup form ---------- */
-.signup-form {
-  max-width: 480px;
-  background: var(--card);
-  border-radius: var(--radius);
-  padding: 2rem 1.8rem;
-  box-shadow: var(--shadow);
-  display: grid;
-  gap: 1.1rem;
-}
-.signup-form label { display: grid; gap: 0.35rem; font-size: 0.95rem; font-weight: 500; }
-.req { color: var(--fizz); font-size: 0.8rem; font-weight: 400; }
-.signup-form input,
-.signup-form select,
-.signup-form textarea {
-  font-family: var(--font-body);
-  font-size: 1rem;
-  padding: 0.6rem 0.8rem;
-  border: 1.5px solid var(--cream-deep);
-  border-radius: 12px;
-  background: #fff;
-  color: var(--cola);
-  width: 100%;
-}
-.signup-form input:focus,
-.signup-form select:focus,
-.signup-form textarea:focus {
-  outline: none;
-  border-color: var(--caramel);
-}
-.form-msg { text-align: center; font-size: 0.95rem; min-height: 1.5em; }
-.form-msg.ok { color: var(--mint); }
-.form-msg.err { color: var(--fizz); }
+/* ---------- signup CTA ---------- */
+.cta-band { display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
 
 /* ---------- footer ---------- */
 .footer {

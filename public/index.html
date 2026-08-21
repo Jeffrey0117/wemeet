@@ -21,7 +21,7 @@
     <a href="#about">關於我們</a>
     <a href="#vibes">在做什麼</a>
     <a href="#events">近期活動</a>
-    <a href="#signup" class="nav-cta">我要報名</a>
+    <a href="/signup" class="nav-cta">我要報名</a>
   </div>
 </nav>
 
@@ -34,7 +34,7 @@
   <p class="hero-slogan">揪可樂，我們就 <em>Chill</em>——是要揪在一起。</p>
   <p class="hero-sub">絕對不吵鬧也不膚淺，認識新的 Chill 友。</p>
   <div class="hero-actions">
-    <a class="btn btn-primary" href="#signup">報名下一場 →</a>
+    <a class="btn btn-primary" href="/signup">報名下一場 →</a>
     <a class="btn btn-ghost" href="#events">看看近期活動</a>
   </div>
 </header>
@@ -97,37 +97,18 @@
 
 <section class="section section-alt" id="signup">
   <h2><span class="squiggle">來揪一下</span></h2>
-  <p class="section-lead">留下資料就完成報名，我們會私訊你活動細節。<br>還沒有想參加的場次？也可以先加入名單，開新團第一個通知你。</p>
-  <form id="signup-form" class="signup-form">
-    <label>
-      想參加哪一場？
-      <select name="eventId" id="signup-event">
-        <option value="">先加入名單，開團通知我</option>
-      </select>
-    </label>
-    <label>
-      你的暱稱 <span class="req">必填</span>
-      <input type="text" name="name" maxlength="40" placeholder="叫你什麼好呢" required>
-    </label>
-    <label>
-      IG / LINE / Email 擇一 <span class="req">必填</span>
-      <input type="text" name="contact" maxlength="120" placeholder="方便我們私訊你活動細節" required>
-    </label>
-    <label>
-      想說的話（選填）
-      <textarea name="note" maxlength="300" rows="3" placeholder="第一次參加？想聊什麼話題？都可以寫"></textarea>
-    </label>
-    <button type="submit" class="btn btn-primary btn-block" id="signup-btn">送出報名 🥤</button>
-    <p class="form-msg" id="form-msg" role="status"></p>
-  </form>
+  <p class="section-lead">一分鐘填完報名問卷，我們會用 LINE 或電話跟你確認細節。<br>還沒有想參加的場次？也可以先加入名單，開新團第一個通知你。</p>
+  <div class="cta-band">
+    <a class="btn btn-primary" href="/signup">填報名問卷 →</a>
+    <a class="btn btn-ghost" href="https://www.instagram.com/we_i_meet" target="_blank" rel="noopener">先去 IG 看看 📸</a>
+  </div>
 </section>
 
 <footer class="footer">
   <p class="footer-logo">🥤 Chill Club 揪可樂</p>
   <p>台中｜做自己的輕鬆小聚</p>
   <p>
-    <!-- TODO: 換成實際 IG 帳號連結 -->
-    <a href="https://www.instagram.com/" target="_blank" rel="noopener">Instagram</a>
+    <a href="https://www.instagram.com/we_i_meet" target="_blank" rel="noopener">Instagram @we_i_meet</a>
   </p>
   <p class="footer-tiny">© 2026 Chill Club 揪可樂</p>
 </footer>

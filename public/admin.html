@@ -48,7 +48,7 @@
     </div>
     <div class="table-scroll">
       <table>
-        <thead><tr><th>時間</th><th>活動</th><th>暱稱</th><th>聯絡方式</th><th>想說的話</th></tr></thead>
+        <thead><tr><th>時間</th><th>活動</th><th>暱稱</th><th>LINE/電話</th><th>IG</th><th>想說的話</th></tr></thead>
         <tbody id="signup-rows"></tbody>
       </table>
     </div>
@@ -101,7 +101,8 @@ const render = (data) => {
   tbody.textContent = "";
   signups.forEach((s) => {
     const tr = document.createElement("tr");
-    [new Date(s.createdAt).toLocaleString("zh-TW"), eventTitle(s.eventId), s.name, s.contact, s.note || ""].forEach((v) => {
+    const ig = (s.igHandle || "") + (s.igFollowed ? "（已追蹤 ✓）" : "");
+    [new Date(s.createdAt).toLocaleString("zh-TW"), eventTitle(s.eventId), s.name, s.contact, ig, s.note || ""].forEach((v) => {
       const td = document.createElement("td");
       td.textContent = v;
       tr.appendChild(td);
@@ -137,7 +138,7 @@ $("save-events").addEventListener("click", async () => {
 });
 
 $("copy-csv").addEventListener("click", async () => {
-  const rows = [["time", "event", "name", "contact", "note"]];
+  const rows = [["time", "event", "name", "contact", "ig", "note"]];
   document.querySelectorAll("#signup-rows tr").forEach((tr) => {
     rows.push([...tr.children].map((td) => '"' + td.textContent.replace(/"/g, '""') + '"'));
   });

@@ -116,12 +116,12 @@ const writeJsonAtomic = (target, obj, cb) => {
 
 const SEED_EVENTS = [
   {
-    id: "eng-2026-09-05",
+    id: "eng-2026-08-22",
     type: "english",
     title: "英文口說小聚 #1",
-    date: "2026-09-05",
-    time: "14:00–16:00",
-    location: "台中西區・咖啡廳（報名後通知）",
+    date: "2026-08-22",
+    time: "15:00",
+    location: "星巴克 文新昌平門市",
     capacity: 8,
     note: "不用很會講，敢開口就好。輕鬆話題、小組練習，全程零壓力。",
     status: "open",
@@ -162,11 +162,17 @@ const clientIp = (req) =>
 const countByEvent = (signups) =>
   signups.reduce((acc, s) => ({ ...acc, [s.eventId]: (acc[s.eventId] || 0) + 1 }), {});
 
+// 過了活動當天就自動下架（date 格式不合法的照常顯示）
+const isPast = (e) => {
+  const end = new Date(String(e.date) + "T23:59:59");
+  return !Number.isNaN(end.getTime()) && end < new Date();
+};
+
 const publicEvents = () => {
   const events = readJsonFile(EVENTS_PATH, []);
   const counts = countByEvent(readJsonFile(SIGNUPS_PATH, []));
   return events
-    .filter((e) => e.status !== "hidden")
+    .filter((e) => e.status !== "hidden" && !isPast(e))
     .map((e) => ({ ...e, signedUp: counts[e.id] || 0 }));
 };
 
@@ -181,6 +187,8 @@ const handleSignup = (req, res) => {
     const name = cleanStr(body.name, 40);
     const contact = cleanStr(body.contact, 120);
     const note = cleanStr(body.note, 300);
+    const igHandle = cleanStr(body.igHandle, 60);
+    const igFollowed = body.igFollowed === true;
     const eventId = cleanStr(body.eventId, 60); // 空字串 = 先加入名單、開團通知
     if (!name || !contact) {
       sendJson(res, 400, { error: "暱稱和聯絡方式都要填喔" });
@@ -210,6 +218,8 @@ const handleSignup = (req, res) => {
       name,
       contact,
       note,
+      igHandle,
+      igFollowed,
       createdAt: new Date().toISOString(),
     };
     writeJsonAtomic(SIGNUPS_PATH, [...signups, entry], (err) => {
@@ -322,6 +332,10 @@ const server = http.createServer((req, res) => {
   }
   if (pathname === "/admin") {
     sendFile(res, path.join(PUBLIC_DIR, "admin.html"));
+    return;
+  }
+  if (pathname === "/signup") {
+    sendFile(res, path.join(PUBLIC_DIR, "signup.html"));
     return;
   }
   if (req.method !== "GET" && req.method !== "HEAD") {
