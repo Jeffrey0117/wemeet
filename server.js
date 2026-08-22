@@ -330,8 +330,9 @@ const handleSignup = (req, res) => {
 
 const QUICKKY_URL_RE = /^https:\/\/quickky\.(isnowfriend\.com|pipee\.tw)\/\S*$/;
 
+// showOnWall 原樣傳回（undefined = 從未表態，前端拿來決定預設勾選）
 const memberPublic = ({ sub, email, name, nickname, contact, igHandle, quickkyUrl, bio, showOnWall }) => ({
-  sub, email, name, nickname, contact, igHandle, quickkyUrl, bio, showOnWall: showOnWall === true,
+  sub, email, name, nickname, contact, igHandle, quickkyUrl, bio, showOnWall,
 });
 
 const handleMe = (req, res) => {
@@ -368,7 +369,9 @@ const handleMe = (req, res) => {
 
   if (req.method === "PUT") {
     readJsonBody(req, res, (body) => {
-      const quickkyUrl = cleanStr(body.quickkyUrl, 200);
+      let quickkyUrl = cleanStr(body.quickkyUrl, 200).replace(/\s+/g, "");
+      if (quickkyUrl && !/^https?:\/\//i.test(quickkyUrl)) quickkyUrl = "https://" + quickkyUrl;
+      quickkyUrl = quickkyUrl.replace(/^http:\/\//i, "https://");
       if (quickkyUrl && !QUICKKY_URL_RE.test(quickkyUrl)) {
         sendJson(res, 400, { error: "Quickky 連結格式不對，貼你卡片頁的網址（quickky.isnowfriend.com 開頭）" });
         return;

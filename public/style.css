@@ -55,6 +55,40 @@ a { color: var(--fizz); }
 }
 .nav-cta:hover { background: var(--fizz-dark); }
 
+/* nav 登入狀態 */
+.nav-login {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  background: transparent;
+  color: var(--cola);
+  border: 1.5px solid var(--cola-soft);
+  border-radius: 999px;
+  padding: 0.3rem 0.9rem;
+  cursor: pointer;
+}
+.nav-login:hover { border-color: var(--fizz); color: var(--fizz); }
+.nav-user { position: relative; display: flex; }
+.nav-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--caramel); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 1.05rem;
+  cursor: pointer; object-fit: cover; border: 2px solid var(--cream-deep);
+}
+.nav-menu {
+  display: none;
+  position: absolute; right: 0; top: calc(100% + 10px);
+  background: var(--card); border-radius: 12px;
+  box-shadow: var(--shadow); padding: 0.4rem; min-width: 130px; z-index: 60;
+}
+.nav-user.open .nav-menu { display: grid; gap: 2px; }
+.nav-menu a, .nav-menu button {
+  font-family: var(--font-body); font-size: 0.92rem; text-align: left;
+  color: var(--cola); text-decoration: none; background: none; border: none;
+  padding: 0.5rem 0.7rem; border-radius: 8px; cursor: pointer;
+}
+.nav-menu a:hover, .nav-menu button:hover { background: var(--cream-deep); color: var(--fizz); }
+
 /* ---------- hero ---------- */
 .hero {
   position: relative;

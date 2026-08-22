@@ -19,3 +19,68 @@ const lmuAuthHeaders = () => {
   const token = sdk && sdk.user && sdk.getToken();
   return token ? { Authorization: "Bearer " + token } : {};
 };
+
+/* ---------- nav 右上角登入狀態（頭貼 + 下拉選單） ---------- */
+
+const initNavAuth = async () => {
+  const slot = document.getElementById("nav-auth");
+  if (!slot) return;
+  const sdk = await waitForLetMeUse();
+
+  const render = (user) => {
+    slot.textContent = "";
+    if (!user) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "nav-login";
+      btn.textContent = "登入";
+      btn.addEventListener("click", () => (sdk ? sdk.login() : (location.href = "/me")));
+      slot.appendChild(btn);
+      return;
+    }
+    const wrap = document.createElement("div");
+    wrap.className = "nav-user";
+
+    let avatar;
+    if (user.avatar) {
+      avatar = document.createElement("img");
+      avatar.src = user.avatar;
+      avatar.alt = user.name || "me";
+    } else {
+      avatar = document.createElement("span");
+      avatar.textContent = (user.name || "?").slice(0, 1);
+    }
+    avatar.className = "nav-avatar";
+    avatar.addEventListener("click", () => wrap.classList.toggle("open"));
+
+    const menu = document.createElement("div");
+    menu.className = "nav-menu";
+    const meLink = document.createElement("a");
+    meLink.href = "/me";
+    meLink.textContent = "會員中心";
+    const logout = document.createElement("button");
+    logout.type = "button";
+    logout.textContent = "登出";
+    logout.addEventListener("click", () => sdk.logout());
+    menu.appendChild(meLink);
+    menu.appendChild(logout);
+
+    wrap.appendChild(avatar);
+    wrap.appendChild(menu);
+    slot.appendChild(wrap);
+  };
+
+  document.addEventListener("click", (e) => {
+    const wrap = slot.querySelector(".nav-user");
+    if (wrap && !wrap.contains(e.target)) wrap.classList.remove("open");
+  });
+
+  if (!sdk) {
+    render(null);
+    return;
+  }
+  sdk.onAuthChange(render);
+  render(sdk.user);
+};
+
+initNavAuth();

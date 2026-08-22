@@ -27,7 +27,8 @@ const fillForm = (member) => {
   $("m-ig").value = member.igHandle || "";
   $("m-bio").value = member.bio || "";
   $("m-quickky").value = member.quickkyUrl || "";
-  $("m-wall").checked = member.showOnWall === true;
+  // 從未表態（undefined）時預設打勾，明確關過就尊重
+  $("m-wall").checked = member.showOnWall === true || member.showOnWall == null;
   renderQuickky(member.quickkyUrl);
 };
 
