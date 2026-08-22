@@ -45,6 +45,7 @@ const MIME = {
   ".webp": "image/webp",
   ".ico": "image/x-icon",
   ".woff2": "font/woff2",
+  ".mp4": "video/mp4",
   ".txt": "text/plain; charset=utf-8",
 };
 
@@ -573,7 +574,31 @@ const sendFile = (res, filePath, longCache) => {
   fs.createReadStream(filePath).pipe(res);
 };
 
-const serveStatic = (res, urlPath, longCache) => {
+// 影片串流：支援 Range（iOS/Safari 播 mp4 必要）
+const sendVideo = (req, res, filePath) => {
+  if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+    res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" }).end("Not Found");
+    return;
+  }
+  const size = fs.statSync(filePath).size;
+  const base = { "Content-Type": "video/mp4", "Accept-Ranges": "bytes", "Cache-Control": "public, max-age=86400" };
+  const m = (req.headers.range || "").match(/bytes=(\d*)-(\d*)/);
+  if (m) {
+    const start = m[1] ? parseInt(m[1], 10) : 0;
+    const end = Math.min(m[2] ? parseInt(m[2], 10) : size - 1, size - 1);
+    if (Number.isNaN(start) || start >= size || start > end) {
+      res.writeHead(416, { "Content-Range": `bytes */${size}` }).end();
+      return;
+    }
+    res.writeHead(206, { ...base, "Content-Range": `bytes ${start}-${end}/${size}`, "Content-Length": end - start + 1 });
+    fs.createReadStream(filePath, { start, end }).pipe(res);
+    return;
+  }
+  res.writeHead(200, { ...base, "Content-Length": size });
+  fs.createReadStream(filePath).pipe(res);
+};
+
+const serveStatic = (req, res, urlPath, longCache) => {
   let filePath = path.normalize(path.join(PUBLIC_DIR, urlPath));
   if (!filePath.startsWith(PUBLIC_DIR)) {
     res.writeHead(403).end("Forbidden");
@@ -581,6 +606,10 @@ const serveStatic = (res, urlPath, longCache) => {
   }
   if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
     filePath = path.join(filePath, "index.html");
+  }
+  if (path.extname(filePath).toLowerCase() === ".mp4") {
+    sendVideo(req, res, filePath);
+    return;
   }
   sendFile(res, filePath, longCache);
 };
@@ -646,7 +675,7 @@ const server = http.createServer((req, res) => {
     sendJson(res, 405, { error: "method not allowed" });
     return;
   }
-  serveStatic(res, pathname, /[?&]v=/.test(req.url || ""));
+  serveStatic(req, res, pathname, /[?&]v=/.test(req.url || ""));
 });
 
 ensureData();
