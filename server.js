@@ -335,18 +335,18 @@ const memberPublic = ({ sub, email, name, nickname, contact, igHandle, quickkyUr
   sub, email, name, nickname, contact, igHandle, quickkyUrl, bio, showOnWall, quickkyAvatar,
 });
 
-// 從卡片連結去 quickky 撈公開頭貼（撈不到就算了，不擋存檔）
-const fetchQuickkyAvatar = async (quickkyUrl) => {
+// 從卡片連結去 quickky 撈公開頭貼與自介（撈不到就算了，不擋存檔）
+const fetchQuickkyProfile = async (quickkyUrl) => {
   try {
     const u = new URL(quickkyUrl);
     const slug = u.pathname.split("/").filter(Boolean)[0];
-    if (!slug || slug === "c") return "";
+    if (!slug || slug === "c") return { avatarUrl: "", bio: "" };
     const res = await fetch(u.origin + "/api/public/profiles/" + encodeURIComponent(slug));
-    if (!res.ok) return "";
-    const data = await res.json();
-    return cleanStr(data.data && data.data.avatarUrl, 300);
+    if (!res.ok) return { avatarUrl: "", bio: "" };
+    const data = (await res.json()).data || {};
+    return { avatarUrl: cleanStr(data.avatarUrl, 300), bio: cleanStr(data.bio, 300) };
   } catch (err) {
-    return "";
+    return { avatarUrl: "", bio: "" };
   }
 };
 
@@ -393,7 +393,9 @@ const handleMe = (req, res) => {
       }
       const base = existing || { sub: payload.sub, createdAt: new Date().toISOString() };
       (async () => {
-        const quickkyAvatar = quickkyUrl ? await fetchQuickkyAvatar(quickkyUrl) : "";
+        const qk = quickkyUrl ? await fetchQuickkyProfile(quickkyUrl) : { avatarUrl: "", bio: "" };
+        const quickkyAvatar = qk.avatarUrl;
+        const quickkyBio = qk.bio;
         const next = {
           ...base,
           email: cleanStr(payload.email, 120),
@@ -403,6 +405,7 @@ const handleMe = (req, res) => {
           igHandle: cleanStr(body.igHandle, 60),
           quickkyUrl,
           quickkyAvatar,
+          quickkyBio,
           bio: cleanStr(body.bio, 300),
           showOnWall: body.showOnWall === true && !!quickkyUrl,
           updatedAt: new Date().toISOString(),
@@ -604,7 +607,12 @@ const server = http.createServer((req, res) => {
   if (req.method === "GET" && pathname === "/api/wall") {
     const members = Object.values(readJsonFile(MEMBERS_PATH, {}))
       .filter((m) => m.showOnWall === true && m.quickkyUrl)
-      .map(({ nickname, bio, quickkyUrl, quickkyAvatar }) => ({ nickname, bio, quickkyUrl, avatarUrl: quickkyAvatar || "" }))
+      .map(({ nickname, bio, quickkyUrl, quickkyAvatar, quickkyBio }) => ({
+        nickname,
+        bio: bio || quickkyBio || "",
+        quickkyUrl,
+        avatarUrl: quickkyAvatar || "",
+      }))
       .sort(() => Math.random() - 0.5);
     sendJson(res, 200, { wall: members });
     return;
