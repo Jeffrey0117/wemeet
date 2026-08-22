@@ -275,6 +275,7 @@ a { color: var(--fizz); }
   background: var(--cream-deep);
   display: flex; align-items: center; justify-content: center;
   font-family: var(--font-display); font-size: 1.5rem; color: var(--caramel);
+  object-fit: cover;
 }
 .wall-card h3 { font-size: 1.1rem; }
 .wall-bio {

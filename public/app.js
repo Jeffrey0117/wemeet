@@ -81,7 +81,15 @@ const renderWall = (wall) => {
     card.href = m.quickkyUrl;
     card.target = "_blank";
     card.rel = "noopener";
-    const avatar = el("div", "wall-avatar", (m.nickname || "?").slice(0, 1));
+    let avatar;
+    if (m.avatarUrl) {
+      avatar = el("img", "wall-avatar");
+      avatar.src = m.avatarUrl;
+      avatar.alt = m.nickname || "";
+      avatar.loading = "lazy";
+    } else {
+      avatar = el("div", "wall-avatar", (m.nickname || "?").slice(0, 1));
+    }
     card.appendChild(avatar);
     card.appendChild(el("h3", null, m.nickname || "Chill 友"));
     if (m.bio) card.appendChild(el("p", "wall-bio", m.bio));

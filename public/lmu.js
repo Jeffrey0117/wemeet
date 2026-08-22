@@ -53,6 +53,25 @@ const initNavAuth = async () => {
     avatar.className = "nav-avatar";
     avatar.addEventListener("click", () => wrap.classList.toggle("open"));
 
+    // 會員資料有 quickky 頭貼／暱稱就升級顯示
+    fetch("/api/me", { headers: lmuAuthHeaders() })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        const m = d && d.member;
+        if (!m) return;
+        if (m.quickkyAvatar) {
+          const img = document.createElement("img");
+          img.src = m.quickkyAvatar;
+          img.alt = m.nickname || "me";
+          img.className = "nav-avatar";
+          img.addEventListener("click", () => wrap.classList.toggle("open"));
+          wrap.replaceChild(img, wrap.firstChild);
+        } else if (avatar.tagName === "SPAN" && m.nickname) {
+          avatar.textContent = m.nickname.slice(0, 1);
+        }
+      })
+      .catch(() => {});
+
     const menu = document.createElement("div");
     menu.className = "nav-menu";
     const meLink = document.createElement("a");

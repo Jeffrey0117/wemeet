@@ -331,9 +331,24 @@ const handleSignup = (req, res) => {
 const QUICKKY_URL_RE = /^https:\/\/quickky\.(isnowfriend\.com|pipee\.tw)\/\S*$/;
 
 // showOnWall 原樣傳回（undefined = 從未表態，前端拿來決定預設勾選）
-const memberPublic = ({ sub, email, name, nickname, contact, igHandle, quickkyUrl, bio, showOnWall }) => ({
-  sub, email, name, nickname, contact, igHandle, quickkyUrl, bio, showOnWall,
+const memberPublic = ({ sub, email, name, nickname, contact, igHandle, quickkyUrl, bio, showOnWall, quickkyAvatar }) => ({
+  sub, email, name, nickname, contact, igHandle, quickkyUrl, bio, showOnWall, quickkyAvatar,
 });
+
+// 從卡片連結去 quickky 撈公開頭貼（撈不到就算了，不擋存檔）
+const fetchQuickkyAvatar = async (quickkyUrl) => {
+  try {
+    const u = new URL(quickkyUrl);
+    const slug = u.pathname.split("/").filter(Boolean)[0];
+    if (!slug || slug === "c") return "";
+    const res = await fetch(u.origin + "/api/public/profiles/" + encodeURIComponent(slug));
+    if (!res.ok) return "";
+    const data = await res.json();
+    return cleanStr(data.data && data.data.avatarUrl, 300);
+  } catch (err) {
+    return "";
+  }
+};
 
 const handleMe = (req, res) => {
   const payload = lmuUser(req);
@@ -377,22 +392,28 @@ const handleMe = (req, res) => {
         return;
       }
       const base = existing || { sub: payload.sub, createdAt: new Date().toISOString() };
-      const next = {
-        ...base,
-        email: cleanStr(payload.email, 120),
-        name: cleanStr(payload.name, 60),
-        nickname: cleanStr(body.nickname, 40) || cleanStr(payload.name, 40),
-        contact: cleanStr(body.contact, 120),
-        igHandle: cleanStr(body.igHandle, 60),
-        quickkyUrl,
-        bio: cleanStr(body.bio, 300),
-        showOnWall: body.showOnWall === true && !!quickkyUrl,
-        updatedAt: new Date().toISOString(),
-      };
-      writeJsonAtomic(MEMBERS_PATH, { ...members, [payload.sub]: next }, (err) => {
-        if (err) sendJson(res, 500, { error: "write failed" });
-        else sendJson(res, 200, { member: memberPublic(next) });
-      });
+      (async () => {
+        const quickkyAvatar = quickkyUrl ? await fetchQuickkyAvatar(quickkyUrl) : "";
+        const next = {
+          ...base,
+          email: cleanStr(payload.email, 120),
+          name: cleanStr(payload.name, 60),
+          nickname: cleanStr(body.nickname, 40) || cleanStr(payload.name, 40),
+          contact: cleanStr(body.contact, 120),
+          igHandle: cleanStr(body.igHandle, 60),
+          quickkyUrl,
+          quickkyAvatar,
+          bio: cleanStr(body.bio, 300),
+          showOnWall: body.showOnWall === true && !!quickkyUrl,
+          updatedAt: new Date().toISOString(),
+        };
+        // 撈頭貼期間名冊可能被別的請求改過，重讀避免蓋掉
+        const fresh = readJsonFile(MEMBERS_PATH, {});
+        writeJsonAtomic(MEMBERS_PATH, { ...fresh, [payload.sub]: next }, (err) => {
+          if (err) sendJson(res, 500, { error: "write failed" });
+          else sendJson(res, 200, { member: memberPublic(next) });
+        });
+      })();
     });
     return;
   }
@@ -583,7 +604,7 @@ const server = http.createServer((req, res) => {
   if (req.method === "GET" && pathname === "/api/wall") {
     const members = Object.values(readJsonFile(MEMBERS_PATH, {}))
       .filter((m) => m.showOnWall === true && m.quickkyUrl)
-      .map(({ nickname, bio, quickkyUrl }) => ({ nickname, bio, quickkyUrl }))
+      .map(({ nickname, bio, quickkyUrl, quickkyAvatar }) => ({ nickname, bio, quickkyUrl, avatarUrl: quickkyAvatar || "" }))
       .sort(() => Math.random() - 0.5);
     sendJson(res, 200, { wall: members });
     return;
