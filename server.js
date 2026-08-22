@@ -549,7 +549,7 @@ const handleAdmin = (req, res, pathname) => {
 // 所以 HTML 裡的資產網址帶 __BUILD__ 版本號，每次部署重啟自動換新
 const BUILD_ID = Date.now().toString(36);
 
-const sendFile = (res, filePath) => {
+const sendFile = (res, filePath, longCache) => {
   if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
     res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" }).end("Not Found");
     return;
@@ -563,12 +563,13 @@ const sendFile = (res, filePath) => {
   }
   res.writeHead(200, {
     "Content-Type": MIME[ext] || "application/octet-stream",
-    "Cache-Control": "no-cache",
+    // 帶 ?v= 版本號的資產內容不會變 → 快取一年；沒帶的維持即時
+    "Cache-Control": longCache ? "public, max-age=31536000, immutable" : "no-cache",
   });
   fs.createReadStream(filePath).pipe(res);
 };
 
-const serveStatic = (res, urlPath) => {
+const serveStatic = (res, urlPath, longCache) => {
   let filePath = path.normalize(path.join(PUBLIC_DIR, urlPath));
   if (!filePath.startsWith(PUBLIC_DIR)) {
     res.writeHead(403).end("Forbidden");
@@ -577,7 +578,7 @@ const serveStatic = (res, urlPath) => {
   if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
     filePath = path.join(filePath, "index.html");
   }
-  sendFile(res, filePath);
+  sendFile(res, filePath, longCache);
 };
 
 /* ---------- 路由 ---------- */
@@ -641,7 +642,7 @@ const server = http.createServer((req, res) => {
     sendJson(res, 405, { error: "method not allowed" });
     return;
   }
-  serveStatic(res, pathname);
+  serveStatic(res, pathname, /[?&]v=/.test(req.url || ""));
 });
 
 ensureData();

@@ -20,57 +20,60 @@ const lmuAuthHeaders = () => {
   return token ? { Authorization: "Bearer " + token } : {};
 };
 
-/* ---------- nav 右上角登入狀態（頭貼 + 下拉選單） ---------- */
+/* ---------- nav 右上角登入狀態（頭貼 + 下拉選單） ----------
+   體驗策略：上次的登入狀態存 localStorage → 頁面一載入立刻畫（零等待、不閃問號），
+   SDK 與 /api/me 回來後靜默校正，畫面只在真的有差異時才重繪。 */
 
-const initNavAuth = async () => {
+const NAV_CACHE_KEY = "wemeet_nav";
+
+const readNavCache = () => {
+  try {
+    return JSON.parse(localStorage.getItem(NAV_CACHE_KEY) || "null");
+  } catch (err) {
+    return null;
+  }
+};
+
+const writeNavCache = (obj) => {
+  try {
+    localStorage.setItem(NAV_CACHE_KEY, JSON.stringify(obj));
+  } catch (err) {}
+};
+
+const initNavAuth = () => {
   const slot = document.getElementById("nav-auth");
   if (!slot) return;
-  const sdk = await waitForLetMeUse();
+  let rendered = "";
 
-  const render = (user) => {
+  const render = (state) => {
+    const sig = JSON.stringify(state);
+    if (sig === rendered) return;
+    rendered = sig;
     slot.textContent = "";
-    if (!user) {
+
+    if (!state.loggedIn) {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "nav-login";
       btn.textContent = "登入";
-      btn.addEventListener("click", () => (sdk ? sdk.login() : (location.href = "/me")));
+      btn.addEventListener("click", () => (window.letmeuse ? window.letmeuse.login() : (location.href = "/me")));
       slot.appendChild(btn);
       return;
     }
+
     const wrap = document.createElement("div");
     wrap.className = "nav-user";
-
     let avatar;
-    if (user.avatar) {
+    if (state.avatar) {
       avatar = document.createElement("img");
-      avatar.src = user.avatar;
-      avatar.alt = user.name || "me";
+      avatar.src = state.avatar;
+      avatar.alt = "";
     } else {
       avatar = document.createElement("span");
-      avatar.textContent = (user.name || "?").slice(0, 1);
+      avatar.textContent = state.letter || "🥤";
     }
     avatar.className = "nav-avatar";
     avatar.addEventListener("click", () => wrap.classList.toggle("open"));
-
-    // 會員資料有 quickky 頭貼／暱稱就升級顯示
-    fetch("/api/me", { headers: lmuAuthHeaders() })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => {
-        const m = d && d.member;
-        if (!m) return;
-        if (m.quickkyAvatar) {
-          const img = document.createElement("img");
-          img.src = m.quickkyAvatar;
-          img.alt = m.nickname || "me";
-          img.className = "nav-avatar";
-          img.addEventListener("click", () => wrap.classList.toggle("open"));
-          wrap.replaceChild(img, wrap.firstChild);
-        } else if (avatar.tagName === "SPAN" && m.nickname) {
-          avatar.textContent = m.nickname.slice(0, 1);
-        }
-      })
-      .catch(() => {});
 
     const menu = document.createElement("div");
     menu.className = "nav-menu";
@@ -80,10 +83,12 @@ const initNavAuth = async () => {
     const logout = document.createElement("button");
     logout.type = "button";
     logout.textContent = "登出";
-    logout.addEventListener("click", () => sdk.logout());
+    logout.addEventListener("click", () => {
+      writeNavCache({ loggedIn: false });
+      if (window.letmeuse) window.letmeuse.logout();
+    });
     menu.appendChild(meLink);
     menu.appendChild(logout);
-
     wrap.appendChild(avatar);
     wrap.appendChild(menu);
     slot.appendChild(wrap);
@@ -94,12 +99,44 @@ const initNavAuth = async () => {
     if (wrap && !wrap.contains(e.target)) wrap.classList.remove("open");
   });
 
-  if (!sdk) {
-    render(null);
-    return;
-  }
-  sdk.onAuthChange(render);
-  render(sdk.user);
+  // 1) 快取先上畫面，零等待
+  const cached = readNavCache();
+  if (cached) render(cached);
+
+  // 2) SDK 就緒後校正真實狀態
+  waitForLetMeUse().then((sdk) => {
+    if (!sdk) {
+      if (!cached) render({ loggedIn: false });
+      return;
+    }
+    const sync = async (user) => {
+      if (!user) {
+        writeNavCache({ loggedIn: false });
+        render({ loggedIn: false });
+        return;
+      }
+      // 沒快取才先用 SDK 資料墊著；有快取就等 /api/me 一次到位，避免中間態閃爍
+      if (!cached || !cached.loggedIn) {
+        render({ loggedIn: true, avatar: user.avatar || "", letter: (user.name || "").slice(0, 1) });
+      }
+      let state = { loggedIn: true, avatar: user.avatar || "", letter: (user.name || "").slice(0, 1) };
+      try {
+        const res = await fetch("/api/me", { headers: lmuAuthHeaders() });
+        if (res.ok) {
+          const { member } = await res.json();
+          state = {
+            loggedIn: true,
+            avatar: member.quickkyAvatar || user.avatar || "",
+            letter: (member.nickname || user.name || "").slice(0, 1),
+          };
+        }
+      } catch (err) {}
+      writeNavCache(state);
+      render(state);
+    };
+    sdk.onAuthChange(sync);
+    sync(sdk.user);
+  });
 };
 
 initNavAuth();
