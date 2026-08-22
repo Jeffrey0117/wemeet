@@ -26,7 +26,7 @@ const show = (step) => {
   $("quiz-nav").hidden = done;
   if (!done) {
     $("btn-prev").hidden = step === 0;
-    $("btn-next").textContent = step === STEP_COUNT - 1 ? "送出報名 🥤" : "下一步 →";
+    $("btn-next").textContent = step === STEP_COUNT - 1 ? "送出報名" : "下一步 →";
   }
   setMsg("");
 };
@@ -58,7 +58,7 @@ const loadEvents = async () => {
       title.textContent = `${fmtDate(ev.date)} ${ev.title}`;
       const sub = document.createElement("span");
       sub.className = "s";
-      sub.textContent = `🕐 ${ev.time || ""}　📍 ${ev.location || ""}` + (left !== null ? `　剩 ${left} 名額` : "");
+      sub.textContent = `${ev.time || ""}｜${ev.location || ""}` + (left !== null ? `　剩 ${left} 名額` : "");
       text.appendChild(title);
       text.appendChild(document.createElement("br"));
       text.appendChild(sub);
@@ -68,7 +68,7 @@ const loadEvents = async () => {
       box.insertBefore(label, box.firstChild);
     });
   } catch (err) {
-    setMsg("活動載入失敗，可以先選「加入名單」完成報名 🙏");
+    setMsg("活動載入失敗，可以先選「加入名單」完成報名");
   }
 };
 
@@ -111,7 +111,7 @@ const submit = async () => {
       setMsg(data.error || "送出失敗，再試一次");
     }
   } catch (err) {
-    setMsg("連線失敗，再試一次 🙏");
+    setMsg("連線失敗，再試一次");
   } finally {
     btn.disabled = false;
   }

@@ -17,6 +17,12 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+/* Lucide inline icons */
+.icon { vertical-align: -0.18em; }
+span.icon { display: inline-flex; vertical-align: -0.18em; }
+span.icon svg { display: block; }
+.logo-icon { color: var(--caramel); vertical-align: -0.22em; }
+
 html { scroll-behavior: smooth; }
 
 body {
@@ -44,9 +50,26 @@ a { color: var(--fizz); }
   border-bottom: 1px solid var(--cream-deep);
 }
 .nav-logo { font-size: 1.25rem; color: var(--cola); text-decoration: none; }
-.nav-links { display: flex; gap: 1rem; align-items: center; }
+.nav-links { display: flex; gap: 1.1rem; align-items: center; }
 .nav-links a { color: var(--cola-soft); text-decoration: none; font-size: 0.95rem; }
 .nav-links a:hover { color: var(--fizz); }
+/* hover 質感底線：由左滑入、離開往右收 */
+.nav-links a:not(.nav-cta) { position: relative; }
+.nav-links a:not(.nav-cta)::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -5px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--fizz);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nav-links a:not(.nav-cta):hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
 .nav-cta {
   background: var(--fizz);
   color: #fff !important;
@@ -193,7 +216,7 @@ a { color: var(--fizz); }
   box-shadow: var(--shadow);
   text-align: center;
 }
-.about-emoji { font-size: 2.2rem; margin-bottom: 0.6rem; }
+.about-emoji { color: var(--caramel); margin-bottom: 0.6rem; }
 .about-card h3 { font-size: 1.2rem; margin-bottom: 0.4rem; }
 .about-card p { font-size: 0.95rem; color: var(--cola-soft); }
 

@@ -70,7 +70,8 @@ const initNavAuth = () => {
       avatar.alt = "";
     } else {
       avatar = document.createElement("span");
-      avatar.textContent = state.letter || "🥤";
+      if (state.letter) avatar.textContent = state.letter;
+      else avatar.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>';
     }
     avatar.className = "nav-avatar";
     avatar.addEventListener("click", () => wrap.classList.toggle("open"));

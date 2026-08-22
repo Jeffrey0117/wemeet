@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>報名小聚｜Chill Club 揪可樂</title>
   <meta name="description" content="報名 Chill Club 揪可樂的台中輕鬆小聚，一分鐘填完。">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥤</text></svg>">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=__BUILD__">
   <link rel="preconnect" href="https://letmeuse.isnowfriend.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -73,7 +73,7 @@
     .quiz-msg { text-align: center; font-size: 0.95rem; min-height: 1.5em; margin-top: 0.8rem; }
     .quiz-msg.err { color: var(--fizz); }
     .done { text-align: center; padding: 1.5rem 0 0.5rem; }
-    .done .big { font-size: 3rem; }
+    .done .big { color: var(--caramel); }
     .fee-box {
       text-align: center; background: #fff7f2; border: 1.5px solid var(--fizz);
       border-radius: 14px; padding: 1rem; margin-bottom: 1.2rem;
@@ -87,7 +87,7 @@
 <body>
 
 <nav class="nav">
-  <a class="nav-logo" href="/">🥤 揪可樂</a>
+  <a class="nav-logo" href="/"><svg class="icon logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20"><path d="m6 8 1.75 12.28a2 2 0 0 0 2 1.72h4.54a2 2 0 0 0 2-1.72L18 8"/><path d="M5 8h14"/><path d="M7 15a6.47 6.47 0 0 1 5 0 6.47 6.47 0 0 0 5 0"/><path d="m12 8 1-6h2"/></svg> 揪可樂</a>
   <div class="nav-links">
     <a href="/#events">近期活動</a>
     <a href="https://www.instagram.com/we_i_meet" target="_blank" rel="noopener">Instagram</a>
@@ -108,7 +108,7 @@
       <div class="choice" id="event-choices">
         <label>
           <input type="radio" name="eventId" value="" checked>
-          <span><span class="t">先加入名單，開團通知我 💌</span><br><span class="s">還不確定時間？沒關係，下一場開團先告訴你。</span></span>
+          <span><span class="t">先加入名單，開團通知我</span><br><span class="s">還不確定時間？沒關係，下一場開團先告訴你。</span></span>
         </label>
       </div>
     </section>
@@ -127,7 +127,7 @@
 
     <!-- Step 3：報名須知（費用 + 出席承諾） -->
     <section class="step" data-step="2">
-      <h2>報名須知 📋</h2>
+      <h2>報名須知</h2>
       <p class="hint">場地和座位都是先訂好的，所以我們收一點點費用，確保大家都會出現。</p>
       <div class="fee-box">
         <span class="fee-num">報名費 $50</span>
@@ -147,10 +147,10 @@
 
     <!-- Step 4：追蹤 IG -->
     <section class="step" data-step="3">
-      <h2>順手追蹤一下 IG 🙌</h2>
+      <h2>順手追蹤一下 IG</h2>
       <p class="hint">活動照片、下一場預告都會發在這裡，追蹤才不會漏接。</p>
       <div class="ig-box">
-        <div class="handle">📸 @we_i_meet</div>
+        <div class="handle"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg> @we_i_meet</div>
         <a class="btn btn-primary" href="https://www.instagram.com/we_i_meet" target="_blank" rel="noopener">去追蹤 Instagram →</a>
       </div>
       <div class="choice">
@@ -176,12 +176,12 @@
     <!-- 完成畫面 -->
     <section class="step" data-step="done">
       <div class="done">
-        <div class="big">🥤✨</div>
+        <div class="big"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="48" height="48"><path d="m6 8 1.75 12.28a2 2 0 0 0 2 1.72h4.54a2 2 0 0 0 2-1.72L18 8"/><path d="M5 8h14"/><path d="M7 15a6.47 6.47 0 0 1 5 0 6.47 6.47 0 0 0 5 0"/><path d="m12 8 1-6h2"/></svg></div>
         <h2>還差最後一步！</h2>
         <p>資料收到了。現在<strong>私訊我們的 IG</strong>，跟我們說你報名了，<br>我們會把匯款帳號給你——<strong>完成匯款，名額就是你的</strong>。</p>
         <a class="btn btn-primary" href="https://ig.me/m/we_i_meet" target="_blank" rel="noopener">私訊 @we_i_meet 完成報名 →</a>
         <p style="margin-top:1.6rem;margin-bottom:0.6rem">等匯款的空檔，先把你的 <strong>Quickky 名片卡</strong>準備好——<br>小聚現場用掃的交換，不用尷尬地互要 IG。</p>
-        <a class="btn btn-ghost" href="/me">🃏 準備我的名片卡</a>
+        <a class="btn btn-ghost" href="/me"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="16" height="16"><path d="M16 10h2"/><path d="M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/></svg> 準備我的名片卡</a>
         <p style="margin-top:1rem"><a href="/">回官網首頁</a></p>
       </div>
     </section>

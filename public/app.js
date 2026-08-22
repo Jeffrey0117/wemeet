@@ -1,6 +1,22 @@
 // 前台首頁：載入活動清單（報名走 /signup 問卷頁）
 const WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"];
 
+/* Lucide inline icons（動態內容用） */
+const ICON_ATTRS =
+  'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+const ICON_PATHS = {
+  clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  "map-pin": '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>',
+  "id-card":
+    '<path d="M16 10h2"/><path d="M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/>',
+};
+const iconEl = (name, size) => {
+  const span = document.createElement("span");
+  span.className = "icon";
+  span.innerHTML = `<svg ${ICON_ATTRS} width="${size}" height="${size}">${ICON_PATHS[name]}</svg>`;
+  return span;
+};
+
 const fmtDate = (iso) => {
   const d = new Date(iso + "T00:00:00");
   if (Number.isNaN(d.getTime())) return { md: iso, w: "" };
@@ -19,7 +35,7 @@ const renderEvents = (events) => {
   list.textContent = "";
 
   if (!events.length) {
-    list.appendChild(el("p", "event-empty", "下一場正在籌備中！先到下面留個資料，開團第一個通知你 👇"));
+    list.appendChild(el("p", "event-empty", "下一場正在籌備中！先到下面留個資料，開團第一個通知你。"));
     return;
   }
 
@@ -37,7 +53,12 @@ const renderEvents = (events) => {
 
     const info = el("div", "event-info");
     info.appendChild(el("h3", null, ev.title));
-    info.appendChild(el("p", "event-meta", `🕐 ${ev.time || ""}　📍 ${ev.location || ""}`));
+    const meta = el("p", "event-meta");
+    meta.appendChild(iconEl("clock", 14));
+    meta.appendChild(document.createTextNode(" " + (ev.time || "") + "　"));
+    meta.appendChild(iconEl("map-pin", 14));
+    meta.appendChild(document.createTextNode(" " + (ev.location || "")));
+    info.appendChild(meta);
     if (ev.note) info.appendChild(el("p", "event-note", ev.note));
     card.appendChild(info);
 
@@ -66,7 +87,7 @@ const loadEvents = async () => {
     renderEvents(data.events || []);
   } catch (err) {
     list.textContent = "";
-    list.appendChild(el("p", "event-empty", "活動載入失敗，重新整理一下試試 🙏"));
+    list.appendChild(el("p", "event-empty", "活動載入失敗，重新整理一下試試"));
   }
 };
 
@@ -100,7 +121,9 @@ const renderWall = (wall) => {
   // 最後一格永遠是邀請卡：卡少時是招募入口，卡多時是加入牆上的入口
   const cta = el("a", "wall-card wall-card-cta");
   cta.href = "/me";
-  cta.appendChild(el("div", "wall-avatar", "🃏"));
+  const ctaAvatar = el("div", "wall-avatar");
+  ctaAvatar.appendChild(iconEl("id-card", 34));
+  cta.appendChild(ctaAvatar);
   cta.appendChild(el("h3", null, wall.length ? "你也上牆" : "成為第一張卡"));
   cta.appendChild(el("p", "wall-bio", "建立你的 Quickky 名片卡，讓大家先認識你。"));
   cta.appendChild(el("span", "wall-go", "去建立 →"));

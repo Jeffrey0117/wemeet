@@ -64,7 +64,7 @@ const saveMember = async () => {
       setMsg(data.error || "儲存失敗，再試一次", false);
     }
   } catch (err) {
-    setMsg("連線失敗，再試一次 🙏", false);
+    setMsg("連線失敗，再試一次", false);
   } finally {
     $("btn-save").disabled = false;
   }
