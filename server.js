@@ -330,8 +330,8 @@ const handleSignup = (req, res) => {
 
 const QUICKKY_URL_RE = /^https:\/\/quickky\.(isnowfriend\.com|pipee\.tw)\/\S*$/;
 
-const memberPublic = ({ sub, email, name, nickname, contact, igHandle, quickkyUrl, bio }) => ({
-  sub, email, name, nickname, contact, igHandle, quickkyUrl, bio,
+const memberPublic = ({ sub, email, name, nickname, contact, igHandle, quickkyUrl, bio, showOnWall }) => ({
+  sub, email, name, nickname, contact, igHandle, quickkyUrl, bio, showOnWall: showOnWall === true,
 });
 
 const handleMe = (req, res) => {
@@ -383,6 +383,7 @@ const handleMe = (req, res) => {
         igHandle: cleanStr(body.igHandle, 60),
         quickkyUrl,
         bio: cleanStr(body.bio, 300),
+        showOnWall: body.showOnWall === true && !!quickkyUrl,
         updatedAt: new Date().toISOString(),
       };
       writeJsonAtomic(MEMBERS_PATH, { ...members, [payload.sub]: next }, (err) => {
@@ -573,6 +574,15 @@ const server = http.createServer((req, res) => {
   }
   if (pathname === "/api/me") {
     handleMe(req, res);
+    return;
+  }
+  // 首頁 Chill 友牆：opt-in 且有連卡的會員，只露暱稱/自介/卡片
+  if (req.method === "GET" && pathname === "/api/wall") {
+    const members = Object.values(readJsonFile(MEMBERS_PATH, {}))
+      .filter((m) => m.showOnWall === true && m.quickkyUrl)
+      .map(({ nickname, bio, quickkyUrl }) => ({ nickname, bio, quickkyUrl }))
+      .sort(() => Math.random() - 0.5);
+    sendJson(res, 200, { wall: members });
     return;
   }
   if (req.method === "POST" && pathname === "/api/webhooks/letmeuse") {

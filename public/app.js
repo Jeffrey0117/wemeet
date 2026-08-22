@@ -70,4 +70,44 @@ const loadEvents = async () => {
   }
 };
 
+/* ---------- Chill 友牆 ---------- */
+
+const renderWall = (wall) => {
+  const grid = document.getElementById("wall-list");
+  grid.textContent = "";
+
+  wall.forEach((m) => {
+    const card = el("a", "wall-card");
+    card.href = m.quickkyUrl;
+    card.target = "_blank";
+    card.rel = "noopener";
+    const avatar = el("div", "wall-avatar", (m.nickname || "?").slice(0, 1));
+    card.appendChild(avatar);
+    card.appendChild(el("h3", null, m.nickname || "Chill 友"));
+    if (m.bio) card.appendChild(el("p", "wall-bio", m.bio));
+    card.appendChild(el("span", "wall-go", "看卡片 →"));
+    grid.appendChild(card);
+  });
+
+  // 最後一格永遠是邀請卡：卡少時是招募入口，卡多時是加入牆上的入口
+  const cta = el("a", "wall-card wall-card-cta");
+  cta.href = "/me";
+  cta.appendChild(el("div", "wall-avatar", "🃏"));
+  cta.appendChild(el("h3", null, wall.length ? "你也上牆" : "成為第一張卡"));
+  cta.appendChild(el("p", "wall-bio", "建立你的 Quickky 名片卡，讓大家先認識你。"));
+  cta.appendChild(el("span", "wall-go", "去建立 →"));
+  grid.appendChild(cta);
+};
+
+const loadWall = async () => {
+  try {
+    const res = await fetch("/api/wall");
+    const data = await res.json();
+    renderWall(data.wall || []);
+  } catch (err) {
+    renderWall([]);
+  }
+};
+
 loadEvents();
+loadWall();

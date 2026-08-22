@@ -27,6 +27,7 @@ const fillForm = (member) => {
   $("m-ig").value = member.igHandle || "";
   $("m-bio").value = member.bio || "";
   $("m-quickky").value = member.quickkyUrl || "";
+  $("m-wall").checked = member.showOnWall === true;
   renderQuickky(member.quickkyUrl);
 };
 
@@ -51,6 +52,7 @@ const saveMember = async () => {
         igHandle: $("m-ig").value.trim(),
         bio: $("m-bio").value.trim(),
         quickkyUrl: $("m-quickky").value.trim(),
+        showOnWall: $("m-wall").checked,
       }),
     });
     const data = await res.json();

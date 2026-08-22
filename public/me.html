@@ -42,6 +42,11 @@
     }
     .quickky-box h3 { font-size: 1.1rem; margin-bottom: 0.4rem; }
     .quickky-box p { font-size: 0.88rem; color: var(--cola-soft); margin-bottom: 0.8rem; }
+    .wall-toggle {
+      display: flex; gap: 0.5rem; align-items: center; justify-content: center;
+      font-size: 0.9rem; font-weight: 500; margin-top: 0.6rem; cursor: pointer;
+    }
+    .wall-toggle input { accent-color: var(--fizz); }
     .me-msg { text-align: center; font-size: 0.95rem; min-height: 1.5em; margin-top: 0.7rem; }
     .me-msg.ok { color: var(--mint); }
     .me-msg.err { color: var(--fizz); }
@@ -104,6 +109,10 @@
         </div>
         <label class="field" style="text-align:left; margin-top:0.8rem">
           <input type="url" id="m-quickky" maxlength="200" placeholder="https://quickky.isnowfriend.com/你的卡片">
+        </label>
+        <label class="wall-toggle">
+          <input type="checkbox" id="m-wall">
+          把我的卡片放上首頁「Chill 友牆」讓大家認識我
         </label>
       </div>
 

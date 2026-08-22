@@ -219,6 +219,37 @@ a { color: var(--fizz); }
 .event-slots { display: block; font-size: 0.85rem; color: var(--mint); margin-bottom: 0.4rem; }
 .event-slots.full { color: var(--fizz); }
 
+/* ---------- Chill 友牆 ---------- */
+.wall-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.2rem; }
+.wall-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 1.5rem 1.2rem;
+  box-shadow: var(--shadow);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: var(--cola);
+  transition: transform 0.15s ease;
+}
+.wall-card:hover { transform: translateY(-4px) rotate(-0.5deg); }
+.wall-avatar {
+  width: 56px; height: 56px; margin: 0 auto;
+  border-radius: 50%;
+  background: var(--cream-deep);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 1.5rem; color: var(--caramel);
+}
+.wall-card h3 { font-size: 1.1rem; }
+.wall-bio {
+  font-size: 0.88rem; color: var(--cola-soft);
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.wall-go { font-size: 0.88rem; color: var(--fizz); margin-top: auto; }
+.wall-card-cta { border: 1.5px dashed var(--caramel); background: transparent; box-shadow: none; justify-content: center; }
+
 /* ---------- signup CTA ---------- */
 .cta-band { display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
 
