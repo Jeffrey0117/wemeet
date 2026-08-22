@@ -220,28 +220,6 @@ a { color: var(--fizz); }
   .hero-actions { justify-content: center; }
 }
 
-/* 氣泡 */
-.bubbles span {
-  position: absolute;
-  bottom: -60px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.9), rgba(193, 98, 47, 0.18));
-  border: 1px solid rgba(193, 98, 47, 0.2);
-  animation: rise 11s infinite ease-in;
-  opacity: 0;
-}
-.bubbles span:nth-child(1) { left: 8%;  width: 26px; height: 26px; animation-delay: 0s; }
-.bubbles span:nth-child(2) { left: 22%; width: 14px; height: 14px; animation-delay: 2.5s; }
-.bubbles span:nth-child(3) { left: 45%; width: 20px; height: 20px; animation-delay: 5s; }
-.bubbles span:nth-child(4) { left: 65%; width: 30px; height: 30px; animation-delay: 1.2s; }
-.bubbles span:nth-child(5) { left: 82%; width: 16px; height: 16px; animation-delay: 3.8s; }
-.bubbles span:nth-child(6) { left: 93%; width: 22px; height: 22px; animation-delay: 6.5s; }
-@keyframes rise {
-  0%   { transform: translateY(0) scale(0.9); opacity: 0; }
-  15%  { opacity: 0.85; }
-  100% { transform: translateY(-560px) scale(1.15); opacity: 0; }
-}
-
 /* ---------- 按鈕 ---------- */
 .btn {
   display: inline-block;
