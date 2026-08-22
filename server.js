@@ -260,7 +260,11 @@ const publicEvents = () => {
   const counts = countByEvent(readJsonFile(SIGNUPS_PATH, []));
   return events
     .filter((e) => e.status !== "hidden" && !isPast(e))
-    .map((e) => ({ ...e, signedUp: counts[e.id] || 0 }));
+    .map((e) => {
+      // 詳細地點不對外，報名後私訊解鎖（admin API 才看得到 location）
+      const { location, ...pub } = e;
+      return { ...pub, signedUp: counts[e.id] || 0 };
+    });
 };
 
 const cleanStr = (v, max) => String(v == null ? "" : v).trim().slice(0, max);

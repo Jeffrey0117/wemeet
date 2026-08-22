@@ -57,7 +57,10 @@ const renderEvents = (events) => {
     meta.appendChild(iconEl("clock", 14));
     meta.appendChild(document.createTextNode(" " + (ev.time || "") + "　"));
     meta.appendChild(iconEl("map-pin", 14));
-    meta.appendChild(document.createTextNode(" " + (ev.location || "")));
+    meta.appendChild(document.createTextNode(" "));
+    meta.appendChild(el("span", "blur-text", "台中市西屯區某某街00巷0號"));
+    meta.appendChild(document.createTextNode(" "));
+    meta.appendChild(el("span", "unlock-note", "詳細地點報名後解鎖"));
     info.appendChild(meta);
     if (ev.note) info.appendChild(el("p", "event-note", ev.note));
     card.appendChild(info);
