@@ -9,6 +9,10 @@ const ICON_PATHS = {
   "map-pin": '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>',
   "id-card":
     '<path d="M16 10h2"/><path d="M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/>',
+  "volume-2":
+    '<path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.364 18.364a9 9 0 0 0 0-12.728"/>',
+  "volume-x":
+    '<path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><line x1="22" x2="16" y1="9" y2="15"/><line x1="16" x2="22" y1="9" y2="15"/>',
 };
 const iconEl = (name, size) => {
   const span = document.createElement("span");
@@ -143,5 +147,28 @@ const loadWall = async () => {
   }
 };
 
+/* ---------- hero 影片聲音開關（自動播放必須靜音，點一下開聲） ---------- */
+
+const bindHeroSound = () => {
+  const video = document.querySelector(".hero-video");
+  const btn = document.getElementById("video-sound");
+  if (!video || !btn) return;
+
+  const renderBtn = () => {
+    btn.innerHTML = video.muted
+      ? `<svg ${ICON_ATTRS} width="18" height="18">${ICON_PATHS["volume-x"]}</svg><span>開聲音</span>`
+      : `<svg ${ICON_ATTRS} width="18" height="18">${ICON_PATHS["volume-2"]}</svg>`;
+  };
+  const toggle = () => {
+    video.muted = !video.muted;
+    if (!video.muted) video.play().catch(() => {});
+    renderBtn();
+  };
+  btn.addEventListener("click", toggle);
+  video.addEventListener("click", toggle);
+  renderBtn();
+};
+
 loadEvents();
 loadWall();
+bindHeroSound();
