@@ -333,6 +333,29 @@ const handleSignup = (req, res) => {
   });
 };
 
+/* ---------- 破冰話題卡（代理 reelscript 公開 API，同機直連） ---------- */
+
+const REELSCRIPT_API = (ENV.REELSCRIPT_API || "").replace(/\/$/, "");
+const REELSCRIPT_PUBLIC_URL = (ENV.REELSCRIPT_PUBLIC_URL || "").replace(/\/$/, "");
+
+const handleIcebreaker = async (res) => {
+  if (!REELSCRIPT_API) {
+    sendJson(res, 503, { error: "not configured" });
+    return;
+  }
+  try {
+    const grab = (p) => fetch(REELSCRIPT_API + p).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+    const [snippet, quotes, vocabulary] = await Promise.all([
+      grab("/api/public/snippet/random"),
+      grab("/api/public/quotes?limit=5"),
+      grab("/api/public/vocabulary?limit=8"),
+    ]);
+    sendJson(res, 200, { base: REELSCRIPT_PUBLIC_URL, snippet, quotes, vocabulary });
+  } catch (err) {
+    sendJson(res, 502, { error: "upstream error" });
+  }
+};
+
 /* ---------- 會員 API（LetMeUse 登入） ---------- */
 
 const QUICKKY_URL_RE = /^https:\/\/quickky\.(isnowfriend\.com|pipee\.tw)\/\S*$/;
@@ -629,6 +652,10 @@ const server = http.createServer((req, res) => {
 
   if (req.method === "GET" && pathname === "/api/events") {
     sendJson(res, 200, { events: publicEvents() });
+    return;
+  }
+  if (req.method === "GET" && pathname === "/api/icebreaker") {
+    handleIcebreaker(res);
     return;
   }
   if (req.method === "POST" && pathname === "/api/signup") {

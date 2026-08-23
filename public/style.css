@@ -296,6 +296,36 @@ a { color: var(--fizz); }
   font-size: 0.85rem;
 }
 
+/* ---------- 破冰話題卡 ---------- */
+.ice-deck { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.2rem; }
+.ice-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 1.5rem 1.4rem;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.ice-featured { border: 2px solid var(--caramel); }
+.ice-en { font-family: var(--font-display); font-size: 1.25rem; line-height: 1.5; }
+.ice-featured .ice-en { font-size: 1.45rem; }
+.ice-zh { color: var(--cola-soft); font-size: 0.95rem; }
+.ice-src { margin-top: auto; font-size: 0.85rem; color: var(--fizz); text-decoration: none; }
+.ice-src:hover { text-decoration: underline; }
+.ice-chips { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; }
+.ice-chip {
+  background: var(--cream-deep);
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.88rem;
+  color: var(--cola-soft);
+  text-decoration: none;
+}
+.ice-chip strong { color: var(--cola); font-weight: 700; }
+.ice-chip:hover { background: var(--fizz); color: #fff; }
+.ice-chip:hover strong { color: #fff; }
+
 /* ---------- 月曆 ---------- */
 .cal {
   max-width: 460px;

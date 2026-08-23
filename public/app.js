@@ -190,6 +190,80 @@ const bindCalendarNav = () => {
   });
 };
 
+/* ---------- 破冰話題卡（reelscript 內容，導流回 reelscript） ---------- */
+
+const renderIcebreaker = (data) => {
+  const deck = document.getElementById("ice-deck");
+  if (!deck) return;
+  deck.textContent = "";
+  const base = data.base || "";
+  const watchLink = (videoId, text) => {
+    const a = el("a", "ice-src", text + " →");
+    if (base && videoId) {
+      a.href = base + "/watch/" + encodeURIComponent(videoId);
+      a.target = "_blank";
+      a.rel = "noopener";
+    }
+    return a;
+  };
+
+  if (data.snippet && data.snippet.en) {
+    const s = data.snippet;
+    const card = el("div", "ice-card ice-featured");
+    card.appendChild(el("p", "ice-en", "“" + s.en + "”"));
+    card.appendChild(el("p", "ice-zh", s.zh || ""));
+    card.appendChild(watchLink(s.videoId, s.videoTitle ? "出自「" + s.videoTitle + "」" : "看出處影片"));
+    deck.appendChild(card);
+  }
+
+  const quotes = (data.quotes && data.quotes.quotes) || [];
+  quotes.slice(0, 2).forEach((q) => {
+    const card = el("div", "ice-card");
+    card.appendChild(el("p", "ice-en", "“" + q.en + "”"));
+    card.appendChild(el("p", "ice-zh", q.zh || ""));
+    card.appendChild(watchLink(q.videoId, q.videoTitle ? "出自「" + q.videoTitle + "」" : "看出處影片"));
+    deck.appendChild(card);
+  });
+
+  const words = (data.vocabulary && data.vocabulary.words) || [];
+  if (words.length) {
+    const chips = el("div", "ice-chips");
+    words.slice(0, 6).forEach((w) => {
+      const chip = el("a", "ice-chip");
+      chip.appendChild(el("strong", null, w.word));
+      chip.appendChild(document.createTextNode(" " + (w.translation || "")));
+      if (base && w.videoId) {
+        chip.href = base + "/watch/" + encodeURIComponent(w.videoId);
+        chip.target = "_blank";
+        chip.rel = "noopener";
+      }
+      chips.appendChild(chip);
+    });
+    deck.appendChild(chips);
+  }
+
+  const more = document.getElementById("ice-more");
+  if (more && base) more.href = base + "/icebreaker";
+};
+
+const loadIcebreaker = async () => {
+  const section = document.getElementById("icebreaker");
+  try {
+    const res = await fetch("/api/icebreaker");
+    if (!res.ok) throw new Error("bad status");
+    const data = await res.json();
+    if (!data.snippet && !data.quotes) throw new Error("empty");
+    renderIcebreaker(data);
+  } catch (err) {
+    if (section) section.hidden = true; // 上游掛了就整區收起來，不留破版
+  }
+};
+
+const bindIcebreaker = () => {
+  const btn = document.getElementById("ice-refresh");
+  if (btn) btn.addEventListener("click", loadIcebreaker);
+};
+
 /* ---------- Chill 友牆 ---------- */
 
 const renderWall = (wall) => {
@@ -263,5 +337,7 @@ const bindHeroSound = () => {
 
 loadEvents();
 loadWall();
+loadIcebreaker();
+bindIcebreaker();
 bindHeroSound();
 bindCalendarNav();
