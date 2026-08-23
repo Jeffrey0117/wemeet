@@ -93,6 +93,32 @@ const init = async () => {
 
   $("btn-login").addEventListener("click", () => sdk.login());
   $("btn-logout").addEventListener("click", () => sdk.logout());
+
+  // 去 Quickky 建卡：已登入就走 SSO（免重新登入），失敗退回普通連結
+  const QUICKKY_APP_ID = "app_DddZG5K0";
+  $("quickky-create").addEventListener("click", async (e) => {
+    if (!sdk.user) return; // 未登入照普通連結走
+    e.preventDefault();
+    const fallback = $("quickky-create").href;
+    try {
+      const res = await fetch("https://letmeuse.isnowfriend.com/api/auth/sso/exchange", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + sdk.getToken() },
+        body: JSON.stringify({ targetAppId: QUICKKY_APP_ID }),
+      });
+      const json = await res.json();
+      const code = (json.data || json).code;
+      if (res.ok && code) {
+        window.open(
+          "https://quickky.isnowfriend.com/sso#code=" + encodeURIComponent(code) + "&next=" + encodeURIComponent("/dashboard"),
+          "_blank",
+          "noopener"
+        );
+        return;
+      }
+    } catch (err) {}
+    window.open(fallback, "_blank", "noopener");
+  });
 };
 
 $("btn-save").addEventListener("click", saveMember);
