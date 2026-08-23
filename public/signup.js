@@ -107,6 +107,17 @@ const submit = async () => {
     });
     const data = await res.json();
     if (res.ok && data.success) {
+      // 報名成功揭露場地：顯示地點與導航
+      if (data.event && (data.event.location || data.event.mapUrl)) {
+        const ev = data.event;
+        $("done-venue").hidden = false;
+        $("venue-title").textContent = `${fmtDate(ev.date)} ${ev.title}　${ev.time || ""}`;
+        $("venue-loc").textContent = ev.location || "";
+        if (ev.mapUrl) {
+          $("venue-nav").hidden = false;
+          $("venue-nav").href = ev.mapUrl;
+        }
+      }
       show("done");
     } else {
       setMsg(data.error || "送出失敗，再試一次");

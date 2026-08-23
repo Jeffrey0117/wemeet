@@ -295,6 +295,7 @@ const handleSignup = (req, res) => {
       return;
     }
     const events = readJsonFile(EVENTS_PATH, []);
+    let joinedEvent = null;
     if (eventId) {
       const event = events.find((e) => e.id === eventId && e.status !== "hidden");
       if (!event) {
@@ -310,6 +311,7 @@ const handleSignup = (req, res) => {
         sendJson(res, 409, { error: "這場滿了！可以先留資料，下一場優先通知你" });
         return;
       }
+      joinedEvent = event;
     }
     const signups = readJsonFile(SIGNUPS_PATH, []);
     const entry = {
@@ -327,8 +329,21 @@ const handleSignup = (req, res) => {
       createdAt: new Date().toISOString(),
     };
     writeJsonAtomic(SIGNUPS_PATH, [...signups, entry], (err) => {
-      if (err) sendJson(res, 500, { error: "寫入失敗，再試一次" });
-      else sendJson(res, 200, { success: true });
+      if (err) {
+        sendJson(res, 500, { error: "寫入失敗，再試一次" });
+        return;
+      }
+      // 報名成功即揭露該場地點與導航連結（完成畫面用）
+      const eventInfo = joinedEvent
+        ? {
+            title: joinedEvent.title,
+            date: joinedEvent.date,
+            time: joinedEvent.time || "",
+            location: joinedEvent.location || "",
+            mapUrl: joinedEvent.mapUrl || "",
+          }
+        : null;
+      sendJson(res, 200, { success: true, event: eventInfo });
     });
   });
 };

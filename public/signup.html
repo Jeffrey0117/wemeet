@@ -64,6 +64,12 @@
     }
     .field input:focus, .field textarea:focus { outline: none; border-color: var(--caramel); }
     .req-star { color: var(--fizz); margin-left: 0.15rem; font-weight: 700; }
+    .done-venue {
+      background: var(--cream-deep); border-radius: 14px;
+      padding: 1rem 1.2rem; margin: 0 0 1.4rem;
+    }
+    .venue-title { font-weight: 700; margin-bottom: 0.2rem; }
+    .venue-loc { color: var(--cola-soft); font-size: 0.92rem; margin-bottom: 0.7rem; }
     .ig-box {
       text-align: center; border: 1.5px dashed var(--caramel);
       border-radius: 14px; padding: 1.4rem 1rem; margin-bottom: 1.2rem;
@@ -180,6 +186,11 @@
         <div class="big"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="48" height="48"><path d="m6 8 1.75 12.28a2 2 0 0 0 2 1.72h4.54a2 2 0 0 0 2-1.72L18 8"/><path d="M5 8h14"/><path d="M7 15a6.47 6.47 0 0 1 5 0 6.47 6.47 0 0 0 5 0"/><path d="m12 8 1-6h2"/></svg></div>
         <h2>還差最後一步！</h2>
         <p>資料收到了。現在<strong>私訊我們的 IG</strong>，跟我們說你報名了，<br>我們會把匯款帳號給你，<strong>完成匯款，名額就是你的</strong>。</p>
+        <div class="done-venue" id="done-venue" hidden>
+          <p class="venue-title" id="venue-title"></p>
+          <p class="venue-loc" id="venue-loc"></p>
+          <a class="btn btn-ghost" id="venue-nav" href="#" target="_blank" rel="noopener" hidden>開啟導航 →</a>
+        </div>
         <a class="btn btn-primary" href="https://ig.me/m/we_i_meet" target="_blank" rel="noopener">私訊 @we_i_meet 完成報名 →</a>
         <p style="margin-top:1.6rem;margin-bottom:0.6rem">等匯款的空檔，先把你的 <strong>Quickky 名片卡</strong>準備好，<br>小聚現場用掃的交換，不用尷尬地互要 IG。</p>
         <a class="btn btn-ghost" href="/me"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="16" height="16"><path d="M16 10h2"/><path d="M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/></svg> 準備我的名片卡</a>
