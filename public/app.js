@@ -66,7 +66,8 @@ const buildEventCard = (ev) => {
     meta.appendChild(el("span", "unlock-note", "詳細地點報名後解鎖"));
   }
   info.appendChild(meta);
-  if (ev.note && !ev.past) info.appendChild(el("p", "event-note", ev.note));
+  // 過往場次的 note 當「回顧」顯示（在 /admin 補一句當天聊了什麼）
+  if (ev.note) info.appendChild(el("p", "event-note", ev.note));
   card.appendChild(info);
 
   const side = el("div", "event-side");
