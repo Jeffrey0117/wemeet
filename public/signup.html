@@ -73,6 +73,12 @@
       background: none; border: none; color: var(--fizz); cursor: pointer;
       font-size: 0.85rem; text-decoration: underline; white-space: nowrap;
     }
+    .express-banner {
+      display: flex; align-items: center; justify-content: space-between; gap: 0.6rem;
+      background: #eef5ef; border: 1.5px solid var(--mint); border-radius: 12px;
+      padding: 0.6rem 0.9rem; margin-bottom: 1.2rem; font-size: 0.92rem; font-weight: 500;
+      color: #4d7d61;
+    }
     .done-venue {
       background: var(--cream-deep); border-radius: 14px;
       padding: 1rem 1.2rem; margin: 0 0 1.4rem;
@@ -120,6 +126,11 @@
     <div class="picked-banner" id="picked-banner" hidden>
       <span id="picked-text"></span>
       <button type="button" class="picked-change" id="picked-change">換場次</button>
+    </div>
+
+    <div class="express-banner" id="express-banner" hidden>
+      <span>⚡ 會員秒報名：暱稱和聯絡方式已自動帶入</span>
+      <button type="button" class="picked-change" id="express-off">改用完整流程</button>
     </div>
 
     <!-- Step 1：選場次 -->

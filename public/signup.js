@@ -1,10 +1,17 @@
-// 報名問卷：一題一步，最後送 POST /api/signup
+// 報名問卷：動態步驟流程
+// 完整流程 [0選場次, 1稱呼, 2須知, 3IG, 4想說的話]
+// 帶場次進來 → 跳過 0；會員資料齊全 → 跳過 1/3/4（會員秒報名：勾須知就送出）
 const WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"];
-const STEP_COUNT = 5;
-let current = 0;
+const ALL_STEPS = [0, 1, 2, 3, 4];
 
 const $ = (id) => document.getElementById(id);
 const steps = [...document.querySelectorAll(".step")];
+
+let flow = [...ALL_STEPS];
+let flowPos = 0;
+let skipEventStep = false; // 帶 ?event= 進來且有效
+let memberExpress = false; // 會員資料齊全
+let memberNickname = "";
 
 const fmtDate = (iso) => {
   const d = new Date(iso + "T00:00:00");
@@ -18,15 +25,41 @@ const setMsg = (text) => {
   node.className = "quiz-msg" + (text ? " err" : "");
 };
 
-const show = (step) => {
-  steps.forEach((s) => s.classList.toggle("on", s.dataset.step === String(step)));
+const computeFlow = () => {
+  let f = [...ALL_STEPS];
+  if (skipEventStep) f = f.filter((s) => s !== 0);
+  if (memberExpress) f = f.filter((s) => s !== 1 && s !== 3 && s !== 4);
+  flow = f;
+  if (flowPos >= flow.length) flowPos = flow.length - 1;
+};
+
+const renderProgress = (done) => {
   const dots = [...$("progress").children];
-  dots.forEach((d, i) => d.classList.toggle("on", step === "done" || i <= step));
-  const done = step === "done";
-  $("quiz-nav").hidden = done;
-  if (!done) {
-    $("btn-prev").hidden = step === 0;
-    $("btn-next").textContent = step === STEP_COUNT - 1 ? "送出報名" : "下一步 →";
+  dots.forEach((d, i) => {
+    const idx = flow.indexOf(i);
+    d.style.display = idx === -1 ? "none" : "";
+    d.classList.toggle("on", done || (idx !== -1 && idx <= flowPos));
+  });
+};
+
+const applyFlow = () => {
+  const step = flow[flowPos];
+  steps.forEach((s) => s.classList.toggle("on", s.dataset.step === String(step)));
+  renderProgress(false);
+  $("quiz-nav").hidden = false;
+  $("btn-prev").hidden = flowPos === 0;
+  $("btn-next").textContent = flowPos === flow.length - 1 ? "送出報名" : "下一步 →";
+  setMsg("");
+};
+
+const showDone = () => {
+  steps.forEach((s) => s.classList.toggle("on", s.dataset.step === "done"));
+  renderProgress(true);
+  $("quiz-nav").hidden = true;
+  // 會員用暱稱打招呼，秒報名的爽感收尾
+  if (memberNickname) {
+    const title = document.querySelector('[data-step="done"] h2');
+    if (title) title.textContent = `${memberNickname}，搞定！`;
   }
   setMsg("");
 };
@@ -44,7 +77,7 @@ const loadEvents = async () => {
 
     // API 已按日期升冪，逐一插在名單選項前 → 日期近的在最上面
     events.forEach((ev) => {
-      if (ev.past) return; // 歷史場次不開放報名
+      if (ev.past) return;
       const left = ev.capacity ? Math.max(0, ev.capacity - (ev.signedUp || 0)) : null;
       const isFull = ev.status === "closed" || (left !== null && left <= 0);
       if (isFull) return;
@@ -75,22 +108,56 @@ const loadEvents = async () => {
       box.insertBefore(label, waitlistOption);
     });
 
-    // 首頁點了特定場次進來 → 跳過選場次，直接從暱稱那步開始
     if (preselected) {
       $("picked-text").textContent = `報名場次：${fmtDate(preselected.date)} ${preselected.title}`;
       $("picked-banner").hidden = false;
-      current = 1;
-      show(1);
+      skipEventStep = true;
+      computeFlow();
+      applyFlow();
     }
   } catch (err) {
     setMsg("活動載入失敗，可以先選「加入名單」完成報名");
   }
 };
 
-document.getElementById("picked-change").addEventListener("click", () => {
+$("picked-change").addEventListener("click", () => {
   $("picked-banner").hidden = true;
-  current = 0;
-  show(0);
+  skipEventStep = false;
+  flowPos = 0;
+  computeFlow();
+  applyFlow();
+});
+
+/* ---------- 會員秒報名 ---------- */
+
+const prefillFromMember = async () => {
+  const sdk = await waitForLetMeUse();
+  if (!sdk || !sdk.user) return;
+  try {
+    const res = await fetch("/api/me", { headers: lmuAuthHeaders() });
+    if (!res.ok) return;
+    const { member } = await res.json();
+    if (member.nickname && !$("f-name").value) $("f-name").value = member.nickname;
+    if (member.contact && !$("f-contact").value) $("f-contact").value = member.contact;
+    if (member.igHandle && !$("f-ig").value) $("f-ig").value = member.igHandle;
+    memberNickname = member.nickname || "";
+
+    // 資料齊全 → 秒報名模式（還停在流程開頭才切，避免打斷已在填的人）
+    if (member.nickname && member.contact && flowPos === 0) {
+      memberExpress = true;
+      $("express-banner").hidden = false;
+      computeFlow();
+      applyFlow();
+    }
+  } catch (err) {}
+};
+
+$("express-off").addEventListener("click", () => {
+  $("express-banner").hidden = true;
+  memberExpress = false;
+  flowPos = 0;
+  computeFlow();
+  applyFlow();
 });
 
 /* ---------- 驗證與送出 ---------- */
@@ -102,6 +169,10 @@ const validate = (step) => {
   }
   if (step === 2) {
     if (!$("f-agree-pay").checked || !$("f-agree-attend").checked) return "兩個都勾一下，我們才能幫你留位子";
+    // 秒報名模式跳過稱呼步，送出前補驗會員資料真的有帶到
+    if (memberExpress && (!$("f-name").value.trim() || !$("f-contact").value.trim())) {
+      return "會員資料沒帶齊，請改用完整流程填寫";
+    }
   }
   return "";
 };
@@ -138,7 +209,7 @@ const submit = async () => {
           $("venue-nav").href = ev.mapUrl;
         }
       }
-      show("done");
+      showDone();
     } else {
       setMsg(data.error || "送出失敗，再試一次");
     }
@@ -150,38 +221,24 @@ const submit = async () => {
 };
 
 $("btn-next").addEventListener("click", () => {
-  const problem = validate(current);
+  const problem = validate(flow[flowPos]);
   if (problem) {
     setMsg(problem);
     return;
   }
-  if (current === STEP_COUNT - 1) {
+  if (flowPos === flow.length - 1) {
     submit();
     return;
   }
-  current += 1;
-  show(current);
+  flowPos += 1;
+  applyFlow();
 });
 
 $("btn-prev").addEventListener("click", () => {
-  current = Math.max(0, current - 1);
-  show(current);
+  flowPos = Math.max(0, flowPos - 1);
+  applyFlow();
 });
 
-// 已登入會員自動預填（欄位有值就不覆蓋）
-const prefillFromMember = async () => {
-  const sdk = await waitForLetMeUse();
-  if (!sdk || !sdk.user) return;
-  try {
-    const res = await fetch("/api/me", { headers: lmuAuthHeaders() });
-    if (!res.ok) return;
-    const { member } = await res.json();
-    if (member.nickname && !$("f-name").value) $("f-name").value = member.nickname;
-    if (member.contact && !$("f-contact").value) $("f-contact").value = member.contact;
-    if (member.igHandle && !$("f-ig").value) $("f-ig").value = member.igHandle;
-  } catch (err) {}
-};
-
-show(0);
+applyFlow();
 loadEvents();
 prefillFromMember();

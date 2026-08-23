@@ -333,6 +333,20 @@ const handleSignup = (req, res) => {
         sendJson(res, 500, { error: "寫入失敗，再試一次" });
         return;
       }
+      // 登入狀態報名 → 回填會員缺的聯絡方式/IG（下次就能秒報名）
+      if (entry.memberSub) {
+        const members = readJsonFile(MEMBERS_PATH, {});
+        const m = members[entry.memberSub];
+        if (m && (!m.contact || !m.igHandle)) {
+          const patched = {
+            ...m,
+            contact: m.contact || contact,
+            igHandle: m.igHandle || igHandle,
+            updatedAt: new Date().toISOString(),
+          };
+          writeJsonAtomic(MEMBERS_PATH, { ...members, [entry.memberSub]: patched }, () => {});
+        }
+      }
       // 報名成功即揭露該場地點與導航連結（完成畫面用）
       const eventInfo = joinedEvent
         ? {
