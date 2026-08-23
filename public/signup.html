@@ -63,6 +63,7 @@
       border-radius: 12px; background: #fff; color: var(--cola); width: 100%;
     }
     .field input:focus, .field textarea:focus { outline: none; border-color: var(--caramel); }
+    .req-star { color: var(--fizz); margin-left: 0.15rem; font-weight: 700; }
     .ig-box {
       text-align: center; border: 1.5px dashed var(--caramel);
       border-radius: 14px; padding: 1.4rem 1rem; margin-bottom: 1.2rem;
@@ -117,10 +118,10 @@
     <section class="step" data-step="1">
       <h2>怎麼稱呼你？</h2>
       <p class="hint">活動細節會用 LINE 或電話通知你。</p>
-      <label class="field">你的暱稱
+      <label class="field">你的暱稱<span class="req-star" aria-hidden="true">*</span>
         <input type="text" id="f-name" maxlength="40" placeholder="叫你什麼好呢" autocomplete="nickname">
       </label>
-      <label class="field">LINE ID 或電話
+      <label class="field">LINE ID 或電話<span class="req-star" aria-hidden="true">*</span>
         <input type="text" id="f-contact" maxlength="120" placeholder="例：line-id-123 或 0912345678" autocomplete="tel">
       </label>
     </section>
