@@ -64,6 +64,15 @@
     }
     .field input:focus, .field textarea:focus { outline: none; border-color: var(--caramel); }
     .req-star { color: var(--fizz); margin-left: 0.15rem; font-weight: 700; }
+    .picked-banner {
+      display: flex; align-items: center; justify-content: space-between; gap: 0.6rem;
+      background: var(--cream-deep); border-radius: 12px;
+      padding: 0.6rem 0.9rem; margin-bottom: 1.2rem; font-size: 0.92rem; font-weight: 500;
+    }
+    .picked-change {
+      background: none; border: none; color: var(--fizz); cursor: pointer;
+      font-size: 0.85rem; text-decoration: underline; white-space: nowrap;
+    }
     .done-venue {
       background: var(--cream-deep); border-radius: 14px;
       padding: 1rem 1.2rem; margin: 0 0 1.4rem;
@@ -106,6 +115,11 @@
   <div class="quiz-card">
     <div class="quiz-progress" id="progress" aria-hidden="true">
       <span></span><span></span><span></span><span></span><span></span>
+    </div>
+
+    <div class="picked-banner" id="picked-banner" hidden>
+      <span id="picked-text"></span>
+      <button type="button" class="picked-change" id="picked-change">換場次</button>
     </div>
 
     <!-- Step 1：選場次 -->

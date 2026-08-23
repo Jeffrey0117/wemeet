@@ -38,8 +38,11 @@ const loadEvents = async () => {
     const res = await fetch("/api/events");
     const { events = [] } = await res.json();
     const box = $("event-choices");
+    const waitlistOption = box.firstElementChild; // 「先加入名單」固定墊底
     const preselect = new URLSearchParams(location.search).get("event") || "";
+    let preselected = null;
 
+    // API 已按日期升冪，逐一插在名單選項前 → 日期近的在最上面
     events.forEach((ev) => {
       if (ev.past) return; // 歷史場次不開放報名
       const left = ev.capacity ? Math.max(0, ev.capacity - (ev.signedUp || 0)) : null;
@@ -51,7 +54,10 @@ const loadEvents = async () => {
       input.type = "radio";
       input.name = "eventId";
       input.value = ev.id;
-      if (ev.id === preselect) input.checked = true;
+      if (ev.id === preselect) {
+        input.checked = true;
+        preselected = ev;
+      }
 
       const text = document.createElement("span");
       const title = document.createElement("span");
@@ -66,12 +72,26 @@ const loadEvents = async () => {
 
       label.appendChild(input);
       label.appendChild(text);
-      box.insertBefore(label, box.firstChild);
+      box.insertBefore(label, waitlistOption);
     });
+
+    // 首頁點了特定場次進來 → 跳過選場次，直接從暱稱那步開始
+    if (preselected) {
+      $("picked-text").textContent = `報名場次：${fmtDate(preselected.date)} ${preselected.title}`;
+      $("picked-banner").hidden = false;
+      current = 1;
+      show(1);
+    }
   } catch (err) {
     setMsg("活動載入失敗，可以先選「加入名單」完成報名");
   }
 };
+
+document.getElementById("picked-change").addEventListener("click", () => {
+  $("picked-banner").hidden = true;
+  current = 0;
+  show(0);
+});
 
 /* ---------- 驗證與送出 ---------- */
 
