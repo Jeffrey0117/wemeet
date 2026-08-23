@@ -296,8 +296,57 @@ a { color: var(--fizz); }
   font-size: 0.85rem;
 }
 
+/* ---------- 月曆 ---------- */
+.cal {
+  max-width: 460px;
+  margin: 0 auto 2rem;
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.2rem 1.2rem 0.8rem;
+}
+.cal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+.cal-title { font-family: var(--font-display); font-size: 1.15rem; }
+.cal-nav {
+  background: var(--cream-deep); border: none; border-radius: 10px;
+  width: 34px; height: 34px; cursor: pointer; color: var(--cola); font-size: 1rem;
+}
+.cal-nav:hover { background: var(--fizz); color: #fff; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
+.cal-dow { font-size: 0.78rem; color: var(--cola-soft); padding: 0.3rem 0; }
+.cal-day {
+  position: relative;
+  padding: 0.45rem 0 0.85rem;
+  font-size: 0.92rem;
+  border-radius: 10px;
+}
+.cal-day.today { outline: 1.5px solid var(--caramel); }
+.cal-day.has-event { cursor: pointer; background: #fff7f2; font-weight: 700; }
+.cal-day.has-event:hover { background: var(--cream-deep); }
+.cal-dot {
+  position: absolute; left: 50%; bottom: 6px; transform: translateX(-50%);
+  width: 6px; height: 6px; border-radius: 50%; background: var(--fizz);
+}
+.cal-day.was-event .cal-dot { background: var(--cola-soft); }
+.cal-day.was-event { font-weight: 500; }
+.cal-hint { text-align: center; font-size: 0.78rem; color: var(--cola-soft); margin-top: 0.6rem; padding-bottom: 0.4rem; }
+
 /* ---------- events ---------- */
 .event-list { display: grid; gap: 1.2rem; }
+.event-history-title {
+  font-size: 1.1rem;
+  color: var(--cola-soft);
+  margin-top: 1rem;
+  padding-bottom: 0.2rem;
+  border-bottom: 1.5px dashed var(--cream-deep);
+}
+.event-past { opacity: 0.72; }
+.event-slots.done { color: var(--cola-soft); }
+@keyframes cardflash {
+  0% { box-shadow: 0 0 0 3px var(--fizz); }
+  100% { box-shadow: var(--shadow); }
+}
+.event-card.flash { animation: cardflash 1.2s ease; }
 .event-loading, .event-empty { text-align: center; color: var(--cola-soft); }
 .event-card {
   display: flex;

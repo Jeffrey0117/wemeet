@@ -41,6 +41,7 @@ const loadEvents = async () => {
     const preselect = new URLSearchParams(location.search).get("event") || "";
 
     events.forEach((ev) => {
+      if (ev.past) return; // 歷史場次不開放報名
       const left = ev.capacity ? Math.max(0, ev.capacity - (ev.signedUp || 0)) : null;
       const isFull = ev.status === "closed" || (left !== null && left <= 0);
       if (isFull) return;

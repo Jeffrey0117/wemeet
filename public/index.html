@@ -113,6 +113,15 @@
 
 <section class="section" id="events">
   <h2><span class="squiggle">近期活動</span></h2>
+  <div class="cal" id="calendar">
+    <div class="cal-head">
+      <button type="button" class="cal-nav" id="cal-prev" aria-label="上個月">←</button>
+      <span class="cal-title" id="cal-title"></span>
+      <button type="button" class="cal-nav" id="cal-next" aria-label="下個月">→</button>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <p class="cal-hint">有標記的日子就是小聚日，點一下看詳情</p>
+  </div>
   <div id="event-list" class="event-list">
     <p class="event-loading">活動載入中⋯</p>
   </div>

@@ -1,4 +1,4 @@
-// 前台首頁：載入活動清單（報名走 /signup 問卷頁）
+// 前台首頁：月曆 + 活動清單（即將/歷史）+ Chill 友牆 + hero 影片聲音
 const WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"];
 
 /* Lucide inline icons（動態內容用） */
@@ -34,56 +34,75 @@ const el = (tag, className, text) => {
   return node;
 };
 
-const renderEvents = (events) => {
-  const list = document.getElementById("event-list");
-  list.textContent = "";
+/* ---------- 活動清單 ---------- */
 
-  if (!events.length) {
-    list.appendChild(el("p", "event-empty", "下一場正在籌備中！先到下面留個資料，開團第一個通知你。"));
-    return;
-  }
+let allEvents = [];
 
-  events.forEach((ev) => {
-    const { md, w } = fmtDate(ev.date);
-    const left = ev.capacity ? Math.max(0, ev.capacity - (ev.signedUp || 0)) : null;
-    const isFull = ev.status === "closed" || (left !== null && left <= 0);
+const buildEventCard = (ev) => {
+  const { md, w } = fmtDate(ev.date);
+  const left = ev.capacity ? Math.max(0, ev.capacity - (ev.signedUp || 0)) : null;
+  const isFull = ev.status === "closed" || (left !== null && left <= 0);
 
-    const card = el("div", "event-card");
+  const card = el("div", "event-card" + (ev.past ? " event-past" : ""));
+  card.id = "event-card-" + ev.id;
 
-    const dateBox = el("div", "event-date");
-    dateBox.appendChild(el("span", "d", md));
-    dateBox.appendChild(el("span", "w", w));
-    card.appendChild(dateBox);
+  const dateBox = el("div", "event-date");
+  dateBox.appendChild(el("span", "d", md));
+  dateBox.appendChild(el("span", "w", w));
+  card.appendChild(dateBox);
 
-    const info = el("div", "event-info");
-    info.appendChild(el("h3", null, ev.title));
-    const meta = el("p", "event-meta");
-    meta.appendChild(iconEl("clock", 14));
-    meta.appendChild(document.createTextNode(" " + (ev.time || "") + "　"));
-    meta.appendChild(iconEl("map-pin", 14));
-    meta.appendChild(document.createTextNode(" "));
+  const info = el("div", "event-info");
+  info.appendChild(el("h3", null, ev.title));
+  const meta = el("p", "event-meta");
+  meta.appendChild(iconEl("clock", 14));
+  meta.appendChild(document.createTextNode(" " + (ev.time || "") + "　"));
+  meta.appendChild(iconEl("map-pin", 14));
+  meta.appendChild(document.createTextNode(" "));
+  if (ev.past) {
+    meta.appendChild(document.createTextNode(ev.location || ""));
+  } else {
     meta.appendChild(el("span", "blur-text", "台中市西屯區某某街00巷0號"));
     meta.appendChild(document.createTextNode(" "));
     meta.appendChild(el("span", "unlock-note", "詳細地點報名後解鎖"));
-    info.appendChild(meta);
-    if (ev.note) info.appendChild(el("p", "event-note", ev.note));
-    card.appendChild(info);
+  }
+  info.appendChild(meta);
+  if (ev.note && !ev.past) info.appendChild(el("p", "event-note", ev.note));
+  card.appendChild(info);
 
-    const side = el("div", "event-side");
-    const slots = el(
-      "span",
-      "event-slots" + (isFull ? " full" : ""),
-      isFull ? "已滿團" : left !== null ? `剩 ${left} 個名額` : "開放報名中"
+  const side = el("div", "event-side");
+  if (ev.past) {
+    side.appendChild(el("span", "event-slots done", "已結束"));
+  } else {
+    side.appendChild(
+      el("span", "event-slots" + (isFull ? " full" : ""), isFull ? "已滿團" : left !== null ? `剩 ${left} 個名額` : "開放報名中")
     );
-    side.appendChild(slots);
     if (!isFull) {
       const btn = el("a", "btn btn-primary", "報名這場");
       btn.href = "/signup?event=" + encodeURIComponent(ev.id);
       side.appendChild(btn);
     }
-    card.appendChild(side);
-    list.appendChild(card);
-  });
+  }
+  card.appendChild(side);
+  return card;
+};
+
+const renderEvents = (events) => {
+  const list = document.getElementById("event-list");
+  list.textContent = "";
+
+  const upcoming = events.filter((e) => !e.past);
+  const past = events.filter((e) => e.past).slice().reverse();
+
+  if (!upcoming.length) {
+    list.appendChild(el("p", "event-empty", "下一場正在籌備中！先到下面留個資料，開團第一個通知你。"));
+  } else {
+    upcoming.forEach((ev) => list.appendChild(buildEventCard(ev)));
+  }
+
+  if (past.length) {
+    list.appendChild(el("h3", "event-history-title", "過往小聚"));
+    past.forEach((ev) => list.appendChild(buildEventCard(ev)));
+  }
 };
 
 const loadEvents = async () => {
@@ -91,11 +110,83 @@ const loadEvents = async () => {
   try {
     const res = await fetch("/api/events");
     const data = await res.json();
-    renderEvents(data.events || []);
+    allEvents = data.events || [];
+    renderEvents(allEvents);
+    renderCalendar();
   } catch (err) {
     list.textContent = "";
     list.appendChild(el("p", "event-empty", "活動載入失敗，重新整理一下試試"));
   }
+};
+
+/* ---------- 月曆 ---------- */
+
+const today = new Date();
+let calYear = today.getFullYear();
+let calMonth = today.getMonth(); // 0-based
+
+const jumpToEvent = (ev) => {
+  const card = document.getElementById("event-card-" + ev.id);
+  if (!card) return;
+  card.scrollIntoView({ behavior: "smooth", block: "center" });
+  card.classList.remove("flash");
+  void card.offsetWidth; // 重新觸發動畫
+  card.classList.add("flash");
+};
+
+const renderCalendar = () => {
+  const grid = document.getElementById("cal-grid");
+  const title = document.getElementById("cal-title");
+  if (!grid || !title) return;
+
+  title.textContent = `${calYear} 年 ${calMonth + 1} 月`;
+  grid.textContent = "";
+
+  WEEKDAYS.forEach((w) => grid.appendChild(el("span", "cal-dow", w)));
+
+  const first = new Date(calYear, calMonth, 1);
+  const days = new Date(calYear, calMonth + 1, 0).getDate();
+  for (let i = 0; i < first.getDay(); i++) grid.appendChild(el("span", "cal-day cal-empty"));
+
+  const byDate = {};
+  allEvents.forEach((ev) => {
+    (byDate[ev.date] = byDate[ev.date] || []).push(ev);
+  });
+
+  for (let d = 1; d <= days; d++) {
+    const iso = `${calYear}-${String(calMonth + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    const dayEvents = byDate[iso] || [];
+    const cell = el("span", "cal-day", String(d));
+    if (
+      d === today.getDate() && calMonth === today.getMonth() && calYear === today.getFullYear()
+    ) {
+      cell.classList.add("today");
+    }
+    if (dayEvents.length) {
+      cell.classList.add("has-event");
+      if (dayEvents.every((e) => e.past)) cell.classList.add("was-event");
+      cell.title = dayEvents.map((e) => e.title).join("、");
+      cell.appendChild(el("i", "cal-dot"));
+      cell.addEventListener("click", () => jumpToEvent(dayEvents[0]));
+    }
+    grid.appendChild(cell);
+  }
+};
+
+const bindCalendarNav = () => {
+  const prev = document.getElementById("cal-prev");
+  const next = document.getElementById("cal-next");
+  if (!prev || !next) return;
+  prev.addEventListener("click", () => {
+    calMonth -= 1;
+    if (calMonth < 0) { calMonth = 11; calYear -= 1; }
+    renderCalendar();
+  });
+  next.addEventListener("click", () => {
+    calMonth += 1;
+    if (calMonth > 11) { calMonth = 0; calYear += 1; }
+    renderCalendar();
+  });
 };
 
 /* ---------- Chill 友牆 ---------- */
@@ -172,3 +263,4 @@ const bindHeroSound = () => {
 loadEvents();
 loadWall();
 bindHeroSound();
+bindCalendarNav();

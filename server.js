@@ -260,12 +260,14 @@ const publicEvents = () => {
   const events = readJsonFile(EVENTS_PATH, []);
   const counts = countByEvent(readJsonFile(SIGNUPS_PATH, []));
   return events
-    .filter((e) => e.status !== "hidden" && !isPast(e))
+    .filter((e) => e.status !== "hidden")
     .map((e) => {
-      // 詳細地點不對外，報名後私訊解鎖（admin API 才看得到 location）
+      // 未來場次的詳細地點不對外（報名後私訊解鎖）；已結束的場次地點屬歷史紀錄，公開
+      const past = isPast(e);
       const { location, ...pub } = e;
-      return { ...pub, signedUp: counts[e.id] || 0 };
-    });
+      return { ...pub, ...(past ? { location } : {}), past, signedUp: counts[e.id] || 0 };
+    })
+    .sort((a, b) => String(a.date).localeCompare(String(b.date)));
 };
 
 const cleanStr = (v, max) => String(v == null ? "" : v).trim().slice(0, max);
