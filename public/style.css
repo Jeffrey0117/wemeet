@@ -189,6 +189,12 @@ a { color: var(--fizz); }
   display: block;
   font-size: clamp(1.9rem, 4.5vw, 3rem);
   color: var(--caramel);
+  white-space: nowrap;
+}
+.hero-brand {
+  font-size: clamp(0.95rem, 1.8vw, 1.25rem);
+  color: var(--cola-soft);
+  letter-spacing: 0.04em;
 }
 .hero-slogan {
   margin-top: 1rem;
