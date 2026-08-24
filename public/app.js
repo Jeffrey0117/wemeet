@@ -55,12 +55,11 @@ const buildEventCard = (ev) => {
   info.appendChild(el("h3", null, ev.title));
   const meta = el("p", "event-meta");
   meta.appendChild(iconEl("clock", 14));
-  meta.appendChild(document.createTextNode(" " + (ev.time || "") + "　"));
-  meta.appendChild(iconEl("map-pin", 14));
-  meta.appendChild(document.createTextNode(" "));
-  if (ev.past) {
-    meta.appendChild(document.createTextNode(ev.location || ""));
-  } else {
+  meta.appendChild(document.createTextNode(" " + (ev.time || "")));
+  if (!ev.past) {
+    meta.appendChild(document.createTextNode("　"));
+    meta.appendChild(iconEl("map-pin", 14));
+    meta.appendChild(document.createTextNode(" "));
     meta.appendChild(el("span", "blur-text", "台中市西屯區某某街00巷0號"));
     meta.appendChild(document.createTextNode(" "));
     meta.appendChild(el("span", "unlock-note", "詳細地點報名後解鎖"));

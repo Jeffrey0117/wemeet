@@ -264,10 +264,10 @@ const publicEvents = () => {
   return events
     .filter((e) => e.status !== "hidden")
     .map((e) => {
-      // 未來場次的詳細地點不對外（報名後私訊解鎖）；已結束的場次地點屬歷史紀錄，公開
+      // 地點一律不對外（場地會重複用，過往地址=洩漏未來場地；報名後才解鎖）
       const past = isPast(e);
-      const { location, ...pub } = e;
-      return { ...pub, ...(past ? { location } : {}), past, signedUp: counts[e.id] || 0 };
+      const { location, mapUrl, ...pub } = e;
+      return { ...pub, past, signedUp: counts[e.id] || 0 };
     })
     .sort((a, b) => String(a.date).localeCompare(String(b.date)));
 };
