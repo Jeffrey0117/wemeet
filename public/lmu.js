@@ -63,6 +63,62 @@ const initNavAuth = () => {
 
     const wrap = document.createElement("div");
     wrap.className = "nav-user";
+
+    // 通知鈴鐺（報名成功/匯款確認/新場次）
+    const bell = document.createElement("button");
+    bell.type = "button";
+    bell.className = "nav-bell";
+    bell.setAttribute("aria-label", "通知");
+    bell.innerHTML =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="19" height="19" aria-hidden="true"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.41 5.956-2.737 7.326"/></svg>' +
+      '<span class="bell-badge" hidden></span>';
+    const noticeMenu = document.createElement("div");
+    noticeMenu.className = "notice-menu";
+    let noticesData = [];
+    const badgeEl = () => bell.querySelector(".bell-badge");
+
+    fetch("/api/me/notices", { headers: lmuAuthHeaders() })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!d) return;
+        noticesData = d.notices || [];
+        if (d.unread > 0) {
+          badgeEl().textContent = d.unread > 9 ? "9+" : String(d.unread);
+          badgeEl().hidden = false;
+        }
+      })
+      .catch(() => {});
+
+    bell.addEventListener("click", () => {
+      wrap.classList.remove("open");
+      const opening = !wrap.classList.contains("notices-open");
+      wrap.classList.toggle("notices-open");
+      if (!opening) return;
+      noticeMenu.textContent = "";
+      if (!noticesData.length) {
+        const p = document.createElement("p");
+        p.className = "notice-empty";
+        p.textContent = "還沒有通知";
+        noticeMenu.appendChild(p);
+      }
+      noticesData.forEach((n) => {
+        const item = document.createElement("div");
+        item.className = "notice-item";
+        const t = document.createElement("strong");
+        t.textContent = n.title;
+        const b = document.createElement("p");
+        b.textContent = n.body || "";
+        const time = document.createElement("span");
+        time.textContent = String(n.createdAt).slice(0, 10);
+        item.appendChild(t);
+        item.appendChild(b);
+        item.appendChild(time);
+        noticeMenu.appendChild(item);
+      });
+      badgeEl().hidden = true;
+      fetch("/api/me/notices/seen", { method: "POST", headers: lmuAuthHeaders() }).catch(() => {});
+    });
+
     let avatar;
     if (state.avatar) {
       avatar = document.createElement("img");
@@ -74,7 +130,10 @@ const initNavAuth = () => {
       else avatar.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>';
     }
     avatar.className = "nav-avatar";
-    avatar.addEventListener("click", () => wrap.classList.toggle("open"));
+    avatar.addEventListener("click", () => {
+      wrap.classList.remove("notices-open");
+      wrap.classList.toggle("open");
+    });
 
     const menu = document.createElement("div");
     menu.className = "nav-menu";
@@ -90,14 +149,19 @@ const initNavAuth = () => {
     });
     menu.appendChild(meLink);
     menu.appendChild(logout);
+    wrap.appendChild(bell);
     wrap.appendChild(avatar);
     wrap.appendChild(menu);
+    wrap.appendChild(noticeMenu);
     slot.appendChild(wrap);
   };
 
   document.addEventListener("click", (e) => {
     const wrap = slot.querySelector(".nav-user");
-    if (wrap && !wrap.contains(e.target)) wrap.classList.remove("open");
+    if (wrap && !wrap.contains(e.target)) {
+      wrap.classList.remove("open");
+      wrap.classList.remove("notices-open");
+    }
   });
 
   // 1) 快取先上畫面，零等待

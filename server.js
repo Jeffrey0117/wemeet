@@ -32,6 +32,7 @@ const ADMIN_TOKEN = ENV.ADMIN_TOKEN || "";
 const LMU_APP_ID = ENV.LETMEUSE_APP_ID || "";
 const LMU_SECRET = ENV.LETMEUSE_APP_SECRET || "";
 const MEMBERS_PATH = path.join(DATA_DIR, "members.json");
+const NOTICES_PATH = path.join(DATA_DIR, "notices.json");
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -137,6 +138,7 @@ const ensureData = () => {
   if (!fs.existsSync(EVENTS_PATH)) fs.writeFileSync(EVENTS_PATH, JSON.stringify(SEED_EVENTS, null, 2), "utf8");
   if (!fs.existsSync(SIGNUPS_PATH)) fs.writeFileSync(SIGNUPS_PATH, "[]", "utf8");
   if (!fs.existsSync(MEMBERS_PATH)) fs.writeFileSync(MEMBERS_PATH, "{}", "utf8");
+  if (!fs.existsSync(NOTICES_PATH)) fs.writeFileSync(NOTICES_PATH, "[]", "utf8");
 };
 
 /* ---------- LetMeUse JWT 驗簽（ES256 via JWKS，HS256 過渡期相容） ---------- */
@@ -563,7 +565,7 @@ const handleAdmin = (req, res, pathname) => {
     return;
   }
 
-  // 整份覆蓋活動清單（後台編輯用）
+  // 整份覆蓋活動清單（後台編輯用）；新增的開放場次自動發站內通知
   if (req.method === "PUT" && pathname === "/api/admin/events") {
     readJsonBody(req, res, (body) => {
       if (!Array.isArray(body.events)) {
@@ -577,9 +579,26 @@ const handleAdmin = (req, res, pathname) => {
         sendJson(res, 400, { error: "每個活動都要有 id 和 title" });
         return;
       }
+      const oldIds = new Set(readJsonFile(EVENTS_PATH, []).map((e) => e.id));
       writeJsonAtomic(EVENTS_PATH, body.events, (err) => {
-        if (err) sendJson(res, 500, { error: "write failed" });
-        else sendJson(res, 200, { success: true });
+        if (err) {
+          sendJson(res, 500, { error: "write failed" });
+          return;
+        }
+        const added = body.events.filter((e) => !oldIds.has(e.id) && e.status === "open" && !isPast(e));
+        if (added.length) {
+          const notices = readJsonFile(NOTICES_PATH, []);
+          const now = new Date().toISOString();
+          const fresh = added.map((e) => ({
+            id: "ev-" + e.id,
+            title: "新場次開放報名",
+            body: `${e.date}${e.time ? " " + e.time : ""}｜${e.title}`,
+            eventId: e.id,
+            createdAt: now,
+          }));
+          writeJsonAtomic(NOTICES_PATH, [...notices, ...fresh], () => {});
+        }
+        sendJson(res, 200, { success: true });
       });
     });
     return;
@@ -657,7 +676,11 @@ const handleAdmin = (req, res, pathname) => {
         sendJson(res, 404, { error: "signup not found" });
         return;
       }
-      const next = signups.map((s) => (s.id === m[1] ? { ...s, paid: body.paid === true } : s));
+      const next = signups.map((s) =>
+        s.id === m[1]
+          ? { ...s, paid: body.paid === true, paidAt: body.paid === true ? s.paidAt || new Date().toISOString() : undefined }
+          : s
+      );
       writeJsonAtomic(SIGNUPS_PATH, next, (err) => {
         if (err) sendJson(res, 500, { error: "write failed" });
         else sendJson(res, 200, { success: true });
@@ -760,6 +783,67 @@ const server = http.createServer((req, res) => {
   }
   if (pathname === "/api/me") {
     handleMe(req, res);
+    return;
+  }
+  // 會員站內通知：廣播（新場次）+ 個人（報名成功/匯款確認），含未讀數
+  if (req.method === "GET" && pathname === "/api/me/notices") {
+    const payload = lmuUser(req);
+    if (!payload) {
+      sendJson(res, 401, { error: "unauthorized" });
+      return;
+    }
+    const events = readJsonFile(EVENTS_PATH, []);
+    const broadcast = readJsonFile(NOTICES_PATH, []).map((n) => ({ ...n, kind: "broadcast" }));
+    const personal = readJsonFile(SIGNUPS_PATH, [])
+      .filter((s) => s.memberSub === payload.sub)
+      .flatMap((s) => {
+        const ev = events.find((e) => e.id === s.eventId);
+        const evName = ev ? `${ev.date} ${ev.title}` : "";
+        const list = [
+          {
+            id: "su-" + s.id,
+            title: "報名成功",
+            body: ev ? `已收到你的報名：${evName}。記得私訊 IG 完成匯款，名額才算保留。` : "已加入開團通知名單，下次開團第一個告訴你。",
+            createdAt: s.createdAt,
+            kind: "personal",
+          },
+        ];
+        if (s.paid && s.paidAt) {
+          list.push({
+            id: "pd-" + s.id,
+            title: "匯款已確認 ✓",
+            body: `${evName || "你的報名"} 名額保留成功，到時見！`,
+            createdAt: s.paidAt,
+            kind: "personal",
+          });
+        }
+        return list;
+      });
+    const all = [...broadcast, ...personal]
+      .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))
+      .slice(0, 30);
+    const me = readJsonFile(MEMBERS_PATH, {})[payload.sub];
+    const lastSeen = (me && me.lastSeenNotices) || "";
+    const unread = all.filter((n) => String(n.createdAt) > String(lastSeen)).length;
+    sendJson(res, 200, { notices: all, unread });
+    return;
+  }
+  // 標記通知已讀
+  if (req.method === "POST" && pathname === "/api/me/notices/seen") {
+    const payload = lmuUser(req);
+    if (!payload) {
+      sendJson(res, 401, { error: "unauthorized" });
+      return;
+    }
+    const members = readJsonFile(MEMBERS_PATH, {});
+    const me = members[payload.sub];
+    if (!me) {
+      sendJson(res, 200, { success: true });
+      return;
+    }
+    writeJsonAtomic(MEMBERS_PATH, { ...members, [payload.sub]: { ...me, lastSeenNotices: new Date().toISOString() } }, () => {
+      sendJson(res, 200, { success: true });
+    });
     return;
   }
   // 我的報名紀錄（含已解鎖的場地與導航）
