@@ -54,6 +54,21 @@
     </div>
   </div>
 
+  <div class="card" id="notify-card" hidden>
+    <h2>發通知</h2>
+    <p class="muted">會員（有 email）直接寄信；只有 LINE/電話的訪客會列成手動名單，你照著私訊。</p>
+    <div class="row" style="margin-top:0.4rem">
+      <select id="n-audience" style="padding:0.5rem 0.7rem;border:1.5px solid #f3e7d3;border-radius:10px"></select>
+      <input type="text" id="n-subject" placeholder="主旨，例如：下一場小聚時間地點通知" style="flex:1;min-width:220px;padding:0.5rem 0.7rem;border:1.5px solid #f3e7d3;border-radius:10px">
+    </div>
+    <textarea id="n-message" style="min-height:140px;margin-top:0.6rem;font-family:inherit" placeholder="內文。例如：上次報名的讀書會因故延期，下一場改到 8/31（日）14:00，地點 Leaven（臺中市西屯區福瑞街75巷3號），名額保留給你，回覆這封信或私訊 IG 確認！"></textarea>
+    <div class="row" style="margin-top:0.6rem">
+      <button id="n-send">寄出</button>
+      <span class="msg" id="n-msg"></span>
+    </div>
+    <div id="n-manual" style="margin-top:0.5rem"></div>
+  </div>
+
   <div class="card" id="events-card" hidden>
     <h2>活動清單（JSON 直接編輯）</h2>
     <p class="muted">欄位：id、type、title、date（YYYY-MM-DD）、time、location、mapUrl（導航連結，報名成功畫面用）、capacity、note、status（open / closed / hidden）</p>
@@ -130,7 +145,57 @@ const render = (data) => {
   $("events-json").value = JSON.stringify(eventsCache, null, 2);
   $("signups-card").hidden = false;
   $("events-card").hidden = false;
+
+  const sel = $("n-audience");
+  sel.innerHTML = "";
+  const addOpt = (v, label) => {
+    const o = document.createElement("option");
+    o.value = v;
+    o.textContent = label;
+    sel.appendChild(o);
+  };
+  eventsCache.forEach((e) => addOpt("event:" + e.id, `${e.date} ${e.title} 的報名者`));
+  addOpt("waitlist", "先加入名單的人");
+  addOpt("members", "全部會員");
+  $("notify-card").hidden = false;
 };
+
+$("n-send").addEventListener("click", async () => {
+  const subject = $("n-subject").value.trim();
+  const message = $("n-message").value.trim();
+  if (!subject || !message) {
+    setMsg("n-msg", "主旨和內文都要填", false);
+    return;
+  }
+  const label = $("n-audience").selectedOptions[0].textContent;
+  if (!confirm(`確定寄給「${label}」？`)) return;
+  $("n-send").disabled = true;
+  setMsg("n-msg", "寄送中…", true);
+  try {
+    const data = await api("/api/admin/notify", {
+      method: "POST",
+      body: JSON.stringify({ audience: $("n-audience").value, subject, message }),
+    });
+    setMsg("n-msg", `已寄 ${data.sent}/${data.totalEmails} 封` + (data.failed ? `，失敗 ${data.failed}` : ""), true);
+    const box = $("n-manual");
+    box.textContent = "";
+    if (data.manual && data.manual.length) {
+      const h = document.createElement("p");
+      h.className = "muted";
+      h.textContent = `以下 ${data.manual.length} 位沒有 email，請手動私訊：`;
+      box.appendChild(h);
+      data.manual.forEach((m) => {
+        const p = document.createElement("p");
+        p.textContent = `・${m.name}：${m.contact}`;
+        box.appendChild(p);
+      });
+    }
+  } catch (err) {
+    setMsg("n-msg", err.message, false);
+  } finally {
+    $("n-send").disabled = false;
+  }
+});
 
 $("load-btn").addEventListener("click", async () => {
   setMsg("auth-msg", "", true);

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登入中…</title>
+  <meta name="robots" content="noindex">
+  <style>
+    body { font-family: "Noto Sans TC", sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background: #faf3e7; color: #3a2318; }
+    .box { text-align: center; }
+    .spin { width: 36px; height: 36px; margin: 0 auto 1rem; border: 3px solid #f3e7d3; border-top-color: #e2572b; border-radius: 50%; animation: r 0.8s linear infinite; }
+    @keyframes r { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+<div class="box"><div class="spin"></div><p id="msg">帳號同步中，馬上好…</p></div>
+<script>
+(async () => {
+  const APP_ID = "app_pkd334f_";
+  const LMU = "https://letmeuse.isnowfriend.com";
+  const params = new URLSearchParams(location.hash.slice(1));
+  const code = params.get("code");
+  const nextRaw = params.get("next") || "/me";
+  // 只允許站內相對路徑，防 open redirect
+  const next = nextRaw.startsWith("/") && !nextRaw.startsWith("//") ? nextRaw : "/me";
+
+  if (!code) { location.replace("/"); return; }
+  try {
+    const res = await fetch(LMU + "/api/auth/sso/redeem", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code, appId: APP_ID }),
+    });
+    const json = await res.json();
+    const data = json.data || json;
+    if (res.ok && data.accessToken) {
+      localStorage.setItem("lmu_" + APP_ID + "_access_token", data.accessToken);
+      localStorage.setItem("lmu_" + APP_ID + "_refresh_token", data.refreshToken);
+      localStorage.removeItem("wemeet_nav"); // 讓 nav 立刻重新抓新身分
+    } else {
+      document.getElementById("msg").textContent = "同步失敗，請直接登入";
+    }
+  } catch (err) {
+    document.getElementById("msg").textContent = "連線失敗，請直接登入";
+  }
+  location.replace(next);
+})();
+</script>
+</body>
+</html>

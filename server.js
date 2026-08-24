@@ -585,6 +585,69 @@ const handleAdmin = (req, res, pathname) => {
     return;
   }
 
+  // 發通知：POST /api/admin/notify {audience, subject, message}
+  // audience: "members"（全會員）| "waitlist"（先加入名單）| "event:{id}"（某場報名者）
+  // 有 email（會員）走 mailer 寄信；只有 LINE/電話的回 manual 名單給管理員手動私訊
+  if (req.method === "POST" && pathname === "/api/admin/notify") {
+    readJsonBody(req, res, (body) => {
+      const audience = cleanStr(body.audience, 80);
+      const subject = cleanStr(body.subject, 120);
+      const message = cleanStr(body.message, 2000);
+      if (!audience || !subject || !message) {
+        sendJson(res, 400, { error: "audience、subject、message 都要填" });
+        return;
+      }
+      const members = readJsonFile(MEMBERS_PATH, {});
+      const signups = readJsonFile(SIGNUPS_PATH, []);
+      let targets = [];
+      if (audience === "members") {
+        targets = Object.values(members).map((m) => ({
+          name: m.nickname || m.name || "",
+          contact: m.contact || "",
+          email: m.email || "",
+        }));
+      } else {
+        const eventId = audience === "waitlist" ? null : audience.replace(/^event:/, "");
+        targets = signups
+          .filter((s) => (audience === "waitlist" ? !s.eventId : s.eventId === eventId))
+          .map((s) => {
+            const m = s.memberSub ? members[s.memberSub] : null;
+            return { name: s.name, contact: s.contact, email: (m && m.email) || "" };
+          });
+      }
+      const emails = [...new Set(targets.filter((t) => t.email).map((t) => t.email))];
+      const manual = targets.filter((t) => !t.email).map(({ name, contact }) => ({ name, contact }));
+      const esc = (v) => String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const siteUrl = (ENV.SITE_URL || "").replace(/\/$/, "");
+      const html =
+        '<div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:16px">' +
+        '<h2 style="color:#e2572b">Chill Club 揪可樂</h2>' +
+        `<p style="white-space:pre-line;line-height:1.8">${esc(message)}</p>` +
+        (siteUrl ? `<p style="margin-top:24px"><a href="${siteUrl}" style="color:#e2572b">看最新場次、報名 →</a></p>` : "") +
+        "</div>";
+      const mailerUrl = (ENV.MAILER_URL || "http://localhost:4018").replace(/\/$/, "");
+      (async () => {
+        let sent = 0;
+        let failedCount = 0;
+        for (const to of emails) {
+          try {
+            const r = await fetch(mailerUrl + "/api/send", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ to, subject, html }),
+            });
+            if (r.ok) sent += 1;
+            else failedCount += 1;
+          } catch (err) {
+            failedCount += 1;
+          }
+        }
+        sendJson(res, 200, { sent, failed: failedCount, totalEmails: emails.length, manual });
+      })();
+    });
+    return;
+  }
+
   // 標記已匯款：PATCH /api/admin/signups/{id} {paid: true|false}
   const m = pathname.match(/^\/api\/admin\/signups\/([a-f0-9]{16})$/);
   if (req.method === "PATCH" && m) {
@@ -756,6 +819,10 @@ const server = http.createServer((req, res) => {
   }
   if (pathname === "/me") {
     sendFile(res, path.join(PUBLIC_DIR, "me.html"));
+    return;
+  }
+  if (pathname === "/sso") {
+    sendFile(res, path.join(PUBLIC_DIR, "sso.html"));
     return;
   }
   if (req.method !== "GET" && req.method !== "HEAD") {
