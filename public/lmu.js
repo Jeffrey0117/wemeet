@@ -74,34 +74,24 @@ const initNavAuth = () => {
       '<span class="bell-badge" hidden></span>';
     const noticeMenu = document.createElement("div");
     noticeMenu.className = "notice-menu";
-    let noticesData = [];
     const badgeEl = () => bell.querySelector(".bell-badge");
 
-    fetch("/api/me/notices", { headers: lmuAuthHeaders() })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => {
-        if (!d) return;
-        noticesData = d.notices || [];
-        if (d.unread > 0) {
-          badgeEl().textContent = d.unread > 9 ? "9+" : String(d.unread);
-          badgeEl().hidden = false;
-        }
-      })
-      .catch(() => {});
+    const fetchNotices = async () => {
+      const res = await fetch("/api/me/notices", { headers: lmuAuthHeaders() });
+      if (!res.ok) return null;
+      return res.json();
+    };
 
-    bell.addEventListener("click", () => {
-      wrap.classList.remove("open");
-      const opening = !wrap.classList.contains("notices-open");
-      wrap.classList.toggle("notices-open");
-      if (!opening) return;
+    const renderNotices = (list) => {
       noticeMenu.textContent = "";
-      if (!noticesData.length) {
+      if (!list.length) {
         const p = document.createElement("p");
         p.className = "notice-empty";
         p.textContent = "還沒有通知";
         noticeMenu.appendChild(p);
+        return;
       }
-      noticesData.forEach((n) => {
+      list.forEach((n) => {
         const item = document.createElement("div");
         item.className = "notice-item";
         const t = document.createElement("strong");
@@ -115,6 +105,31 @@ const initNavAuth = () => {
         item.appendChild(time);
         noticeMenu.appendChild(item);
       });
+    };
+
+    // SDK 就緒（token 拿得到）才查未讀，避免紅點與內容不同步
+    waitForLetMeUse().then((sdk2) => {
+      if (!sdk2 || !sdk2.user) return;
+      fetchNotices()
+        .then((d) => {
+          if (d && d.unread > 0 && (d.notices || []).length) badgeEl().hidden = false;
+        })
+        .catch(() => {});
+    });
+
+    bell.addEventListener("click", async () => {
+      wrap.classList.remove("open");
+      const opening = !wrap.classList.contains("notices-open");
+      wrap.classList.toggle("notices-open");
+      if (!opening) return;
+      renderNotices([]);
+      noticeMenu.querySelector(".notice-empty").textContent = "載入中…";
+      try {
+        const d = await fetchNotices();
+        renderNotices((d && d.notices) || []);
+      } catch (err) {
+        renderNotices([]);
+      }
       badgeEl().hidden = true;
       fetch("/api/me/notices/seen", { method: "POST", headers: lmuAuthHeaders() }).catch(() => {});
     });
