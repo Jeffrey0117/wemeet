@@ -198,6 +198,14 @@ const submit = async () => {
     });
     const data = await res.json();
     if (res.ok && data.success) {
+      // 重複報名：不新增資料，提示已報過並再次顯示場地
+      if (data.already) {
+        const doneEl = document.querySelector('[data-step="done"]');
+        const title = doneEl.querySelector("h2");
+        if (title) title.textContent = "你已經報名過這場了！";
+        const firstP = doneEl.querySelector("p");
+        if (firstP) firstP.innerHTML = "不用重複報名，場地資訊在下面。<br>還沒匯款的話，記得<strong>私訊 IG 完成最後一步</strong>。";
+      }
       // 報名成功揭露場地：顯示地點與導航
       if (data.event && (data.event.location || data.event.mapUrl)) {
         const ev = data.event;

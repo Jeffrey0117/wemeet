@@ -32,12 +32,65 @@ const fillForm = (member) => {
   renderQuickky(member.quickkyUrl);
 };
 
+const renderMySignups = (signups) => {
+  const box = $("my-signups");
+  const list = $("signup-list");
+  list.textContent = "";
+  const rows = signups.filter((s) => s.event);
+  if (!rows.length) {
+    box.hidden = true;
+    return;
+  }
+  const WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"];
+  rows.forEach((s) => {
+    const ev = s.event;
+    const d = new Date(ev.date + "T00:00:00");
+    const dateText = Number.isNaN(d.getTime()) ? ev.date : `${d.getMonth() + 1}/${d.getDate()}（週${WEEKDAYS[d.getDay()]}）`;
+    const row = document.createElement("div");
+    row.className = "signup-row" + (ev.past ? " past" : "");
+
+    const t = document.createElement("p");
+    t.className = "t";
+    t.textContent = `${dateText} ${ev.title}　${ev.time || ""}`;
+    row.appendChild(t);
+
+    if (ev.location) {
+      const loc = document.createElement("p");
+      loc.className = "loc";
+      loc.textContent = ev.location;
+      row.appendChild(loc);
+    }
+
+    const foot = document.createElement("div");
+    foot.className = "row-foot";
+    const state = document.createElement("span");
+    state.className = "state" + (s.paid ? " ok" : "");
+    state.textContent = ev.past ? "已結束" : s.paid ? "已確認 ✓" : "待匯款（私訊 IG 完成）";
+    foot.appendChild(state);
+    if (ev.mapUrl && !ev.past) {
+      const nav = document.createElement("a");
+      nav.href = ev.mapUrl;
+      nav.target = "_blank";
+      nav.rel = "noopener";
+      nav.textContent = "開啟導航 →";
+      foot.appendChild(nav);
+    }
+    row.appendChild(foot);
+    list.appendChild(row);
+  });
+  box.hidden = false;
+};
+
 const loadMember = async () => {
   const res = await fetch("/api/me", { headers: lmuAuthHeaders() });
   if (!res.ok) throw new Error("載入會員資料失敗");
   const { member } = await res.json();
   fillForm(member);
   setState("member");
+  try {
+    const sr = await fetch("/api/me/signups", { headers: lmuAuthHeaders() });
+    if (sr.ok) renderMySignups((await sr.json()).signups || []);
+  } catch (err) {}
 };
 
 const saveMember = async () => {

@@ -48,6 +48,19 @@
       font-size: 0.9rem; font-weight: 500; margin-top: 0.6rem; cursor: pointer;
     }
     .wall-toggle input { accent-color: var(--fizz); }
+    .my-signups { margin: 1.4rem 0; }
+    .my-signups h3 { font-size: 1.1rem; margin-bottom: 0.6rem; }
+    .signup-row {
+      background: var(--cream-deep); border-radius: 12px;
+      padding: 0.8rem 1rem; margin-bottom: 0.6rem; font-size: 0.92rem;
+    }
+    .signup-row.past { opacity: 0.65; }
+    .signup-row .t { font-weight: 700; }
+    .signup-row .loc { color: var(--cola-soft); margin-top: 0.15rem; }
+    .signup-row .row-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 0.4rem; }
+    .signup-row .state { font-size: 0.82rem; color: var(--cola-soft); }
+    .signup-row .state.ok { color: #4d7d61; }
+    .signup-row a { color: var(--fizz); font-size: 0.88rem; }
     .me-msg { text-align: center; font-size: 0.95rem; min-height: 1.5em; margin-top: 0.7rem; }
     .me-msg.ok { color: var(--mint); }
     .me-msg.err { color: var(--fizz); }
@@ -96,6 +109,11 @@
       <label class="field">自我介紹
         <textarea id="m-bio" maxlength="300" rows="3" placeholder="選填，讓大家先認識你一點點"></textarea>
       </label>
+
+      <div class="my-signups" id="my-signups" hidden>
+        <h3>我的報名</h3>
+        <div id="signup-list"></div>
+      </div>
 
       <div class="quickky-box">
         <h3><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="18" height="18"><path d="M16 10h2"/><path d="M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/></svg> 你的 Quickky 名片卡</h3>

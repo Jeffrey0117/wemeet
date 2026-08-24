@@ -295,6 +295,10 @@ const handleSignup = (req, res) => {
       return;
     }
     const events = readJsonFile(EVENTS_PATH, []);
+    const memberSub = (lmuUser(req) || {}).sub || null;
+    const eventPublicInfo = (e) =>
+      e ? { title: e.title, date: e.date, time: e.time || "", location: e.location || "", mapUrl: e.mapUrl || "" } : null;
+
     let joinedEvent = null;
     if (eventId) {
       const event = events.find((e) => e.id === eventId && e.status !== "hidden");
@@ -304,6 +308,15 @@ const handleSignup = (req, res) => {
       }
       if (event.status === "closed") {
         sendJson(res, 409, { error: "這場已經截止報名囉" });
+        return;
+      }
+      // 重複報名：不新增資料，直接再給一次場地資訊（想再看地址的人不用重報）
+      const norm = (v) => String(v || "").trim().toLowerCase();
+      const dup = readJsonFile(SIGNUPS_PATH, []).find(
+        (s) => s.eventId === eventId && ((memberSub && s.memberSub === memberSub) || norm(s.contact) === norm(contact))
+      );
+      if (dup) {
+        sendJson(res, 200, { success: true, already: true, event: eventPublicInfo(event) });
         return;
       }
       const count = countByEvent(readJsonFile(SIGNUPS_PATH, []))[eventId] || 0;
@@ -325,7 +338,7 @@ const handleSignup = (req, res) => {
       agreedPayment,
       agreedAttend,
       paid: false,
-      memberSub: (lmuUser(req) || {}).sub || null,
+      memberSub,
       createdAt: new Date().toISOString(),
     };
     writeJsonAtomic(SIGNUPS_PATH, [...signups, entry], (err) => {
@@ -348,16 +361,7 @@ const handleSignup = (req, res) => {
         }
       }
       // 報名成功即揭露該場地點與導航連結（完成畫面用）
-      const eventInfo = joinedEvent
-        ? {
-            title: joinedEvent.title,
-            date: joinedEvent.date,
-            time: joinedEvent.time || "",
-            location: joinedEvent.location || "",
-            mapUrl: joinedEvent.mapUrl || "",
-          }
-        : null;
-      sendJson(res, 200, { success: true, event: eventInfo });
+      sendJson(res, 200, { success: true, event: eventPublicInfo(joinedEvent) });
     });
   });
 };
@@ -693,6 +697,31 @@ const server = http.createServer((req, res) => {
   }
   if (pathname === "/api/me") {
     handleMe(req, res);
+    return;
+  }
+  // 我的報名紀錄（含已解鎖的場地與導航）
+  if (req.method === "GET" && pathname === "/api/me/signups") {
+    const payload = lmuUser(req);
+    if (!payload) {
+      sendJson(res, 401, { error: "unauthorized" });
+      return;
+    }
+    const events = readJsonFile(EVENTS_PATH, []);
+    const mine = readJsonFile(SIGNUPS_PATH, [])
+      .filter((s) => s.memberSub === payload.sub)
+      .map((s) => {
+        const ev = events.find((e) => e.id === s.eventId);
+        return {
+          id: s.id,
+          createdAt: s.createdAt,
+          paid: s.paid === true,
+          event: ev
+            ? { title: ev.title, date: ev.date, time: ev.time || "", location: ev.location || "", mapUrl: ev.mapUrl || "", past: isPast(ev) }
+            : null,
+        };
+      })
+      .reverse();
+    sendJson(res, 200, { signups: mine });
     return;
   }
   // 首頁 Chill 友牆：opt-in 且有連卡的會員，只露暱稱/自介/卡片
