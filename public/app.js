@@ -340,7 +340,8 @@ const initVoicePlayer = () => {
   const audio = document.getElementById("voice-audio");
   const btn = document.getElementById("voice-play");
   const wave = document.getElementById("voice-wave");
-  const timeEl = document.getElementById("voice-time");
+  const curEl = document.getElementById("voice-cur");
+  const durEl = document.getElementById("voice-dur");
   if (!audio || !btn || !wave) return;
 
   const PLAY = `<svg ${ICON_ATTRS} width="22" height="22" style="margin-left:3px" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>`;
@@ -399,11 +400,11 @@ const initVoicePlayer = () => {
     audio.currentTime = 0;
     setBtn();
   });
-  audio.addEventListener("loadedmetadata", () => { timeEl.textContent = fmtTime(audio.duration); });
+  audio.addEventListener("loadedmetadata", () => { durEl.textContent = " / " + fmtTime(audio.duration); });
   audio.addEventListener("timeupdate", () => {
     const ratio = audio.currentTime / (audio.duration || 1);
     bars.forEach((b, i) => b.classList.toggle("played", i / bars.length < ratio));
-    timeEl.textContent = fmtTime(audio.currentTime) + " / " + fmtTime(audio.duration);
+    curEl.textContent = fmtTime(audio.currentTime);
   });
   wave.addEventListener("click", (e) => {
     if (!audio.duration) return;

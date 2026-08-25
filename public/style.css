@@ -393,10 +393,18 @@ a { color: var(--fizz); }
   color: var(--cola-soft);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+  min-width: 84px;
+  text-align: right;
+  flex-shrink: 0;
 }
 @media (max-width: 560px) {
-  .voice-card { padding-right: 1.1rem; gap: 0.8rem; }
-  .voice-play { width: 46px; height: 46px; }
+  .voice-section { padding: 0 1rem 0.5rem; }
+  .voice-card { padding-right: 1rem; gap: 0.7rem; }
+  .voice-play { width: 44px; height: 44px; }
+  .voice-total { display: none; }
+  .voice-time { min-width: 34px; font-size: 0.78rem; }
+  .voice-label { font-size: 0.8rem; }
+  .voice-wave { height: 28px; }
 }
 
 /* ---------- 破冰話題卡 ---------- */
