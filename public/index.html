@@ -63,15 +63,23 @@
 </header>
 
 <section class="voice-section" id="voice">
-  <div class="voice-card">
-    <button type="button" class="voice-play" id="voice-play" aria-label="播放會員心得"></button>
+  <p class="voice-heading">會員心得・真實聲音</p>
+  <div class="voice-card" data-src="/media/voice.mp3?v=__BUILD__">
+    <button type="button" class="voice-play" aria-label="播放會員心得"></button>
     <div class="voice-body">
-      <p class="voice-label">會員心得・真實聲音</p>
-      <div class="voice-wave" id="voice-wave" aria-hidden="true"></div>
+      <p class="voice-label">男・25 歲・街頭藝術家</p>
+      <div class="voice-wave" aria-hidden="true"></div>
     </div>
-    <span class="voice-time"><span id="voice-cur">0:00</span><span class="voice-total" id="voice-dur"></span></span>
+    <span class="voice-time"><span class="voice-cur">0:00</span><span class="voice-total"></span></span>
   </div>
-  <audio id="voice-audio" src="/media/voice.mp3?v=__BUILD__" preload="metadata"></audio>
+  <div class="voice-card" data-src="/media/voice2.mp3?v=__BUILD__">
+    <button type="button" class="voice-play" aria-label="播放會員心得"></button>
+    <div class="voice-body">
+      <p class="voice-label">女・Chill 友</p>
+      <div class="voice-wave" aria-hidden="true"></div>
+    </div>
+    <span class="voice-time"><span class="voice-cur">0:00</span><span class="voice-total"></span></span>
+  </div>
 </section>
 
 <section class="section" id="about">

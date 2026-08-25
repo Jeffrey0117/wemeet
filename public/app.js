@@ -336,16 +336,22 @@ const bindHeroSound = () => {
 
 /* ---------- 會員心得語音條（真實波形 + 點擊跳轉） ---------- */
 
-const initVoicePlayer = () => {
-  const audio = document.getElementById("voice-audio");
-  const btn = document.getElementById("voice-play");
-  const wave = document.getElementById("voice-wave");
-  const curEl = document.getElementById("voice-cur");
-  const durEl = document.getElementById("voice-dur");
-  if (!audio || !btn || !wave) return;
+const VOICE_PLAY_ICON = `<svg ${ICON_ATTRS} width="22" height="22" style="margin-left:3px" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>`;
+const VOICE_PAUSE_ICON = `<svg ${ICON_ATTRS} width="22" height="22" fill="currentColor"><rect x="5" y="4" width="4.5" height="16" rx="1.5"/><rect x="14.5" y="4" width="4.5" height="16" rx="1.5"/></svg>`;
+const voiceAudios = [];
 
-  const PLAY = `<svg ${ICON_ATTRS} width="22" height="22" style="margin-left:3px" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>`;
-  const PAUSE = `<svg ${ICON_ATTRS} width="22" height="22" fill="currentColor"><rect x="5" y="4" width="4.5" height="16" rx="1.5"/><rect x="14.5" y="4" width="4.5" height="16" rx="1.5"/></svg>`;
+const initVoiceCard = (card) => {
+  const src = card.dataset.src;
+  const btn = card.querySelector(".voice-play");
+  const wave = card.querySelector(".voice-wave");
+  const curEl = card.querySelector(".voice-cur");
+  const durEl = card.querySelector(".voice-total");
+  if (!src || !btn || !wave) return;
+
+  const audio = new Audio(src);
+  audio.preload = "metadata";
+  voiceAudios.push(audio);
+
   const BAR_COUNT = 56;
   let bars = [];
 
@@ -360,9 +366,9 @@ const initVoicePlayer = () => {
   };
 
   // 先畫假波形墊底，Web Audio 解碼出真實波形後替換
-  drawBars(Array.from({ length: BAR_COUNT }, (_, i) => 0.3 + 0.35 * Math.abs(Math.sin(i * 0.6)) + (i % 6 === 0 ? 0.2 : 0)).map((v) => Math.min(v, 1)));
+  drawBars(Array.from({ length: BAR_COUNT }, (_, i) => Math.min(0.3 + 0.35 * Math.abs(Math.sin(i * 0.6)) + (i % 6 === 0 ? 0.2 : 0), 1)));
 
-  fetch(audio.src)
+  fetch(src)
     .then((r) => r.arrayBuffer())
     .then((buf) => {
       const AC = window.AudioContext || window.webkitAudioContext;
@@ -391,9 +397,13 @@ const initVoicePlayer = () => {
     if (!Number.isFinite(s)) return "0:00";
     return Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
   };
-  const setBtn = () => { btn.innerHTML = audio.paused ? PLAY : PAUSE; };
+  const setBtn = () => { btn.innerHTML = audio.paused ? VOICE_PLAY_ICON : VOICE_PAUSE_ICON; };
+  const playSolo = () => {
+    voiceAudios.forEach((a) => { if (a !== audio) a.pause(); }); // 同時間只播一段
+    audio.play().catch(() => {});
+  };
 
-  btn.addEventListener("click", () => (audio.paused ? audio.play() : audio.pause()));
+  btn.addEventListener("click", () => (audio.paused ? playSolo() : audio.pause()));
   audio.addEventListener("play", setBtn);
   audio.addEventListener("pause", setBtn);
   audio.addEventListener("ended", () => {
@@ -410,9 +420,13 @@ const initVoicePlayer = () => {
     if (!audio.duration) return;
     const rect = wave.getBoundingClientRect();
     audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
-    if (audio.paused) audio.play().catch(() => {});
+    if (audio.paused) playSolo();
   });
   setBtn();
+};
+
+const initVoicePlayer = () => {
+  document.querySelectorAll(".voice-card[data-src]").forEach(initVoiceCard);
 };
 
 loadEvents();

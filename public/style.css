@@ -345,7 +345,14 @@ a { color: var(--fizz); }
 }
 
 /* ---------- 會員心得語音條 ---------- */
-.voice-section { max-width: 760px; margin: 0 auto; padding: 0 1.5rem 0.5rem; }
+.voice-section { max-width: 760px; margin: 0 auto; padding: 0 1.5rem 0.5rem; display: grid; gap: 0.8rem; }
+.voice-heading {
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  color: var(--cola-soft);
+  letter-spacing: 0.08em;
+}
 .voice-card {
   display: flex;
   align-items: center;
