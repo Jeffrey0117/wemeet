@@ -47,6 +47,7 @@ const MIME = {
   ".ico": "image/x-icon",
   ".woff2": "font/woff2",
   ".mp4": "video/mp4",
+  ".mp3": "audio/mpeg",
   ".txt": "text/plain; charset=utf-8",
 };
 
@@ -718,14 +719,15 @@ const sendFile = (res, filePath, longCache) => {
   fs.createReadStream(filePath).pipe(res);
 };
 
-// 影片串流：支援 Range（iOS/Safari 播 mp4 必要）
+// 影音串流：支援 Range（iOS/Safari 播 mp4/mp3 與 seek 必要）
 const sendVideo = (req, res, filePath) => {
   if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
     res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" }).end("Not Found");
     return;
   }
   const size = fs.statSync(filePath).size;
-  const base = { "Content-Type": "video/mp4", "Accept-Ranges": "bytes", "Cache-Control": "public, max-age=86400" };
+  const mediaType = MIME[path.extname(filePath).toLowerCase()] || "application/octet-stream";
+  const base = { "Content-Type": mediaType, "Accept-Ranges": "bytes", "Cache-Control": "public, max-age=86400" };
   const m = (req.headers.range || "").match(/bytes=(\d*)-(\d*)/);
   if (m) {
     const start = m[1] ? parseInt(m[1], 10) : 0;
@@ -751,7 +753,8 @@ const serveStatic = (req, res, urlPath, longCache) => {
   if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
     filePath = path.join(filePath, "index.html");
   }
-  if (path.extname(filePath).toLowerCase() === ".mp4") {
+  const mediaExt = path.extname(filePath).toLowerCase();
+  if (mediaExt === ".mp4" || mediaExt === ".mp3") {
     sendVideo(req, res, filePath);
     return;
   }

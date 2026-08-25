@@ -344,6 +344,61 @@ a { color: var(--fizz); }
   font-size: 0.85rem;
 }
 
+/* ---------- 會員心得語音條 ---------- */
+.voice-section { max-width: 760px; margin: 0 auto; padding: 0 1.5rem 0.5rem; }
+.voice-card {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  background: var(--card);
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+  padding: 0.9rem 1.6rem 0.9rem 0.9rem;
+}
+.voice-play {
+  width: 52px; height: 52px; flex-shrink: 0;
+  border: none; border-radius: 50%;
+  background: var(--fizz); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.voice-play:hover { background: var(--fizz-dark); transform: scale(1.06); }
+.voice-play:active { transform: scale(0.96); }
+.voice-body { flex: 1; min-width: 0; }
+.voice-label {
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  color: var(--cola-soft);
+  margin-bottom: 0.35rem;
+  letter-spacing: 0.05em;
+}
+.voice-wave {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 34px;
+  cursor: pointer;
+}
+.voice-wave i {
+  flex: 1;
+  min-width: 2px;
+  border-radius: 2px;
+  background: var(--cream-deep);
+  transition: background 0.12s linear;
+}
+.voice-wave i.played { background: var(--fizz); }
+.voice-time {
+  font-size: 0.82rem;
+  color: var(--cola-soft);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+@media (max-width: 560px) {
+  .voice-card { padding-right: 1.1rem; gap: 0.8rem; }
+  .voice-play { width: 46px; height: 46px; }
+}
+
 /* ---------- 破冰話題卡 ---------- */
 .ice-deck { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.2rem; }
 .ice-card {

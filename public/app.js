@@ -334,9 +334,90 @@ const bindHeroSound = () => {
   renderBtn();
 };
 
+/* ---------- 會員心得語音條（真實波形 + 點擊跳轉） ---------- */
+
+const initVoicePlayer = () => {
+  const audio = document.getElementById("voice-audio");
+  const btn = document.getElementById("voice-play");
+  const wave = document.getElementById("voice-wave");
+  const timeEl = document.getElementById("voice-time");
+  if (!audio || !btn || !wave) return;
+
+  const PLAY = `<svg ${ICON_ATTRS} width="22" height="22" style="margin-left:3px" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>`;
+  const PAUSE = `<svg ${ICON_ATTRS} width="22" height="22" fill="currentColor"><rect x="5" y="4" width="4.5" height="16" rx="1.5"/><rect x="14.5" y="4" width="4.5" height="16" rx="1.5"/></svg>`;
+  const BAR_COUNT = 56;
+  let bars = [];
+
+  const drawBars = (peaks) => {
+    wave.textContent = "";
+    bars = peaks.map((p) => {
+      const b = document.createElement("i");
+      b.style.height = Math.max(12, Math.round(p * 100)) + "%";
+      wave.appendChild(b);
+      return b;
+    });
+  };
+
+  // 先畫假波形墊底，Web Audio 解碼出真實波形後替換
+  drawBars(Array.from({ length: BAR_COUNT }, (_, i) => 0.3 + 0.35 * Math.abs(Math.sin(i * 0.6)) + (i % 6 === 0 ? 0.2 : 0)).map((v) => Math.min(v, 1)));
+
+  fetch(audio.src)
+    .then((r) => r.arrayBuffer())
+    .then((buf) => {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      const ctx = new AC();
+      return ctx.decodeAudioData(buf).then((ab) => {
+        const data = ab.getChannelData(0);
+        const block = Math.floor(data.length / BAR_COUNT);
+        const peaks = [];
+        for (let i = 0; i < BAR_COUNT; i++) {
+          let max = 0;
+          for (let j = i * block; j < (i + 1) * block; j += 40) {
+            const v = Math.abs(data[j]);
+            if (v > max) max = v;
+          }
+          peaks.push(max);
+        }
+        const top = Math.max(...peaks) || 1;
+        drawBars(peaks.map((p) => Math.max(0.12, p / top)));
+        ctx.close();
+      });
+    })
+    .catch(() => {});
+
+  const fmtTime = (s) => {
+    if (!Number.isFinite(s)) return "0:00";
+    return Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
+  };
+  const setBtn = () => { btn.innerHTML = audio.paused ? PLAY : PAUSE; };
+
+  btn.addEventListener("click", () => (audio.paused ? audio.play() : audio.pause()));
+  audio.addEventListener("play", setBtn);
+  audio.addEventListener("pause", setBtn);
+  audio.addEventListener("ended", () => {
+    audio.currentTime = 0;
+    setBtn();
+  });
+  audio.addEventListener("loadedmetadata", () => { timeEl.textContent = fmtTime(audio.duration); });
+  audio.addEventListener("timeupdate", () => {
+    const ratio = audio.currentTime / (audio.duration || 1);
+    bars.forEach((b, i) => b.classList.toggle("played", i / bars.length < ratio));
+    timeEl.textContent = fmtTime(audio.currentTime) + " / " + fmtTime(audio.duration);
+  });
+  wave.addEventListener("click", (e) => {
+    if (!audio.duration) return;
+    const rect = wave.getBoundingClientRect();
+    audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
+    if (audio.paused) audio.play().catch(() => {});
+  });
+  setBtn();
+};
+
 loadEvents();
 loadWall();
 loadIcebreaker();
 bindIcebreaker();
 bindHeroSound();
 bindCalendarNav();
+initVoicePlayer();
