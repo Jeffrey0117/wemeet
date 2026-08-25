@@ -422,13 +422,22 @@ a { color: var(--fizz); }
 .voice-rate.boost { background: var(--fizz); color: #fff; }
 @media (max-width: 560px) {
   .voice-section { padding: 0 1rem 0.5rem; }
-  .voice-card { padding-right: 1rem; gap: 0.7rem; }
-  .voice-rate { padding: 0.25rem 0.5rem; font-size: 0.72rem; }
-  .voice-play { width: 44px; height: 44px; }
-  .voice-total { display: none; }
-  .voice-time { min-width: 34px; font-size: 0.78rem; }
+  /* 窄版改兩行網格：播放鈕跨兩行｜上=標註+波形、下=時間+倍速 */
+  .voice-card {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.3rem 0.8rem;
+    align-items: center;
+    border-radius: 22px;
+    padding: 0.8rem 1rem;
+  }
+  .voice-play { grid-row: 1 / 3; width: 44px; height: 44px; }
+  .voice-body { grid-column: 2 / 4; min-width: 0; }
+  .voice-time { grid-column: 2; justify-self: start; text-align: left; min-width: 0; font-size: 0.78rem; }
+  .voice-rate { grid-column: 3; justify-self: end; padding: 0.22rem 0.55rem; font-size: 0.72rem; }
   .voice-label { font-size: 0.8rem; }
-  .voice-wave { height: 28px; }
+  .voice-wave { height: 26px; gap: 1px; }
+  .voice-wave i { min-width: 1px; }
 }
 
 /* ---------- 破冰話題卡 ---------- */
