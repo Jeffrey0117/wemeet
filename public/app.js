@@ -352,6 +352,19 @@ const initVoiceCard = (card) => {
   audio.preload = "metadata";
   voiceAudios.push(audio);
 
+  // 倍速切換 1x → 1.5x → 2x
+  const rateBtn = card.querySelector(".voice-rate");
+  if (rateBtn) {
+    const RATES = [1, 1.5, 2];
+    let rateIdx = 0;
+    rateBtn.addEventListener("click", () => {
+      rateIdx = (rateIdx + 1) % RATES.length;
+      audio.playbackRate = RATES[rateIdx];
+      rateBtn.textContent = RATES[rateIdx] + "x";
+      rateBtn.classList.toggle("boost", rateIdx > 0);
+    });
+  }
+
   const BAR_COUNT = 56;
   let bars = [];
 
