@@ -421,22 +421,25 @@ a { color: var(--fizz); }
 .voice-rate:hover { background: var(--fizz); color: #fff; }
 .voice-rate.boost { background: var(--fizz); color: #fff; }
 @media (max-width: 560px) {
-  .voice-section { padding: 0 1rem 0.5rem; }
+  .voice-section { padding: 0 1rem 0.4rem; gap: 0.5rem; }
+  .voice-heading { font-size: 0.85rem; }
   /* 窄版改兩行網格：播放鈕跨兩行｜上=標註+波形、下=時間+倍速 */
   .voice-card {
     display: grid;
     grid-template-columns: auto 1fr auto;
-    gap: 0.3rem 0.8rem;
+    gap: 0.15rem 0.6rem;
     align-items: center;
-    border-radius: 22px;
-    padding: 0.8rem 1rem;
+    border-radius: 16px;
+    padding: 0.55rem 0.75rem;
+    box-shadow: 0 3px 12px rgba(58, 35, 24, 0.07);
   }
-  .voice-play { grid-row: 1 / 3; width: 44px; height: 44px; }
+  .voice-play { grid-row: 1 / 3; width: 34px; height: 34px; }
+  .voice-play svg { width: 16px; height: 16px; }
   .voice-body { grid-column: 2 / 4; min-width: 0; }
-  .voice-time { grid-column: 2; justify-self: start; text-align: left; min-width: 0; font-size: 0.78rem; }
-  .voice-rate { grid-column: 3; justify-self: end; padding: 0.22rem 0.55rem; font-size: 0.72rem; }
-  .voice-label { font-size: 0.8rem; }
-  .voice-wave { height: 26px; gap: 1px; }
+  .voice-time { grid-column: 2; justify-self: start; text-align: left; min-width: 0; font-size: 0.7rem; }
+  .voice-rate { grid-column: 3; justify-self: end; padding: 0.12rem 0.45rem; font-size: 0.66rem; }
+  .voice-label { font-size: 0.72rem; margin-bottom: 0.2rem; }
+  .voice-wave { height: 18px; gap: 1px; }
   .voice-wave i { min-width: 1px; }
 }
 
