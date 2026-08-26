@@ -380,6 +380,13 @@ a { color: var(--fizz); }
   margin-bottom: 0.35rem;
   letter-spacing: 0.05em;
 }
+.voice-quote {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  color: var(--cola);
+  line-height: 1.5;
+  margin-bottom: 0.4rem;
+}
 .voice-wave {
   display: flex;
   align-items: center;
@@ -438,7 +445,8 @@ a { color: var(--fizz); }
   .voice-body { grid-column: 2 / 4; min-width: 0; }
   .voice-time { grid-column: 2; justify-self: start; text-align: left; min-width: 0; font-size: 0.7rem; }
   .voice-rate { grid-column: 3; justify-self: end; padding: 0.12rem 0.45rem; font-size: 0.66rem; }
-  .voice-label { font-size: 0.72rem; margin-bottom: 0.2rem; }
+  .voice-label { font-size: 0.72rem; margin-bottom: 0.1rem; }
+  .voice-quote { font-size: 0.8rem; margin-bottom: 0.25rem; }
   .voice-wave { height: 18px; gap: 1px; }
   .voice-wave i { min-width: 1px; }
 }
