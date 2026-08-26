@@ -806,7 +806,7 @@ const server = http.createServer((req, res) => {
           {
             id: "su-" + s.id,
             title: "報名成功",
-            body: ev ? `已收到你的報名：${evName}。記得私訊 IG 完成匯款，名額才算保留。` : "已加入開團通知名單，下次開團第一個告訴你。",
+            body: ev ? `已收到你的報名：${evName}。記得私訊 IG 跟我們說一聲，報名費 50 元現場繳就好。` : "已加入開團通知名單，下次開團第一個告訴你。",
             createdAt: s.createdAt,
             kind: "personal",
           },
@@ -814,7 +814,7 @@ const server = http.createServer((req, res) => {
         if (s.paid && s.paidAt) {
           list.push({
             id: "pd-" + s.id,
-            title: "匯款已確認 ✓",
+            title: "報名確認 ✓",
             body: `${evName || "你的報名"} 名額保留成功，到時見！`,
             createdAt: s.paidAt,
             kind: "personal",

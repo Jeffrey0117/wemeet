@@ -48,7 +48,7 @@
     </div>
     <div class="table-scroll">
       <table>
-        <thead><tr><th>匯款</th><th>時間</th><th>活動</th><th>暱稱</th><th>LINE/電話</th><th>IG</th><th>想說的話</th></tr></thead>
+        <thead><tr><th>收款</th><th>時間</th><th>活動</th><th>暱稱</th><th>LINE/電話</th><th>IG</th><th>想說的話</th></tr></thead>
         <tbody id="signup-rows"></tbody>
       </table>
     </div>
@@ -121,7 +121,7 @@ const render = (data) => {
     const paidCb = document.createElement("input");
     paidCb.type = "checkbox";
     paidCb.checked = !!s.paid;
-    paidCb.title = "已匯款";
+    paidCb.title = "已收款／已確認";
     paidCb.addEventListener("change", async () => {
       try {
         await api("/api/admin/signups/" + s.id, { method: "PATCH", body: JSON.stringify({ paid: paidCb.checked }) });

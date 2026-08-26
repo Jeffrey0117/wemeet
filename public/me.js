@@ -65,7 +65,7 @@ const renderMySignups = (signups) => {
     foot.className = "row-foot";
     const state = document.createElement("span");
     state.className = "state" + (s.paid ? " ok" : "");
-    state.textContent = ev.past ? "已結束" : s.paid ? "已確認 ✓" : "待匯款（私訊 IG 完成）";
+    state.textContent = ev.past ? "已結束" : s.paid ? "已確認 ✓" : "已報名・費用現場繳";
     foot.appendChild(state);
     if (ev.mapUrl && !ev.past) {
       const nav = document.createElement("a");
