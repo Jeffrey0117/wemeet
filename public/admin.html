@@ -48,7 +48,7 @@
     </div>
     <div class="table-scroll">
       <table>
-        <thead><tr><th>收款</th><th>時間</th><th>活動</th><th>暱稱</th><th>LINE/電話</th><th>IG</th><th>想說的話</th></tr></thead>
+        <thead><tr><th>收款</th><th>時間</th><th>活動</th><th>暱稱</th><th>LINE/電話</th><th>IG</th><th>想說的話</th><th></th></tr></thead>
         <tbody id="signup-rows"></tbody>
       </table>
     </div>
@@ -139,6 +139,23 @@ const render = (data) => {
       td.textContent = v;
       tr.appendChild(td);
     });
+
+    const delTd = document.createElement("td");
+    const delBtn = document.createElement("button");
+    delBtn.className = "ghost";
+    delBtn.textContent = "刪";
+    delBtn.style.padding = "0.15rem 0.6rem";
+    delBtn.addEventListener("click", async () => {
+      if (!confirm(`確定刪除「${s.name}」這筆報名？`)) return;
+      try {
+        await api("/api/admin/signups/" + s.id, { method: "DELETE" });
+        tr.remove();
+      } catch (err) {
+        alert("刪除失敗：" + err.message);
+      }
+    });
+    delTd.appendChild(delBtn);
+    tr.appendChild(delTd);
     tbody.appendChild(tr);
   });
 

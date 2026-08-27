@@ -668,6 +668,21 @@ const handleAdmin = (req, res, pathname) => {
     return;
   }
 
+  // 刪除報名（亂填/騙地址的）：DELETE /api/admin/signups/{id}
+  const md = pathname.match(/^\/api\/admin\/signups\/([a-f0-9]{16})$/);
+  if (req.method === "DELETE" && md) {
+    const signups = readJsonFile(SIGNUPS_PATH, []);
+    if (!signups.some((s) => s.id === md[1])) {
+      sendJson(res, 404, { error: "signup not found" });
+      return;
+    }
+    writeJsonAtomic(SIGNUPS_PATH, signups.filter((s) => s.id !== md[1]), (err) => {
+      if (err) sendJson(res, 500, { error: "write failed" });
+      else sendJson(res, 200, { success: true });
+    });
+    return;
+  }
+
   // 標記已匯款：PATCH /api/admin/signups/{id} {paid: true|false}
   const m = pathname.match(/^\/api\/admin\/signups\/([a-f0-9]{16})$/);
   if (req.method === "PATCH" && m) {
