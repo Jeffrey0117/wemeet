@@ -90,7 +90,7 @@ const loadEvents = async () => {
     // API 已按日期升冪，逐一插在名單選項前 → 日期近的在最上面
     events.forEach((ev) => {
       if (ev.past) return;
-      const left = ev.capacity ? Math.max(0, ev.capacity - (ev.signedUp || 0)) : null;
+      const left = !ev.hideCount && ev.capacity ? Math.max(0, ev.capacity - (ev.signedUp || 0)) : null;
       const isFull = ev.status === "closed" || (left !== null && left <= 0);
       if (isFull) return;
 
@@ -178,6 +178,10 @@ const validate = (step) => {
   if (step === 1) {
     if (!$("f-name").value.trim()) return "暱稱要填喔，不然不知道怎麼叫你";
     if (!$("f-contact").value.trim()) return "留個 LINE ID 或電話，才通知得到你";
+    const pickedEv = eventsCache.find((e) => e.id === ((document.querySelector('input[name="eventId"]:checked') || {}).value || ""));
+    if (pickedEv && pickedEv.ratio && !(document.querySelector('input[name="gender"]:checked') || {}).value) {
+      return "這場會平衡參加組成，性別選一下";
+    }
   }
   if (step === 2) {
     if (!$("f-agree-pay").checked || !$("f-agree-attend").checked) return "兩個都勾一下，我們才能幫你留位子";
@@ -211,6 +215,14 @@ const submit = async () => {
     });
     const data = await res.json();
     if (res.ok && data.success) {
+      // 候補：軟文案（不透露額度機制）
+      if (data.waitlisted) {
+        const doneEl = document.querySelector('[data-step="done"]');
+        const title = doneEl.querySelector("h2");
+        if (title) title.textContent = "報名收到了！";
+        const firstP = doneEl.querySelector("p");
+        if (firstP) firstP.innerHTML = "這場報名很熱烈，我們會<strong>依序私訊確認名額</strong>。<br>先私訊 IG 跟我們說一聲，確認後會通知你場地細節。";
+      }
       // 重複報名：不新增資料，提示已報過並再次顯示場地
       if (data.already) {
         const doneEl = document.querySelector('[data-step="done"]');

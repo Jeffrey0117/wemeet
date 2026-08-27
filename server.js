@@ -269,6 +269,11 @@ const publicEvents = () => {
       // ended:true = 手動提前收進歷史（當天活動結束、不想等午夜自動下架）
       const past = isPast(e) || e.ended === true;
       const { location, mapUrl, ...pub } = e;
+      if (e.ratio) {
+        // 抓比例的場次不洩漏名額與報名數（候補調節不可見）
+        const { capacity, ...noCap } = pub;
+        return { ...noCap, past, hideCount: true };
+      }
       return { ...pub, past, signedUp: counts[e.id] || 0 };
     })
     .sort((a, b) => String(a.date).localeCompare(String(b.date)));
@@ -305,6 +310,7 @@ const handleSignup = (req, res) => {
       e ? { title: e.title, date: e.date, time: e.time || "", location: e.location || "", mapUrl: e.mapUrl || "" } : null;
 
     let joinedEvent = null;
+    let waitlisted = false;
     if (eventId) {
       const event = events.find((e) => e.id === eventId && e.status !== "hidden");
       if (!event) {
@@ -324,10 +330,22 @@ const handleSignup = (req, res) => {
         sendJson(res, 200, { success: true, already: true, event: eventPublicInfo(event) });
         return;
       }
-      const count = countByEvent(readJsonFile(SIGNUPS_PATH, []))[eventId] || 0;
-      if (event.capacity && count >= event.capacity) {
-        sendJson(res, 409, { error: "這場滿了！可以先留資料，下一場優先通知你" });
-        return;
+      const all = readJsonFile(SIGNUPS_PATH, []);
+      if (event.ratio) {
+        if (!gender) {
+          sendJson(res, 400, { error: "這場會平衡參加組成，請選一下性別" });
+          return;
+        }
+        // 性別額度 = capacity 對半；超額不拒絕，默默進候補（主辦人私訊時調節）
+        const quota = Math.floor((event.capacity || 20) / 2);
+        const genderCount = all.filter((x) => x.eventId === eventId && x.gender === gender && !x.waitlisted).length;
+        if (genderCount >= quota) waitlisted = true;
+      } else {
+        const count = all.filter((x) => x.eventId === eventId).length;
+        if (event.capacity && count >= event.capacity) {
+          sendJson(res, 409, { error: "這場滿了！可以先留資料，下一場優先通知你" });
+          return;
+        }
       }
       joinedEvent = event;
     }
@@ -341,6 +359,7 @@ const handleSignup = (req, res) => {
       igHandle,
       igFollowed,
       gender,
+      waitlisted,
       agreedPayment,
       agreedAttend,
       paid: false,
@@ -366,8 +385,12 @@ const handleSignup = (req, res) => {
           writeJsonAtomic(MEMBERS_PATH, { ...members, [entry.memberSub]: patched }, () => {});
         }
       }
-      // 報名成功即揭露該場地點與導航連結（完成畫面用）
-      sendJson(res, 200, { success: true, event: eventPublicInfo(joinedEvent) });
+      // 報名成功即揭露該場地點與導航連結（完成畫面用）；候補用軟文案、不給地點
+      sendJson(res, 200, {
+        success: true,
+        waitlisted,
+        event: waitlisted ? null : eventPublicInfo(joinedEvent),
+      });
     });
   });
 };

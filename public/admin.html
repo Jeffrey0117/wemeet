@@ -42,6 +42,7 @@
 
   <div class="card" id="signups-card" hidden>
     <h2>報名名單（<span id="signup-count">0</span>）</h2>
+    <div id="gender-tally" style="margin-bottom:0.4rem"></div>
     <div class="row" style="margin-bottom:0.6rem">
       <button class="ghost" id="copy-csv">複製 CSV</button>
       <span class="msg" id="copy-msg"></span>
@@ -71,7 +72,7 @@
 
   <div class="card" id="events-card" hidden>
     <h2>活動清單（JSON 直接編輯）</h2>
-    <p class="muted">欄位：id、type、title、date（YYYY-MM-DD）、time、location、mapUrl（導航）、capacity、fee（報名費，預設 50）、feeNote（費用補充說明）、note、status（open / closed / hidden）</p>
+    <p class="muted">欄位：id、type、title、date（YYYY-MM-DD）、time、location、mapUrl（導航）、capacity、fee（報名費，預設 50）、feeNote（費用補充說明）、ratio: true（抓男女比例：性別必填、名額不顯示、超額進候補）、ended: true（提前收歷史）、note、status（open / closed / hidden）</p>
     <textarea id="events-json" spellcheck="false"></textarea>
     <div class="row" style="margin-top:0.6rem">
       <button id="save-events">儲存活動</button>
@@ -112,6 +113,22 @@ const render = (data) => {
   const signups = (data.signups || []).slice().reverse();
 
   $("signup-count").textContent = signups.length;
+  const tally = {};
+  signups.forEach((x) => {
+    if (!x.eventId) return;
+    const t = (tally[x.eventId] = tally[x.eventId] || { m: 0, f: 0, w: 0 });
+    if (x.waitlisted) t.w += 1;
+    else if (x.gender === "male") t.m += 1;
+    else if (x.gender === "female") t.f += 1;
+  });
+  const tallyBox = $("gender-tally");
+  tallyBox.textContent = "";
+  Object.entries(tally).forEach(([eid, t]) => {
+    const p = document.createElement("p");
+    p.className = "muted";
+    p.textContent = `${eventTitle(eid)}：男 ${t.m}・女 ${t.f}` + (t.w ? `・候補 ${t.w}` : "");
+    tallyBox.appendChild(p);
+  });
   const tbody = $("signup-rows");
   tbody.textContent = "";
   signups.forEach((s) => {
@@ -134,7 +151,7 @@ const render = (data) => {
     tr.appendChild(paidTd);
 
     const ig = (s.igHandle || "") + (s.igFollowed ? "（已追蹤 ✓）" : "");
-    [new Date(s.createdAt).toLocaleString("zh-TW"), eventTitle(s.eventId), s.name, s.gender === "male" ? "男" : s.gender === "female" ? "女" : "", s.contact, ig, s.note || ""].forEach((v) => {
+    [new Date(s.createdAt).toLocaleString("zh-TW"), eventTitle(s.eventId), s.name, (s.gender === "male" ? "男" : s.gender === "female" ? "女" : "") + (s.waitlisted ? "（候補）" : ""), s.contact, ig, s.note || ""].forEach((v) => {
       const td = document.createElement("td");
       td.textContent = v;
       tr.appendChild(td);
