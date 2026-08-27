@@ -107,14 +107,20 @@ const initNavAuth = () => {
       });
     };
 
-    // SDK 就緒（token 拿得到）才查未讀，避免紅點與內容不同步
-    waitForLetMeUse().then((sdk2) => {
-      if (!sdk2 || !sdk2.user) return;
+    const refreshBadge = () =>
       fetchNotices()
         .then((d) => {
           if (d && d.unread > 0 && (d.notices || []).length) badgeEl().hidden = false;
         })
         .catch(() => {});
+
+    // 報名等動作完成後，其他頁面腳本可呼叫這個立即刷新紅點
+    window.__wemeetBellRefresh = refreshBadge;
+
+    // SDK 就緒（token 拿得到）才查未讀，避免紅點與內容不同步
+    waitForLetMeUse().then((sdk2) => {
+      if (!sdk2 || !sdk2.user) return;
+      refreshBadge();
     });
 
     bell.addEventListener("click", async () => {

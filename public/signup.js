@@ -217,6 +217,11 @@ const submit = async () => {
           $("venue-nav").href = ev.mapUrl;
         }
       }
+      // 報名成功的即時回饋：鈴鐺紅點立刻亮、完成頁給「看我的報名」入口
+      const loggedIn = !!(window.letmeuse && window.letmeuse.user);
+      if (loggedIn && window.__wemeetBellRefresh) setTimeout(window.__wemeetBellRefresh, 600);
+      $("done-track-member").hidden = !loggedIn;
+      $("done-track-guest").hidden = loggedIn;
       showDone();
     } else {
       setMsg(data.error || "送出失敗，再試一次");
