@@ -69,6 +69,14 @@
     }
     .field input:focus, .field textarea:focus { outline: none; border-color: var(--caramel); }
     .req-star { color: var(--fizz); margin-left: 0.15rem; font-weight: 700; }
+    .gender-chips { display: flex; gap: 0.6rem; }
+    .gchip {
+      display: flex; align-items: center; gap: 0.4rem;
+      border: 1.5px solid var(--cream-deep); border-radius: 999px;
+      padding: 0.4rem 1.1rem; cursor: pointer; font-weight: 500;
+    }
+    .gchip:has(input:checked) { border-color: var(--fizz); background: #fff7f2; }
+    .gchip input { accent-color: var(--fizz); }
     .picked-banner {
       display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; flex-wrap: wrap;
       background: var(--cream-deep); border-radius: 12px;
@@ -162,6 +170,12 @@
       <label class="field"><span>LINE ID 或電話<span class="req-star" aria-hidden="true">*</span></span>
         <input type="text" id="f-contact" maxlength="120" placeholder="例：line-id-123 或 0912345678" autocomplete="tel">
       </label>
+      <div class="field"><span>性別（選填，有些場次會抓男女比例）</span>
+        <div class="gender-chips">
+          <label class="gchip"><input type="radio" name="gender" value="male">男</label>
+          <label class="gchip"><input type="radio" name="gender" value="female">女</label>
+        </div>
+      </div>
     </section>
 
     <!-- Step 3：報名須知（費用 + 出席承諾） -->
@@ -169,13 +183,13 @@
       <h2>報名須知</h2>
       <p class="hint">場地和座位都是先訂好的，所以我們收一點點費用，確保大家都會出現。</p>
       <div class="fee-box">
-        <span class="fee-num">報名費 $50</span>
-        <span class="fee-sub">現場繳費就好，不用先匯款</span>
+        <span class="fee-num" id="fee-num">報名費 $50</span>
+        <span class="fee-sub" id="fee-sub">現場繳費就好，不用先匯款</span>
       </div>
       <div class="choice">
         <label>
           <input type="checkbox" id="f-agree-pay">
-          <span class="t">我了解活動收報名費 50 元，當天現場繳費</span>
+          <span class="t">我了解活動報名費金額，當天現場繳費</span>
         </label>
         <label>
           <input type="checkbox" id="f-agree-attend">

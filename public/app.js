@@ -55,7 +55,7 @@ const buildEventCard = (ev) => {
   info.appendChild(el("h3", null, ev.title));
   const meta = el("p", "event-meta");
   meta.appendChild(iconEl("clock", 14));
-  meta.appendChild(document.createTextNode(" " + (ev.time || "")));
+  meta.appendChild(document.createTextNode(" " + (ev.time || "") + (ev.past ? "" : `　報名費 $${ev.fee != null ? ev.fee : 50}`)));
   if (!ev.past) {
     meta.appendChild(document.createTextNode("　"));
     meta.appendChild(iconEl("map-pin", 14));

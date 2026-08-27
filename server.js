@@ -286,6 +286,7 @@ const handleSignup = (req, res) => {
     const note = cleanStr(body.note, 300);
     const igHandle = cleanStr(body.igHandle, 60);
     const igFollowed = body.igFollowed === true;
+    const gender = ["male", "female"].includes(body.gender) ? body.gender : "";
     const agreedPayment = body.agreedPayment === true;
     const agreedAttend = body.agreedAttend === true;
     const eventId = cleanStr(body.eventId, 60); // 空字串 = 先加入名單、開團通知
@@ -338,6 +339,7 @@ const handleSignup = (req, res) => {
       note,
       igHandle,
       igFollowed,
+      gender,
       agreedPayment,
       agreedAttend,
       paid: false,

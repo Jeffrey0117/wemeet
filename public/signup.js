@@ -42,8 +42,19 @@ const renderProgress = (done) => {
   });
 };
 
+let eventsCache = [];
+
+const updateFeeBox = () => {
+  const picked = (document.querySelector('input[name="eventId"]:checked') || {}).value || "";
+  const ev = eventsCache.find((e) => e.id === picked);
+  const fee = ev && ev.fee != null ? ev.fee : 50;
+  document.getElementById("fee-num").textContent = `報名費 $${fee}`;
+  document.getElementById("fee-sub").textContent = (ev && ev.feeNote) || "現場繳費就好，不用先匯款";
+};
+
 const applyFlow = () => {
   const step = flow[flowPos];
+  if (step === 2) updateFeeBox();
   steps.forEach((s) => s.classList.toggle("on", s.dataset.step === String(step)));
   renderProgress(false);
   $("quiz-nav").hidden = false;
@@ -70,6 +81,7 @@ const loadEvents = async () => {
   try {
     const res = await fetch("/api/events");
     const { events = [] } = await res.json();
+    eventsCache = events;
     const box = $("event-choices");
     const waitlistOption = box.firstElementChild; // 「先加入名單」固定墊底
     const preselect = new URLSearchParams(location.search).get("event") || "";
@@ -192,6 +204,7 @@ const submit = async () => {
         note: $("f-note").value.trim(),
         igHandle: $("f-ig").value.trim(),
         igFollowed: $("f-followed").checked,
+        gender: (document.querySelector('input[name="gender"]:checked') || {}).value || "",
         agreedPayment: $("f-agree-pay").checked,
         agreedAttend: $("f-agree-attend").checked,
       }),

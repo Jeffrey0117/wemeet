@@ -48,7 +48,7 @@
     </div>
     <div class="table-scroll">
       <table>
-        <thead><tr><th>收款</th><th>時間</th><th>活動</th><th>暱稱</th><th>LINE/電話</th><th>IG</th><th>想說的話</th><th></th></tr></thead>
+        <thead><tr><th>收款</th><th>時間</th><th>活動</th><th>暱稱</th><th>性別</th><th>LINE/電話</th><th>IG</th><th>想說的話</th><th></th></tr></thead>
         <tbody id="signup-rows"></tbody>
       </table>
     </div>
@@ -71,7 +71,7 @@
 
   <div class="card" id="events-card" hidden>
     <h2>活動清單（JSON 直接編輯）</h2>
-    <p class="muted">欄位：id、type、title、date（YYYY-MM-DD）、time、location、mapUrl（導航連結，報名成功畫面用）、capacity、note、status（open / closed / hidden）</p>
+    <p class="muted">欄位：id、type、title、date（YYYY-MM-DD）、time、location、mapUrl（導航）、capacity、fee（報名費，預設 50）、feeNote（費用補充說明）、note、status（open / closed / hidden）</p>
     <textarea id="events-json" spellcheck="false"></textarea>
     <div class="row" style="margin-top:0.6rem">
       <button id="save-events">儲存活動</button>
@@ -134,7 +134,7 @@ const render = (data) => {
     tr.appendChild(paidTd);
 
     const ig = (s.igHandle || "") + (s.igFollowed ? "（已追蹤 ✓）" : "");
-    [new Date(s.createdAt).toLocaleString("zh-TW"), eventTitle(s.eventId), s.name, s.contact, ig, s.note || ""].forEach((v) => {
+    [new Date(s.createdAt).toLocaleString("zh-TW"), eventTitle(s.eventId), s.name, s.gender === "male" ? "男" : s.gender === "female" ? "女" : "", s.contact, ig, s.note || ""].forEach((v) => {
       const td = document.createElement("td");
       td.textContent = v;
       tr.appendChild(td);
