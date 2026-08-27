@@ -38,6 +38,20 @@ const el = (tag, className, text) => {
 
 let allEvents = [];
 
+// 過往場次：純文字時間軸樣式（跟現役活動卡明顯區隔，避免誤會還能報名）
+const buildHistoryRow = (ev) => {
+  const { md, w } = fmtDate(ev.date);
+  const row = el("div", "history-row");
+  row.id = "event-card-" + ev.id;
+  const head = el("p", "history-head");
+  head.appendChild(el("span", "history-date", `${md}（${w}）`));
+  head.appendChild(document.createTextNode(" " + ev.title));
+  head.appendChild(el("span", "history-done", "已結束"));
+  row.appendChild(head);
+  if (ev.note) row.appendChild(el("p", "history-recap", ev.note));
+  return row;
+};
+
 const buildEventCard = (ev) => {
   const { md, w } = fmtDate(ev.date);
   const left = !ev.hideCount && ev.capacity ? Math.max(0, ev.capacity - (ev.signedUp || 0)) : null;
@@ -101,7 +115,9 @@ const renderEvents = (events) => {
 
   if (past.length) {
     list.appendChild(el("h3", "event-history-title", "過往小聚"));
-    past.forEach((ev) => list.appendChild(buildEventCard(ev)));
+    const wrap = el("div", "history-list");
+    past.forEach((ev) => wrap.appendChild(buildHistoryRow(ev)));
+    list.appendChild(wrap);
   }
 };
 

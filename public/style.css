@@ -557,6 +557,35 @@ a { color: var(--fizz); }
 }
 .event-past { opacity: 0.72; }
 .event-slots.done { color: var(--cola-soft); }
+/* 過往時間軸 */
+.history-list {
+  border-left: 2px solid var(--cream-deep);
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.9rem;
+}
+.history-row { position: relative; }
+.history-row::before {
+  content: "";
+  position: absolute;
+  left: calc(-1.1rem - 5px);
+  top: 0.5em;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--cola-soft);
+  opacity: 0.55;
+}
+.history-head { font-size: 0.98rem; font-weight: 500; color: var(--cola-soft); }
+.history-date { font-variant-numeric: tabular-nums; color: var(--caramel); margin-right: 0.2rem; }
+.history-done {
+  font-size: 0.72rem;
+  border: 1px solid var(--cream-deep);
+  border-radius: 999px;
+  padding: 0.05rem 0.5rem;
+  margin-left: 0.5rem;
+  vertical-align: 0.1em;
+}
+.history-recap { font-size: 0.88rem; color: var(--cola-soft); opacity: 0.85; margin-top: 0.15rem; font-family: var(--font-display); }
 @keyframes cardflash {
   0% { box-shadow: 0 0 0 3px var(--fizz); }
   100% { box-shadow: var(--shadow); }
