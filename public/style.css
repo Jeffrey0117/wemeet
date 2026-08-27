@@ -459,6 +459,28 @@ a { color: var(--fizz); }
   .voice-wave i { min-width: 1px; }
 }
 
+/* ---------- 活動場景相簿 ---------- */
+.scene-section { max-width: 1040px; margin: 0 auto; padding: 2.2rem 1.5rem 0.5rem; }
+.scene-section .voice-heading { margin-bottom: 0.9rem; }
+.scene-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.8rem;
+}
+.scene-grid img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s ease;
+}
+.scene-grid img:hover { transform: scale(1.025) rotate(-0.4deg); }
+@media (max-width: 760px) {
+  .scene-grid { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
+  .scene-grid img { border-radius: 12px; }
+}
+
 /* ---------- 破冰話題卡 ---------- */
 .ice-deck { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.2rem; }
 .ice-card {
