@@ -266,7 +266,8 @@ const publicEvents = () => {
     .filter((e) => e.status !== "hidden")
     .map((e) => {
       // 地點一律不對外（場地會重複用，過往地址=洩漏未來場地；報名後才解鎖）
-      const past = isPast(e);
+      // ended:true = 手動提前收進歷史（當天活動結束、不想等午夜自動下架）
+      const past = isPast(e) || e.ended === true;
       const { location, mapUrl, ...pub } = e;
       return { ...pub, past, signedUp: counts[e.id] || 0 };
     })
