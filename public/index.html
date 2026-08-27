@@ -34,8 +34,8 @@
   <a class="nav-logo" href="#top"><img class="nav-logo-img" src="/logo-icon.png?v=__BUILD__" alt=""> 揪可樂<span class="nav-sub">｜台中第一小聚品牌</span></a>
   <div class="nav-links">
     <a href="#about">關於我們</a>
-    <a href="#vibes">在做什麼</a>
     <a href="#events">近期活動</a>
+    <a href="#vibes">在做什麼</a>
     <a href="#wall">Chill 友牆</a>
     <span id="nav-auth"></span>
   </div>
@@ -172,7 +172,23 @@
   </div>
 </section>
 
-<section class="section section-alt" id="vibes">
+<section class="section section-alt" id="events">
+  <h2><span class="squiggle">近期活動</span></h2>
+  <div class="cal" id="calendar">
+    <div class="cal-head">
+      <button type="button" class="cal-nav" id="cal-prev" aria-label="上個月">←</button>
+      <span class="cal-title" id="cal-title"></span>
+      <button type="button" class="cal-nav" id="cal-next" aria-label="下個月">→</button>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <p class="cal-hint">有標記的日子就是小聚日，點一下看詳情</p>
+  </div>
+  <div id="event-list" class="event-list">
+    <p class="event-loading">活動載入中⋯</p>
+  </div>
+</section>
+
+<section class="section" id="vibes">
   <h2><span class="squiggle">我們都在揪什麼？</span></h2>
   <div class="vibe-grid">
     <div class="vibe-card vibe-featured">
@@ -195,7 +211,7 @@
   </div>
 </section>
 
-<section class="section" id="icebreaker">
+<section class="section section-alt" id="icebreaker">
   <h2><span class="squiggle">聊不出話題？抽一張</span></h2>
   <p class="section-lead">小聚現場的破冰卡，真實影片裡的英文句子，聊得來、也學得到。</p>
   <div id="ice-deck" class="ice-deck"></div>
@@ -205,21 +221,6 @@
   </div>
 </section>
 
-<section class="section section-alt" id="events">
-  <h2><span class="squiggle">近期活動</span></h2>
-  <div class="cal" id="calendar">
-    <div class="cal-head">
-      <button type="button" class="cal-nav" id="cal-prev" aria-label="上個月">←</button>
-      <span class="cal-title" id="cal-title"></span>
-      <button type="button" class="cal-nav" id="cal-next" aria-label="下個月">→</button>
-    </div>
-    <div class="cal-grid" id="cal-grid"></div>
-    <p class="cal-hint">有標記的日子就是小聚日，點一下看詳情</p>
-  </div>
-  <div id="event-list" class="event-list">
-    <p class="event-loading">活動載入中⋯</p>
-  </div>
-</section>
 
 <section class="section" id="wall">
   <h2><span class="squiggle">牆上的 Chill 友</span></h2>
