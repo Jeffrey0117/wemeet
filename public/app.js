@@ -290,31 +290,30 @@ const renderWall = (wall) => {
     card.href = m.quickkyUrl;
     card.target = "_blank";
     card.rel = "noopener";
-    let avatar;
     if (m.avatarUrl) {
-      avatar = el("img", "wall-avatar");
+      const avatar = el("img", "wall-photo");
       avatar.src = m.avatarUrl;
       avatar.alt = m.nickname || "";
       avatar.loading = "lazy";
+      card.appendChild(avatar);
     } else {
-      avatar = el("div", "wall-avatar", (m.nickname || "?").slice(0, 1));
+      card.appendChild(el("div", "wall-photo wall-photo-blank", (m.nickname || "?").slice(0, 1)));
     }
-    card.appendChild(avatar);
-    card.appendChild(el("h3", null, m.nickname || "Chill 友"));
-    if (m.bio) card.appendChild(el("p", "wall-bio", m.bio));
-    card.appendChild(el("span", "wall-go", "看卡片 →"));
+    const body = el("div", "wall-body");
+    body.appendChild(el("h3", null, m.nickname || "Chill 友"));
+    if (m.bio) body.appendChild(el("p", "wall-bio", m.bio));
+    card.appendChild(body);
     grid.appendChild(card);
   });
 
   // 最後一格永遠是邀請卡：卡少時是招募入口，卡多時是加入牆上的入口
   const cta = el("a", "wall-card wall-card-cta");
   cta.href = "/me";
-  const ctaAvatar = el("div", "wall-avatar");
-  ctaAvatar.appendChild(iconEl("id-card", 34));
-  cta.appendChild(ctaAvatar);
-  cta.appendChild(el("h3", null, wall.length ? "你也上牆" : "成為第一張卡"));
-  cta.appendChild(el("p", "wall-bio", "建立你的 Quickky 名片卡，讓大家先認識你。"));
-  cta.appendChild(el("span", "wall-go", "去建立 →"));
+  const ctaBody = el("div", "wall-cta-body");
+  ctaBody.appendChild(iconEl("id-card", 30));
+  ctaBody.appendChild(el("h3", null, wall.length ? "你也上牆" : "成為第一張卡"));
+  ctaBody.appendChild(el("p", "wall-bio", "建立你的 Quickky 名片卡"));
+  cta.appendChild(ctaBody);
   grid.appendChild(cta);
 };
 
