@@ -510,7 +510,8 @@ a { color: var(--fizz); }
 .reel-actions { display: grid; gap: 0.5rem; margin-top: 1.1rem; }
 .reel-learn {
   display: block;
-  margin-top: 0.9rem;
+  grid-column: 2;
+  margin-top: 0;
   text-align: center;
   background: var(--fizz);
   color: #fff;
@@ -549,6 +550,7 @@ a { color: var(--fizz); }
   .reel-wrap { grid-template-columns: 1fr; }
   .reel-player { position: static; }
   .reel-segs { max-height: 300px; }
+  .reel-learn { grid-column: 1; }
 }
 
 /* ---------- 月曆 ---------- */
