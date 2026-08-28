@@ -223,14 +223,12 @@
   <p class="section-lead">真實影片的雙語逐字稿，播到哪句亮哪句。點句子直接跳到那一秒。</p>
   <div class="reel-wrap" id="reel-wrap">
     <div class="reel-player">
-      <button type="button" class="reel-play" id="reel-play" aria-label="播放"></button>
+      <video class="reel-video" id="reel-video" controls playsinline preload="metadata"></video>
       <h3 class="reel-title" id="reel-title"></h3>
       <p class="reel-channel" id="reel-channel"></p>
-      <div class="reel-progress" id="reel-progress"><i id="reel-bar"></i></div>
-      <p class="reel-time"><span id="reel-cur">0:00</span> / <span id="reel-dur">0:00</span></p>
       <div class="reel-actions">
         <button type="button" class="btn btn-ghost" id="reel-next">換一部 ↻</button>
-        <a class="btn btn-primary" id="reel-watch" href="#" target="_blank" rel="noopener">看完整影片 →</a>
+        <a class="btn btn-primary" id="reel-watch" href="#" target="_blank" rel="noopener">更多影片＋收藏功能 →</a>
       </div>
     </div>
     <div class="reel-transcript" id="reel-transcript">

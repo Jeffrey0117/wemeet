@@ -207,74 +207,34 @@ const bindCalendarNav = () => {
 
 /* ---------- 跟著影片學英文（reelscript 音檔 + 同步逐字稿） ---------- */
 
-let reelAudio = null;
-
-const fmtSec = (t) => {
-  if (!Number.isFinite(t)) return "0:00";
-  return Math.floor(t / 60) + ":" + String(Math.floor(t % 60)).padStart(2, "0");
-};
-
 const renderReel = (data) => {
-  const playBtn = document.getElementById("reel-play");
-  const bar = document.getElementById("reel-bar");
+  const video = document.getElementById("reel-video");
   const segsBox = document.getElementById("reel-segs");
-  if (!playBtn) return;
+  if (!video) return;
 
-  if (reelAudio) { reelAudio.pause(); reelAudio = null; }
-  const audio = new Audio(data.audioUrl);
-  audio.preload = "metadata";
-  reelAudio = audio;
+  video.pause();
+  video.src = data.videoUrl || data.audioUrl;
+  if (data.thumbnail) video.poster = data.thumbnail;
 
   document.getElementById("reel-title").textContent = data.title || "";
   document.getElementById("reel-channel").textContent = data.channel ? "@" + data.channel : "";
   document.getElementById("reel-watch").href = data.base + "/watch/" + encodeURIComponent(data.videoId);
   document.getElementById("reel-count").textContent = data.segments.length ? data.segments.length + " 段" : "";
-  document.getElementById("reel-dur").textContent = fmtSec(data.duration);
-
-  const PLAY = `<svg ${ICON_ATTRS} width="24" height="24" style="margin-left:3px" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>`;
-  const PAUSE = `<svg ${ICON_ATTRS} width="24" height="24" fill="currentColor"><rect x="5" y="4" width="4.5" height="16" rx="1.5"/><rect x="14.5" y="4" width="4.5" height="16" rx="1.5"/></svg>`;
-  const setBtn = () => { playBtn.innerHTML = audio.paused ? PLAY : PAUSE; };
-  playBtn.onclick = () => (audio.paused ? audio.play().catch(() => {}) : audio.pause());
-  audio.addEventListener("play", setBtn);
-  audio.addEventListener("pause", setBtn);
-  setBtn();
 
   segsBox.textContent = "";
-  const rows = data.segments.map((seg) => {
+  data.segments.forEach((seg) => {
     const row = el("div", "reel-seg");
-    row.appendChild(el("span", "reel-seg-time", fmtSec(seg.start)));
+    row.appendChild(el("span", "reel-seg-time", (Math.floor(seg.start / 60)) + ":" + String(Math.floor(seg.start % 60)).padStart(2, "0")));
     const txt = el("div", "reel-seg-text");
     txt.appendChild(el("p", "reel-en", seg.en || ""));
     if (seg.zh) txt.appendChild(el("p", "reel-zh", seg.zh));
     row.appendChild(txt);
     row.addEventListener("click", () => {
-      audio.currentTime = seg.start;
-      audio.play().catch(() => {});
+      video.currentTime = seg.start;
+      video.play().catch(() => {});
     });
     segsBox.appendChild(row);
-    return { row, seg };
   });
-
-  audio.addEventListener("timeupdate", () => {
-    const t = audio.currentTime;
-    document.getElementById("reel-cur").textContent = fmtSec(t);
-    bar.style.width = (t / (data.duration || audio.duration || 1)) * 100 + "%";
-    let active = null;
-    rows.forEach(({ row, seg }) => {
-      const on = t >= seg.start && t < seg.end;
-      row.classList.toggle("on", on);
-      if (on) active = row;
-    });
-    if (active && !audio.paused) active.scrollIntoView({ block: "nearest", behavior: "smooth" });
-  });
-
-  document.getElementById("reel-progress").onclick = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const dur = data.duration || audio.duration || 0;
-    if (!dur) return;
-    audio.currentTime = ((e.clientX - rect.left) / rect.width) * dur;
-    audio.play().catch(() => {});
-  };
 };
 
 const loadReel = async () => {

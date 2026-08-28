@@ -445,6 +445,8 @@ const handleReelplay = async (res) => {
       channel: audio.channel || "",
       duration: audio.duration || 0,
       audioUrl: REELSCRIPT_PUBLIC_URL + audio.audioUrl,
+      videoUrl: audio.videoUrl ? REELSCRIPT_PUBLIC_URL + audio.videoUrl : "",
+      thumbnail: audio.thumbnail ? REELSCRIPT_PUBLIC_URL + audio.thumbnail : "",
       segments: (audio.segments || []).slice(0, 40),
     });
   } catch (err) {

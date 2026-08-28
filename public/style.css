@@ -497,25 +497,16 @@ a { color: var(--fizz); }
   position: sticky;
   top: 76px;
 }
-.reel-play {
-  width: 64px; height: 64px;
-  border: none; border-radius: 50%;
-  background: var(--fizz); color: #fff;
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 0.9rem;
-  cursor: pointer;
-  transition: transform 0.15s ease, background 0.15s ease;
+.reel-video {
+  width: 100%;
+  max-height: 440px;
+  border-radius: 14px;
+  background: #1a110c;
+  display: block;
+  margin-bottom: 0.8rem;
 }
-.reel-play:hover { background: var(--fizz-dark); transform: scale(1.06); }
-.reel-title { font-size: 1.15rem; line-height: 1.4; }
-.reel-channel { font-size: 0.85rem; color: var(--cola-soft); margin-top: 0.15rem; }
-.reel-progress {
-  height: 8px; border-radius: 999px;
-  background: var(--cream-deep);
-  margin-top: 1rem; cursor: pointer; overflow: hidden;
-}
-.reel-progress i { display: block; height: 100%; width: 0; background: var(--fizz); border-radius: 999px; }
-.reel-time { font-size: 0.8rem; color: var(--cola-soft); margin-top: 0.35rem; font-variant-numeric: tabular-nums; }
+.reel-title { font-size: 1.1rem; line-height: 1.4; text-align: left; }
+.reel-channel { font-size: 0.85rem; color: var(--cola-soft); margin-top: 0.1rem; text-align: left; }
 .reel-actions { display: grid; gap: 0.5rem; margin-top: 1.1rem; }
 .reel-transcript {
   background: var(--card);
@@ -533,7 +524,6 @@ a { color: var(--fizz); }
   cursor: pointer;
 }
 .reel-seg:hover { background: var(--cream-deep); }
-.reel-seg.on { background: #fff7f2; box-shadow: inset 3px 0 0 var(--fizz); }
 .reel-seg-time { font-size: 0.75rem; color: var(--cola-soft); font-variant-numeric: tabular-nums; padding-top: 0.15rem; flex-shrink: 0; width: 34px; }
 .reel-en { font-size: 0.98rem; line-height: 1.55; }
 .reel-zh { font-size: 0.85rem; color: var(--cola-soft); line-height: 1.5; }
