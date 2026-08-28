@@ -219,6 +219,7 @@ const renderReel = (data) => {
   document.getElementById("reel-title").textContent = data.title || "";
   document.getElementById("reel-channel").textContent = data.channel ? "@" + data.channel : "";
   document.getElementById("reel-watch").href = data.base + "/watch/" + encodeURIComponent(data.videoId);
+  bindReelLearn(data);
   document.getElementById("reel-count").textContent = data.segments.length ? data.segments.length + " 段" : "";
 
   segsBox.textContent = "";
@@ -247,6 +248,35 @@ const renderReel = (data) => {
       if (on) active = row;
     });
     if (active && !video.paused) active.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  };
+};
+
+// 學習模式大按鈕：wemeet 已登入 → SSO 帶帳號直達 reelscript；未登入 → 直接去註冊
+const REELSCRIPT_APP_ID = "app_3lXIxPKb";
+const LMU_ORIGIN = "https://letmeuse.isnowfriend.com";
+const bindReelLearn = (data) => {
+  const btn = document.getElementById("reel-learn");
+  if (!btn) return;
+  const watchPath = "/watch/" + encodeURIComponent(data.videoId);
+  btn.href = data.base + watchPath;
+  btn.onclick = async (e) => {
+    const sdk = window.letmeuse;
+    if (!sdk || !sdk.user) return; // 未登入照普通連結走（去 reelscript 註冊）
+    e.preventDefault();
+    try {
+      const res = await fetch(LMU_ORIGIN + "/api/auth/sso/exchange", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + sdk.getToken() },
+        body: JSON.stringify({ targetAppId: REELSCRIPT_APP_ID }),
+      });
+      const json = await res.json();
+      const code = (json.data || json).code;
+      if (res.ok && code) {
+        window.open(data.base + "/sso.html#code=" + encodeURIComponent(code) + "&next=" + encodeURIComponent(watchPath), "_blank", "noopener");
+        return;
+      }
+    } catch (err) {}
+    window.open(data.base + watchPath, "_blank", "noopener");
   };
 };
 
