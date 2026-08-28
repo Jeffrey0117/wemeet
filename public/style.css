@@ -153,8 +153,7 @@ a { color: var(--fizz); }
   position: relative;
   overflow: hidden;
   padding: 5rem 1.5rem 5.5rem;
-  background: #241610;
-  color: var(--cream);
+  background: linear-gradient(180deg, var(--cream) 0%, #f6ecdb 100%);
 }
 .hero-bgword {
   position: absolute;
@@ -164,7 +163,7 @@ a { color: var(--fizz); }
   font-weight: 700;
   font-size: clamp(9rem, 24vw, 20rem);
   line-height: 1;
-  color: rgba(250, 243, 231, 0.045);
+  color: rgba(58, 35, 24, 0.05);
   letter-spacing: 0.02em;
   pointer-events: none;
   user-select: none;
@@ -185,8 +184,8 @@ a { color: var(--fizz); }
   aspect-ratio: 9 / 16;
   object-fit: cover;
   border-radius: 24px;
-  background: #120a06;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+  background: #1a110c;
+  box-shadow: 0 22px 56px rgba(58, 35, 24, 0.3);
   cursor: pointer;
 }
 .video-sound {
@@ -196,7 +195,7 @@ a { color: var(--fizz); }
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(26, 17, 12, 0.62);
   color: #fff;
   border: none;
   border-radius: 999px;
@@ -217,32 +216,32 @@ a { color: var(--fizz); }
   width: clamp(90px, 11vw, 132px);
   height: auto;
   flex-shrink: 0;
-  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.45));
+  filter: drop-shadow(0 8px 22px rgba(58, 35, 24, 0.25));
 }
 .hero-copy { text-align: left; }
 .hero h1 {
   font-size: clamp(3rem, 7.5vw, 5.6rem);
   line-height: 1.06;
   letter-spacing: 0.02em;
-  color: var(--cream);
+  color: var(--cola);
 }
 .hero-zh {
   display: block;
   font-size: clamp(2.4rem, 6vw, 4.4rem);
-  color: var(--fizz);
+  color: var(--caramel);
   white-space: nowrap;
 }
 .hero-slogan {
   margin-top: 1.3rem;
   font-size: clamp(1.35rem, 3.4vw, 1.95rem);
   font-family: var(--font-display);
-  color: var(--cream);
+  color: var(--cola);
 }
 .hero-slogan em { color: var(--fizz); font-style: normal; }
 .hero-brandline {
   margin-top: 0.6rem;
   font-size: clamp(0.92rem, 2vw, 1.05rem);
-  color: rgba(250, 243, 231, 0.65);
+  color: var(--cola-soft);
   letter-spacing: 0.08em;
 }
 .hero-actions { margin-top: 2.2rem; display: flex; gap: 0.8rem; }
@@ -253,7 +252,7 @@ a { color: var(--fizz); }
   font-weight: 700;
   padding: 0.95rem 2.4rem;
   border-radius: 999px;
-  box-shadow: 0 10px 30px rgba(226, 87, 43, 0.4);
+  box-shadow: 0 10px 28px rgba(226, 87, 43, 0.32);
 }
 .btn-hero:hover { background: var(--fizz-dark); transform: translateY(-2px); }
 .about-points { justify-items: center; margin-bottom: 2rem; }
