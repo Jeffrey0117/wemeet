@@ -222,7 +222,7 @@ const renderReel = (data) => {
   document.getElementById("reel-count").textContent = data.segments.length ? data.segments.length + " 段" : "";
 
   segsBox.textContent = "";
-  data.segments.forEach((seg) => {
+  const rows = data.segments.map((seg) => {
     const row = el("div", "reel-seg");
     row.appendChild(el("span", "reel-seg-time", (Math.floor(seg.start / 60)) + ":" + String(Math.floor(seg.start % 60)).padStart(2, "0")));
     const txt = el("div", "reel-seg-text");
@@ -234,7 +234,20 @@ const renderReel = (data) => {
       video.play().catch(() => {});
     });
     segsBox.appendChild(row);
+    return { row, seg };
   });
+
+  // 播到哪句亮哪句（淡底色）＋自動捲到當前句
+  video.ontimeupdate = () => {
+    const t = video.currentTime;
+    let active = null;
+    rows.forEach(({ row, seg }) => {
+      const on = t >= seg.start && t < seg.end;
+      row.classList.toggle("on", on);
+      if (on) active = row;
+    });
+    if (active && !video.paused) active.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  };
 };
 
 const loadReel = async () => {

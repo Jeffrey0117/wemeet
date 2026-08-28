@@ -524,6 +524,8 @@ a { color: var(--fizz); }
   cursor: pointer;
 }
 .reel-seg:hover { background: var(--cream-deep); }
+.reel-seg.on { background: var(--cream-deep); }
+.reel-seg.on .reel-en { font-weight: 700; }
 .reel-seg-time { font-size: 0.75rem; color: var(--cola-soft); font-variant-numeric: tabular-nums; padding-top: 0.15rem; flex-shrink: 0; width: 34px; }
 .reel-en { font-size: 0.98rem; line-height: 1.55; }
 .reel-zh { font-size: 0.85rem; color: var(--cola-soft); line-height: 1.5; }
