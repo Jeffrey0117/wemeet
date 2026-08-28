@@ -508,10 +508,9 @@ a { color: var(--fizz); }
 .reel-title { font-size: 1.1rem; line-height: 1.4; text-align: left; }
 .reel-channel { font-size: 0.85rem; color: var(--cola-soft); margin-top: 0.1rem; text-align: left; }
 .reel-actions { display: grid; gap: 0.5rem; margin-top: 1.1rem; }
+.reel-right { display: grid; gap: 0.8rem; align-content: start; }
 .reel-learn {
   display: block;
-  grid-column: 2;
-  margin-top: 0;
   text-align: center;
   background: var(--fizz);
   color: #fff;
@@ -550,7 +549,6 @@ a { color: var(--fizz); }
   .reel-wrap { grid-template-columns: 1fr; }
   .reel-player { position: static; }
   .reel-segs { max-height: 300px; }
-  .reel-learn { grid-column: 1; }
 }
 
 /* ---------- 月曆 ---------- */
