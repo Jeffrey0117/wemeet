@@ -376,6 +376,17 @@ const voiceAudios = [];
 
 const initVoiceCard = (card) => {
   const src = card.dataset.src;
+  // data-avatar 有給就在標註前顯示頭貼（心得主本人的臉）
+  if (card.dataset.avatar) {
+    const img = document.createElement("img");
+    img.className = "voice-avatar";
+    img.src = card.dataset.avatar;
+    img.alt = "";
+    img.loading = "lazy";
+    const body = card.querySelector(".voice-body");
+    card.insertBefore(img, body);
+    card.classList.add("has-avatar");
+  }
   const btn = card.querySelector(".voice-play");
   const wave = card.querySelector(".voice-wave");
   const curEl = card.querySelector(".voice-cur");

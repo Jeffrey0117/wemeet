@@ -380,6 +380,11 @@ a { color: var(--fizz); }
 }
 .voice-play:hover { background: var(--fizz-dark); transform: scale(1.06); }
 .voice-play:active { transform: scale(0.96); }
+.voice-avatar {
+  width: 46px; height: 46px; flex-shrink: 0;
+  border-radius: 50%; object-fit: cover; object-position: center top;
+  border: 2px solid var(--cream-deep);
+}
 .voice-body { flex: 1; min-width: 0; }
 .voice-label {
   font-family: var(--font-display);
@@ -449,6 +454,7 @@ a { color: var(--fizz); }
     box-shadow: 0 3px 12px rgba(58, 35, 24, 0.07);
   }
   .voice-play { grid-row: 1 / 3; width: 34px; height: 34px; }
+  .voice-avatar { display: none; }
   .voice-play svg { width: 16px; height: 16px; }
   .voice-body { grid-column: 2 / 4; min-width: 0; }
   .voice-time { grid-column: 2; justify-self: start; text-align: left; min-width: 0; font-size: 0.7rem; }
