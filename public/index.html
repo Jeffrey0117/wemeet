@@ -218,12 +218,25 @@
 </section>
 
 <section class="section" id="icebreaker">
-  <h2><span class="squiggle">聊不出話題？抽一張</span></h2>
-  <p class="section-lead">小聚現場的破冰卡，真實影片裡的英文句子，聊得來、也學得到。</p>
-  <div id="ice-deck" class="ice-deck"></div>
-  <div class="cta-band" style="margin-top:1.4rem">
-    <button type="button" class="btn btn-ghost" id="ice-refresh">換一批 ↻</button>
-    <a class="btn btn-primary" id="ice-more" href="#" target="_blank" rel="noopener">更多話題卡＋影片學英文 →</a>
+  <p class="section-kicker">小聚都在聊這個</p>
+  <h2><span class="squiggle">跟著影片學英文</span></h2>
+  <p class="section-lead">真實影片的雙語逐字稿，播到哪句亮哪句。點句子直接跳到那一秒。</p>
+  <div class="reel-wrap" id="reel-wrap">
+    <div class="reel-player">
+      <button type="button" class="reel-play" id="reel-play" aria-label="播放"></button>
+      <h3 class="reel-title" id="reel-title"></h3>
+      <p class="reel-channel" id="reel-channel"></p>
+      <div class="reel-progress" id="reel-progress"><i id="reel-bar"></i></div>
+      <p class="reel-time"><span id="reel-cur">0:00</span> / <span id="reel-dur">0:00</span></p>
+      <div class="reel-actions">
+        <button type="button" class="btn btn-ghost" id="reel-next">換一部 ↻</button>
+        <a class="btn btn-primary" id="reel-watch" href="#" target="_blank" rel="noopener">看完整影片 →</a>
+      </div>
+    </div>
+    <div class="reel-transcript" id="reel-transcript">
+      <p class="reel-panel-title">逐字稿 <span id="reel-count"></span></p>
+      <div class="reel-segs" id="reel-segs"></div>
+    </div>
   </div>
 </section>
 

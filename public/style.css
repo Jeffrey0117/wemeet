@@ -481,35 +481,67 @@ a { color: var(--fizz); }
   .scene-grid img { border-radius: 12px; }
 }
 
-/* ---------- 破冰話題卡 ---------- */
-.ice-deck { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.2rem; }
-.ice-card {
+/* ---------- 跟著影片學英文 ---------- */
+.reel-wrap {
+  display: grid;
+  grid-template-columns: minmax(240px, 5fr) 7fr;
+  gap: 1.4rem;
+  align-items: start;
+}
+.reel-player {
   background: var(--card);
   border-radius: var(--radius);
-  padding: 1.5rem 1.4rem;
   box-shadow: var(--shadow);
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  padding: 1.6rem 1.5rem;
+  text-align: center;
+  position: sticky;
+  top: 76px;
 }
-.ice-featured { border: 2px solid var(--caramel); }
-.ice-en { font-family: var(--font-display); font-size: 1.25rem; line-height: 1.5; }
-.ice-featured .ice-en { font-size: 1.45rem; }
-.ice-zh { color: var(--cola-soft); font-size: 0.95rem; }
-.ice-src { margin-top: auto; font-size: 0.85rem; color: var(--fizz); text-decoration: none; }
-.ice-src:hover { text-decoration: underline; }
-.ice-chips { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; }
-.ice-chip {
+.reel-play {
+  width: 64px; height: 64px;
+  border: none; border-radius: 50%;
+  background: var(--fizz); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 0.9rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.reel-play:hover { background: var(--fizz-dark); transform: scale(1.06); }
+.reel-title { font-size: 1.15rem; line-height: 1.4; }
+.reel-channel { font-size: 0.85rem; color: var(--cola-soft); margin-top: 0.15rem; }
+.reel-progress {
+  height: 8px; border-radius: 999px;
   background: var(--cream-deep);
-  border-radius: 999px;
-  padding: 0.35rem 0.9rem;
-  font-size: 0.88rem;
-  color: var(--cola-soft);
-  text-decoration: none;
+  margin-top: 1rem; cursor: pointer; overflow: hidden;
 }
-.ice-chip strong { color: var(--cola); font-weight: 700; }
-.ice-chip:hover { background: var(--fizz); color: #fff; }
-.ice-chip:hover strong { color: #fff; }
+.reel-progress i { display: block; height: 100%; width: 0; background: var(--fizz); border-radius: 999px; }
+.reel-time { font-size: 0.8rem; color: var(--cola-soft); margin-top: 0.35rem; font-variant-numeric: tabular-nums; }
+.reel-actions { display: grid; gap: 0.5rem; margin-top: 1.1rem; }
+.reel-transcript {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.2rem 1.3rem;
+}
+.reel-panel-title { font-weight: 700; margin-bottom: 0.6rem; }
+.reel-panel-title span { font-weight: 400; font-size: 0.82rem; color: var(--cola-soft); }
+.reel-segs { max-height: 430px; overflow-y: auto; display: grid; gap: 0.15rem; padding-right: 0.3rem; }
+.reel-seg {
+  display: flex; gap: 0.8rem;
+  padding: 0.55rem 0.6rem;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.reel-seg:hover { background: var(--cream-deep); }
+.reel-seg.on { background: #fff7f2; box-shadow: inset 3px 0 0 var(--fizz); }
+.reel-seg-time { font-size: 0.75rem; color: var(--cola-soft); font-variant-numeric: tabular-nums; padding-top: 0.15rem; flex-shrink: 0; width: 34px; }
+.reel-en { font-size: 0.98rem; line-height: 1.55; }
+.reel-zh { font-size: 0.85rem; color: var(--cola-soft); line-height: 1.5; }
+@media (max-width: 760px) {
+  .reel-wrap { grid-template-columns: 1fr; }
+  .reel-player { position: static; }
+  .reel-segs { max-height: 300px; }
+}
 
 /* ---------- 月曆 ---------- */
 .cal {

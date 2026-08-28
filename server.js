@@ -418,6 +418,40 @@ const handleIcebreaker = async (res) => {
   }
 };
 
+/* ---------- 跟片學英文（reelscript 音檔+逐字稿） ---------- */
+
+const handleReelplay = async (res) => {
+  if (!REELSCRIPT_API) {
+    sendJson(res, 503, { error: "not configured" });
+    return;
+  }
+  try {
+    const snippet = await fetch(REELSCRIPT_API + "/api/public/snippet/random").then((r) => (r.ok ? r.json() : null));
+    if (!snippet || !snippet.videoId) {
+      sendJson(res, 502, { error: "no snippet" });
+      return;
+    }
+    const audio = await fetch(REELSCRIPT_API + "/api/public/videos/" + snippet.videoId + "/audio").then((r) =>
+      r.ok ? r.json() : null
+    );
+    if (!audio || !audio.audioUrl) {
+      sendJson(res, 502, { error: "no audio" });
+      return;
+    }
+    sendJson(res, 200, {
+      base: REELSCRIPT_PUBLIC_URL,
+      videoId: audio.videoId,
+      title: audio.title || snippet.videoTitle || "",
+      channel: audio.channel || "",
+      duration: audio.duration || 0,
+      audioUrl: REELSCRIPT_PUBLIC_URL + audio.audioUrl,
+      segments: (audio.segments || []).slice(0, 40),
+    });
+  } catch (err) {
+    sendJson(res, 502, { error: "upstream error" });
+  }
+};
+
 /* ---------- 會員 API（LetMeUse 登入） ---------- */
 
 const QUICKKY_URL_RE = /^https:\/\/quickky\.(isnowfriend\.com|pipee\.tw)\/\S*$/;
@@ -819,6 +853,10 @@ const server = http.createServer((req, res) => {
   }
   if (req.method === "GET" && pathname === "/api/icebreaker") {
     handleIcebreaker(res);
+    return;
+  }
+  if (req.method === "GET" && pathname === "/api/reelplay") {
+    handleReelplay(res);
     return;
   }
   if (req.method === "POST" && pathname === "/api/signup") {

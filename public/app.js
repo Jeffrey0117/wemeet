@@ -205,78 +205,94 @@ const bindCalendarNav = () => {
   });
 };
 
-/* ---------- 破冰話題卡（reelscript 內容，導流回 reelscript） ---------- */
+/* ---------- 跟著影片學英文（reelscript 音檔 + 同步逐字稿） ---------- */
 
-const renderIcebreaker = (data) => {
-  const deck = document.getElementById("ice-deck");
-  if (!deck) return;
-  deck.textContent = "";
-  const base = data.base || "";
-  const watchLink = (videoId, text) => {
-    const a = el("a", "ice-src", text + " →");
-    if (base && videoId) {
-      a.href = base + "/watch/" + encodeURIComponent(videoId);
-      a.target = "_blank";
-      a.rel = "noopener";
-    }
-    return a;
-  };
+let reelAudio = null;
 
-  if (data.snippet && data.snippet.en) {
-    const s = data.snippet;
-    const card = el("div", "ice-card ice-featured");
-    card.appendChild(el("p", "ice-en", "“" + s.en + "”"));
-    card.appendChild(el("p", "ice-zh", s.zh || ""));
-    card.appendChild(watchLink(s.videoId, s.videoTitle ? "出自「" + s.videoTitle + "」" : "看出處影片"));
-    deck.appendChild(card);
-  }
+const fmtSec = (t) => {
+  if (!Number.isFinite(t)) return "0:00";
+  return Math.floor(t / 60) + ":" + String(Math.floor(t % 60)).padStart(2, "0");
+};
 
-  const quotes = (data.quotes && data.quotes.quotes) || [];
-  quotes.slice(0, 2).forEach((q) => {
-    const card = el("div", "ice-card");
-    card.appendChild(el("p", "ice-en", "“" + q.en + "”"));
-    card.appendChild(el("p", "ice-zh", q.zh || ""));
-    card.appendChild(watchLink(q.videoId, q.videoTitle ? "出自「" + q.videoTitle + "」" : "看出處影片"));
-    deck.appendChild(card);
+const renderReel = (data) => {
+  const playBtn = document.getElementById("reel-play");
+  const bar = document.getElementById("reel-bar");
+  const segsBox = document.getElementById("reel-segs");
+  if (!playBtn) return;
+
+  if (reelAudio) { reelAudio.pause(); reelAudio = null; }
+  const audio = new Audio(data.audioUrl);
+  audio.preload = "metadata";
+  reelAudio = audio;
+
+  document.getElementById("reel-title").textContent = data.title || "";
+  document.getElementById("reel-channel").textContent = data.channel ? "@" + data.channel : "";
+  document.getElementById("reel-watch").href = data.base + "/watch/" + encodeURIComponent(data.videoId);
+  document.getElementById("reel-count").textContent = data.segments.length ? data.segments.length + " 段" : "";
+  document.getElementById("reel-dur").textContent = fmtSec(data.duration);
+
+  const PLAY = `<svg ${ICON_ATTRS} width="24" height="24" style="margin-left:3px" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>`;
+  const PAUSE = `<svg ${ICON_ATTRS} width="24" height="24" fill="currentColor"><rect x="5" y="4" width="4.5" height="16" rx="1.5"/><rect x="14.5" y="4" width="4.5" height="16" rx="1.5"/></svg>`;
+  const setBtn = () => { playBtn.innerHTML = audio.paused ? PLAY : PAUSE; };
+  playBtn.onclick = () => (audio.paused ? audio.play().catch(() => {}) : audio.pause());
+  audio.addEventListener("play", setBtn);
+  audio.addEventListener("pause", setBtn);
+  setBtn();
+
+  segsBox.textContent = "";
+  const rows = data.segments.map((seg) => {
+    const row = el("div", "reel-seg");
+    row.appendChild(el("span", "reel-seg-time", fmtSec(seg.start)));
+    const txt = el("div", "reel-seg-text");
+    txt.appendChild(el("p", "reel-en", seg.en || ""));
+    if (seg.zh) txt.appendChild(el("p", "reel-zh", seg.zh));
+    row.appendChild(txt);
+    row.addEventListener("click", () => {
+      audio.currentTime = seg.start;
+      audio.play().catch(() => {});
+    });
+    segsBox.appendChild(row);
+    return { row, seg };
   });
 
-  const words = (data.vocabulary && data.vocabulary.words) || [];
-  if (words.length) {
-    const chips = el("div", "ice-chips");
-    words.slice(0, 6).forEach((w) => {
-      const chip = el("a", "ice-chip");
-      chip.appendChild(el("strong", null, w.word));
-      chip.appendChild(document.createTextNode(" " + (w.translation || "")));
-      if (base && w.videoId) {
-        chip.href = base + "/watch/" + encodeURIComponent(w.videoId);
-        chip.target = "_blank";
-        chip.rel = "noopener";
-      }
-      chips.appendChild(chip);
+  audio.addEventListener("timeupdate", () => {
+    const t = audio.currentTime;
+    document.getElementById("reel-cur").textContent = fmtSec(t);
+    bar.style.width = (t / (data.duration || audio.duration || 1)) * 100 + "%";
+    let active = null;
+    rows.forEach(({ row, seg }) => {
+      const on = t >= seg.start && t < seg.end;
+      row.classList.toggle("on", on);
+      if (on) active = row;
     });
-    deck.appendChild(chips);
-  }
+    if (active && !audio.paused) active.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  });
 
-  const more = document.getElementById("ice-more");
-  if (more && base) more.href = base + "/icebreaker";
+  document.getElementById("reel-progress").onclick = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const dur = data.duration || audio.duration || 0;
+    if (!dur) return;
+    audio.currentTime = ((e.clientX - rect.left) / rect.width) * dur;
+    audio.play().catch(() => {});
+  };
 };
 
-const loadIcebreaker = async () => {
+const loadReel = async () => {
   const section = document.getElementById("icebreaker");
   try {
-    const res = await fetch("/api/icebreaker");
+    const res = await fetch("/api/reelplay");
     if (!res.ok) throw new Error("bad status");
     const data = await res.json();
-    if (!data.snippet && !data.quotes) throw new Error("empty");
-    renderIcebreaker(data);
+    if (!data.audioUrl || !(data.segments || []).length) throw new Error("empty");
+    renderReel(data);
   } catch (err) {
-    if (section) section.hidden = true; // 上游掛了就整區收起來，不留破版
+    if (section) section.hidden = true; // 上游掛了整區收起，不留破版
   }
 };
 
-const bindIcebreaker = () => {
-  const btn = document.getElementById("ice-refresh");
-  if (btn) btn.addEventListener("click", loadIcebreaker);
+const bindReel = () => {
+  const btn = document.getElementById("reel-next");
+  if (btn) btn.addEventListener("click", loadReel);
 };
 
 /* ---------- Chill 友牆 ---------- */
@@ -459,8 +475,8 @@ const initVoicePlayer = () => {
 
 loadEvents();
 loadWall();
-loadIcebreaker();
-bindIcebreaker();
+loadReel();
+bindReel();
 bindHeroSound();
 bindCalendarNav();
 initVoicePlayer();
