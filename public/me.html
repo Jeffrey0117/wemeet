@@ -48,6 +48,26 @@
       font-size: 0.9rem; font-weight: 500; margin-top: 0.6rem; cursor: pointer;
     }
     .wall-toggle input { accent-color: var(--fizz); }
+    .avail-box { margin: 1.4rem 0; }
+    .avail-box h3 { font-size: 1.1rem; margin-bottom: 0.2rem; }
+    .avail-hint { font-size: 0.82rem; color: var(--cola-soft); margin-bottom: 0.6rem; }
+    .avail-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; font-family: var(--font-display); }
+    .avail-nav { background: var(--cream-deep); border: none; border-radius: 8px; width: 30px; height: 30px; cursor: pointer; color: var(--cola); }
+    .avail-nav:hover { background: var(--fizz); color: #fff; }
+    .avail-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; text-align: center; }
+    .av-dow { font-size: 0.72rem; color: var(--cola-soft); padding: 0.2rem 0; }
+    .av-day {
+      padding: 0.45rem 0; font-size: 0.88rem; border-radius: 8px;
+      cursor: pointer; user-select: none; border: 1.5px solid transparent;
+    }
+    .av-day.past { opacity: 0.3; cursor: default; }
+    .av-day:not(.past):hover { border-color: var(--cream-deep); }
+    .av-day.s-day { background: #ffe3c9; }
+    .av-day.s-night { background: #d9d2ec; }
+    .av-day.s-both { background: var(--fizz); color: #fff; }
+    .avail-legend { font-size: 0.75rem; color: var(--cola-soft); margin-top: 0.5rem; }
+    .avail-legend i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; vertical-align: -1px; margin-right: 3px; }
+    .lg-day { background: #ffe3c9; } .lg-night { background: #d9d2ec; } .lg-both { background: var(--fizz); }
     .my-signups { margin: 1.4rem 0; }
     .my-signups h3 { font-size: 1.1rem; margin-bottom: 0.6rem; }
     .signup-row {
@@ -113,6 +133,18 @@
       <div class="my-signups" id="my-signups" hidden>
         <h3>我的報名</h3>
         <div id="signup-list"></div>
+      </div>
+
+      <div class="avail-box">
+        <h3>我的空檔</h3>
+        <p class="avail-hint">點日期切換：一下＝白天有空、兩下＝晚上、三下＝整天。我們照大家的空檔排下一場。</p>
+        <div class="avail-head">
+          <button type="button" class="avail-nav" id="av-prev">←</button>
+          <span id="av-title"></span>
+          <button type="button" class="avail-nav" id="av-next">→</button>
+        </div>
+        <div class="avail-grid" id="av-grid"></div>
+        <p class="avail-legend"><i class="lg-day"></i>白天　<i class="lg-night"></i>晚上　<i class="lg-both"></i>整天</p>
       </div>
 
       <div class="quickky-box">

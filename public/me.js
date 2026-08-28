@@ -29,8 +29,67 @@ const fillForm = (member) => {
   $("m-quickky").value = member.quickkyUrl || "";
   // 從未表態（undefined）時預設打勾，明確關過就尊重
   $("m-wall").checked = member.showOnWall === true || member.showOnWall == null;
+  availData = member.availability || {};
+  renderAvail();
   renderQuickky(member.quickkyUrl);
 };
+
+/* ---------- 我的空檔月曆 ---------- */
+
+let availData = {}; // { "YYYY-MM-DD": "day"|"night"|"both" }
+const AV_WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"];
+const avNow = new Date();
+let avYear = avNow.getFullYear();
+let avMonth = avNow.getMonth();
+
+const renderAvail = () => {
+  const grid = $("av-grid");
+  const title = $("av-title");
+  if (!grid) return;
+  title.textContent = `${avYear} 年 ${avMonth + 1} 月`;
+  grid.textContent = "";
+  AV_WEEKDAYS.forEach((w) => {
+    const d = document.createElement("span");
+    d.className = "av-dow";
+    d.textContent = w;
+    grid.appendChild(d);
+  });
+  const first = new Date(avYear, avMonth, 1);
+  const days = new Date(avYear, avMonth + 1, 0).getDate();
+  const todayIso = new Date().toISOString().slice(0, 10);
+  for (let i = 0; i < first.getDay(); i++) grid.appendChild(document.createElement("span"));
+  for (let d = 1; d <= days; d++) {
+    const iso = `${avYear}-${String(avMonth + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    const cell = document.createElement("span");
+    cell.className = "av-day";
+    cell.textContent = d;
+    if (iso < todayIso) {
+      cell.classList.add("past");
+    } else {
+      const state = availData[iso];
+      if (state) cell.classList.add("s-" + state);
+      cell.addEventListener("click", () => {
+        const order = [undefined, "day", "night", "both"];
+        const next = order[(order.indexOf(availData[iso]) + 1) % order.length];
+        if (next) availData[iso] = next;
+        else delete availData[iso];
+        renderAvail();
+      });
+    }
+    grid.appendChild(cell);
+  }
+};
+
+$("av-prev").addEventListener("click", () => {
+  avMonth -= 1;
+  if (avMonth < 0) { avMonth = 11; avYear -= 1; }
+  renderAvail();
+});
+$("av-next").addEventListener("click", () => {
+  avMonth += 1;
+  if (avMonth > 11) { avMonth = 0; avYear += 1; }
+  renderAvail();
+});
 
 const renderMySignups = (signups) => {
   const box = $("my-signups");
@@ -107,6 +166,7 @@ const saveMember = async () => {
         bio: $("m-bio").value.trim(),
         quickkyUrl: $("m-quickky").value.trim(),
         showOnWall: $("m-wall").checked,
+        availability: availData,
       }),
     });
     const data = await res.json();

@@ -459,8 +459,8 @@ const handleReelplay = async (res) => {
 const QUICKKY_URL_RE = /^https:\/\/quickky\.(isnowfriend\.com|pipee\.tw)\/\S*$/;
 
 // showOnWall 原樣傳回（undefined = 從未表態，前端拿來決定預設勾選）
-const memberPublic = ({ sub, email, name, nickname, contact, igHandle, quickkyUrl, bio, showOnWall, quickkyAvatar }) => ({
-  sub, email, name, nickname, contact, igHandle, quickkyUrl, bio, showOnWall, quickkyAvatar,
+const memberPublic = ({ sub, email, name, nickname, contact, igHandle, quickkyUrl, bio, showOnWall, quickkyAvatar, availability }) => ({
+  sub, email, name, nickname, contact, igHandle, quickkyUrl, bio, showOnWall, quickkyAvatar, availability: availability || {},
 });
 
 // 從卡片連結去 quickky 撈公開頭貼與自介（撈不到就算了，不擋存檔）
@@ -512,6 +512,17 @@ const handleMe = (req, res) => {
 
   if (req.method === "PUT") {
     readJsonBody(req, res, (body) => {
+      // 空檔月曆：{ "YYYY-MM-DD": "day"|"night"|"both" }，只留未來 90 天內
+      const availability = {};
+      if (body.availability && typeof body.availability === "object" && !Array.isArray(body.availability)) {
+        const todayIso = new Date().toISOString().slice(0, 10);
+        const maxIso = new Date(Date.now() + 90 * 86400000).toISOString().slice(0, 10);
+        for (const [k, v] of Object.entries(body.availability).slice(0, 120)) {
+          if (/^\d{4}-\d{2}-\d{2}$/.test(k) && k >= todayIso && k <= maxIso && ["day", "night", "both"].includes(v)) {
+            availability[k] = v;
+          }
+        }
+      }
       let quickkyUrl = cleanStr(body.quickkyUrl, 200).replace(/\s+/g, "");
       if (quickkyUrl && !/^https?:\/\//i.test(quickkyUrl)) quickkyUrl = "https://" + quickkyUrl;
       quickkyUrl = quickkyUrl.replace(/^http:\/\//i, "https://");
@@ -536,6 +547,7 @@ const handleMe = (req, res) => {
           quickkyBio,
           bio: cleanStr(body.bio, 300),
           showOnWall: body.showOnWall === true && !!quickkyUrl,
+          availability,
           updatedAt: new Date().toISOString(),
         };
         // 撈頭貼期間名冊可能被別的請求改過，重讀避免蓋掉
@@ -664,6 +676,23 @@ const handleAdmin = (req, res, pathname) => {
         sendJson(res, 200, { success: true });
       });
     });
+    return;
+  }
+
+  // 會員空檔重疊：GET /api/admin/availability → { "YYYY-MM-DD": { day: [names], night: [names] } }
+  if (req.method === "GET" && pathname === "/api/admin/availability") {
+    const members = readJsonFile(MEMBERS_PATH, {});
+    const dates = {};
+    for (const m of Object.values(members)) {
+      if (m.seeded || !m.availability) continue;
+      const who = m.nickname || m.name || "?";
+      for (const [d, slot] of Object.entries(m.availability)) {
+        const cell = (dates[d] = dates[d] || { day: [], night: [] });
+        if (slot === "day" || slot === "both") cell.day.push(who);
+        if (slot === "night" || slot === "both") cell.night.push(who);
+      }
+    }
+    sendJson(res, 200, { dates });
     return;
   }
 

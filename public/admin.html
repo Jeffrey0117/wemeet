@@ -55,6 +55,18 @@
     </div>
   </div>
 
+  <div class="card" id="avail-card" hidden>
+    <h2>會員空檔重疊</h2>
+    <p class="muted">會員在會員中心填的有空日期。數字＝有空人數（白天/晚上），點日期看名單。</p>
+    <div class="row" style="justify-content:space-between;max-width:420px">
+      <button class="ghost" id="ava-prev">←</button>
+      <strong id="ava-title"></strong>
+      <button class="ghost" id="ava-next">→</button>
+    </div>
+    <div id="ava-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;max-width:420px;text-align:center;margin-top:0.5rem"></div>
+    <div id="ava-detail" class="muted" style="margin-top:0.5rem"></div>
+  </div>
+
   <div class="card" id="notify-card" hidden>
     <h2>發通知</h2>
     <p class="muted">會員（有 email）直接寄信；只有 LINE/電話的訪客會列成手動名單，你照著私訊。</p>
@@ -192,7 +204,55 @@ const render = (data) => {
   addOpt("waitlist", "先加入名單的人");
   addOpt("members", "全部會員");
   $("notify-card").hidden = false;
+  $("avail-card").hidden = false;
+  loadAvail();
 };
+
+/* ---- 會員空檔重疊月曆 ---- */
+let avaDates = {};
+const avaNow = new Date();
+let avaY = avaNow.getFullYear();
+let avaM = avaNow.getMonth();
+
+const renderAva = () => {
+  $("ava-title").textContent = `${avaY} 年 ${avaM + 1} 月`;
+  const grid = $("ava-grid");
+  grid.innerHTML = "";
+  ["日","一","二","三","四","五","六"].forEach((w) => {
+    const d = document.createElement("span");
+    d.style.cssText = "font-size:0.72rem;color:#6b4a38";
+    d.textContent = w;
+    grid.appendChild(d);
+  });
+  const first = new Date(avaY, avaM, 1);
+  const days = new Date(avaY, avaM + 1, 0).getDate();
+  for (let i = 0; i < first.getDay(); i++) grid.appendChild(document.createElement("span"));
+  for (let d = 1; d <= days; d++) {
+    const iso = `${avaY}-${String(avaM + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    const info = avaDates[iso];
+    const cell = document.createElement("button");
+    const total = info ? Math.max(info.day.length, info.night.length) : 0;
+    cell.style.cssText = `border:none;border-radius:8px;padding:0.35rem 0;cursor:pointer;font-size:0.8rem;line-height:1.3;background:${total ? `rgba(226,87,43,${Math.min(0.15 + total * 0.18, 0.85)})` : "#f7efe2"};color:${total >= 3 ? "#fff" : "#3a2318"}`;
+    cell.innerHTML = `<strong>${d}</strong>` + (info ? `<br>${info.day.length}/${info.night.length}` : "");
+    if (info) {
+      cell.addEventListener("click", () => {
+        $("ava-detail").textContent = `${iso}｜白天：${info.day.join("、") || "—"}｜晚上：${info.night.join("、") || "—"}`;
+      });
+    }
+    grid.appendChild(cell);
+  }
+};
+
+const loadAvail = async () => {
+  try {
+    const data = await api("/api/admin/availability");
+    avaDates = data.dates || {};
+    renderAva();
+  } catch (err) {}
+};
+
+$("ava-prev").addEventListener("click", () => { avaM -= 1; if (avaM < 0) { avaM = 11; avaY -= 1; } renderAva(); });
+$("ava-next").addEventListener("click", () => { avaM += 1; if (avaM > 11) { avaM = 0; avaY += 1; } renderAva(); });
 
 $("n-send").addEventListener("click", async () => {
   const subject = $("n-subject").value.trim();
