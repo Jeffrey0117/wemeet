@@ -508,7 +508,20 @@ a { color: var(--fizz); }
 .reel-title { font-size: 1.1rem; line-height: 1.4; text-align: left; }
 .reel-channel { font-size: 0.85rem; color: var(--cola-soft); margin-top: 0.1rem; text-align: left; }
 .reel-actions { display: grid; gap: 0.5rem; margin-top: 1.1rem; }
-.reel-learn { font-size: 1.05rem; padding: 0.8rem 1.5rem; }
+.reel-learn {
+  display: block;
+  margin-top: 0.9rem;
+  text-align: center;
+  background: var(--fizz);
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.15rem;
+  font-weight: 700;
+  padding: 1.05rem 1.5rem;
+  border-radius: 14px;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.reel-learn:hover { background: var(--fizz-dark); transform: translateY(-2px); }
 .reel-watch-link { text-align: center; font-size: 0.85rem; color: var(--cola-soft); }
 .reel-watch-link:hover { color: var(--fizz); }
 .reel-transcript {
