@@ -90,7 +90,7 @@ const loadEvents = async () => {
     // API 已按日期升冪，逐一插在名單選項前 → 日期近的在最上面
     events.forEach((ev) => {
       if (ev.past) return;
-      const left = !ev.hideCount && ev.capacity ? Math.max(0, ev.capacity - (ev.signedUp || 0)) : null;
+      const left = ev.left != null ? ev.left : (!ev.hideCount && ev.capacity ? Math.max(0, ev.capacity - (ev.signedUp || 0)) : null);
       const isFull = ev.status === "closed" || (left !== null && left <= 0);
       if (isFull) return;
 

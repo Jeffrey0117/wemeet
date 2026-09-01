@@ -54,7 +54,7 @@ const buildHistoryRow = (ev) => {
 
 const buildEventCard = (ev) => {
   const { md, w } = fmtDate(ev.date);
-  const left = !ev.hideCount && ev.capacity ? Math.max(0, ev.capacity - (ev.signedUp || 0)) : null;
+  const left = ev.left != null ? ev.left : (!ev.hideCount && ev.capacity ? Math.max(0, ev.capacity - (ev.signedUp || 0)) : null);
   const isFull = ev.status === "closed" || (left !== null && left <= 0);
 
   const card = el("div", "event-card" + (ev.past ? " event-past" : ""));

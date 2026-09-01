@@ -274,6 +274,11 @@ const publicEvents = () => {
         const { capacity, ...noCap } = pub;
         return { ...noCap, past, hideCount: true };
       }
+      if (e.fomo) {
+        // 稀缺顯示：對外顯示剩餘 = max(1, fomo - 已報名)，永不顯示滿、永不擋報名
+        const { capacity, fomo, ...noCap } = pub;
+        return { ...noCap, past, left: Math.max(1, fomo - (counts[e.id] || 0)) };
+      }
       return { ...pub, past, signedUp: counts[e.id] || 0 };
     })
     .sort((a, b) => String(a.date).localeCompare(String(b.date)));
@@ -340,7 +345,7 @@ const handleSignup = (req, res) => {
         const quota = Math.floor((event.capacity || 20) / 2);
         const genderCount = all.filter((x) => x.eventId === eventId && x.gender === gender && !x.waitlisted).length;
         if (genderCount >= quota) waitlisted = true;
-      } else {
+      } else if (!event.fomo) {
         const count = all.filter((x) => x.eventId === eventId).length;
         if (event.capacity && count >= event.capacity) {
           sendJson(res, 409, { error: "這場滿了！可以先留資料，下一場優先通知你" });

@@ -84,7 +84,7 @@
 
   <div class="card" id="events-card" hidden>
     <h2>活動清單（JSON 直接編輯）</h2>
-    <p class="muted">欄位：id、type、title、date（YYYY-MM-DD）、time、location、mapUrl（導航）、capacity、fee（報名費，預設 50）、feeNote（費用補充說明）、ratio: true（抓男女比例：性別必填、名額不顯示、超額進候補）、ended: true（提前收歷史）、note、status（open / closed / hidden）</p>
+    <p class="muted">欄位：id、type、title、date（YYYY-MM-DD）、time、location、mapUrl（導航）、capacity、fee（報名費，預設 50）、feeNote（費用補充說明）、ratio: true（抓男女比例：性別必填、名額不顯示、超額進候補）、fomo: 5（稀缺顯示：對外剩餘=max(1, 5-已報)，永不滿、不擋報名）、ended: true（提前收歷史）、note、status（open / closed / hidden）</p>
     <textarea id="events-json" spellcheck="false"></textarea>
     <div class="row" style="margin-top:0.6rem">
       <button id="save-events">儲存活動</button>
