@@ -353,6 +353,16 @@ const handleSignup = (req, res) => {
         }
       }
       joinedEvent = event;
+    } else {
+      // 「先加入名單」也要防重複（同聯絡方式已在名單就不再新增）
+      const norm = (v) => String(v || "").trim().toLowerCase();
+      const dup = readJsonFile(SIGNUPS_PATH, []).find(
+        (x) => !x.eventId && ((memberSub && x.memberSub === memberSub) || norm(x.contact) === norm(contact))
+      );
+      if (dup) {
+        sendJson(res, 200, { success: true, already: true, event: null });
+        return;
+      }
     }
     const signups = readJsonFile(SIGNUPS_PATH, []);
     const entry = {
