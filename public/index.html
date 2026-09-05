@@ -52,11 +52,14 @@
     <div class="hero-copy hero-calside">
       <p class="hero-cal-title">這個月的揪可樂</p>
       <div class="cal" id="calendar">
-    <div class="cal-head">
-      <button type="button" class="cal-nav" id="cal-prev" aria-label="上個月">←</button>
-      <span class="cal-title" id="cal-title"></span>
-      <button type="button" class="cal-nav" id="cal-next" aria-label="下個月">→</button>
-    </div>
+        <div class="cal-head">
+          <button type="button" class="cal-nav" id="cal-prev" aria-label="上個月">←</button>
+          <span class="cal-title" id="cal-title"></span>
+          <button type="button" class="cal-nav" id="cal-next" aria-label="下個月">→</button>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+      <div id="event-list" class="event-list hero-events"></div>
       <div class="hero-actions">
         <a class="btn btn-primary" href="/signup">報名下一場 →</a>
         <a class="btn btn-ghost" href="https://www.instagram.com/we_i_meet" target="_blank" rel="noopener">追蹤 IG</a>
@@ -66,7 +69,8 @@
 </header>
 
 <section class="section intro-section" id="intro">
-  <div class="intro-inner">
+  <div class="duo-grid">
+    <div class="intro-inner">
       <p class="hero-tag"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="14" height="14"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> 台中｜做自己的輕鬆小聚</p>
       <div class="hero-title">
         <img class="hero-logo-sm" src="/logo-sm.png?v=__BUILD__" alt="Chill Club 揪可樂 logo">
@@ -82,10 +86,8 @@
     <a class="btn btn-primary" href="/signup">報名下一場 →</a>
     <a class="btn btn-ghost" href="#events">看看近期活動</a>
   </div>
-  </div>
-</section>
-
-<section class="voice-section" id="voice">
+    </div>
+    <div class="voice-slim" id="voice">
   <p class="voice-heading">會員心得・真實聲音</p>
   <div class="voice-card" data-src="/media/voice.mp3?v=__BUILD__">
     <button type="button" class="voice-play" aria-label="播放會員心得"></button>
@@ -147,7 +149,10 @@
     <span class="voice-time"><span class="voice-cur">0:00</span><span class="voice-total"></span></span>
     <button type="button" class="voice-rate" aria-label="播放速度">1x</button>
   </div>
+    </div>
+  </div>
 </section>
+
 
 <section class="scene-section" id="scenes">
   <p class="voice-heading">活動場景・現場直擊</p>
@@ -194,14 +199,9 @@
   <div id="wall-list" class="wall-grid"></div>
 </section>
 
-<section class="section" id="events">
-  <h2><span class="squiggle">近期活動</span></h2>
-    <div class="cal-grid" id="cal-grid"></div>
-    <p class="cal-hint">有標記的日子就是小聚日，點一下看詳情</p>
-  </div>
-  <div id="event-list" class="event-list">
-    <p class="event-loading">活動載入中⋯</p>
-  </div>
+<section class="section" id="events" hidden>
+  <h2><span class="squiggle">過往小聚</span></h2>
+  <div id="history-list" class="event-list"></div>
 </section>
 
 <section class="section section-alt" id="vibes">

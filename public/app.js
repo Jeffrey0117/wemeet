@@ -108,16 +108,20 @@ const renderEvents = (events) => {
   const past = events.filter((e) => e.past).slice().reverse();
 
   if (!upcoming.length) {
-    list.appendChild(el("p", "event-empty", "下一場正在籌備中！先到下面留個資料，開團第一個通知你。"));
+    list.appendChild(el("p", "event-empty", "下一場正在籌備中！先報名加入名單，開團第一個通知你。"));
   } else {
     upcoming.forEach((ev) => list.appendChild(buildEventCard(ev)));
   }
 
-  if (past.length) {
-    list.appendChild(el("h3", "event-history-title", "過往小聚"));
+  // 過往小聚：獨立區塊（有資料才顯示）
+  const historySection = document.getElementById("events");
+  const historyList = document.getElementById("history-list");
+  if (historySection && historyList && past.length) {
+    historyList.textContent = "";
     const wrap = el("div", "history-list");
     past.forEach((ev) => wrap.appendChild(buildHistoryRow(ev)));
-    list.appendChild(wrap);
+    historyList.appendChild(wrap);
+    historySection.hidden = false;
   }
 };
 
