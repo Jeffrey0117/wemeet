@@ -292,7 +292,12 @@ a { color: var(--fizz); }
 
 /* 聲音細條版：兩行式（上=標註+時間+倍速、下=波形滿寬） */
 /* intro 雙欄：左介紹右聲音（欄位對齊 hero：同 max-width/比例/間距 → 右欄直線對下來） */
-.intro-section { padding-left: 1.5rem; padding-right: 1.5rem; }
+.intro-section {
+  /* 解除 .section 的 880px 上限，與 hero 的 1100px 容器同寬 → 右欄直線對齊 */
+  max-width: 1100px;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
 .duo-grid {
   max-width: 1100px;
   margin: 0 auto;
@@ -303,8 +308,8 @@ a { color: var(--fizz); }
   text-align: left;
 }
 .duo-grid .intro-inner { max-width: none; margin: 0; justify-items: start; text-align: left; min-width: 0; }
-.duo-grid .intro-inner h1 { font-size: clamp(2rem, 3.6vw, 3rem); }
-.duo-grid .intro-inner .hero-zh { font-size: clamp(1.6rem, 3vw, 2.4rem); white-space: normal; }
+.duo-grid .intro-inner h1 { font-size: clamp(2.2rem, 4vw, 3.4rem); }
+.duo-grid .intro-inner .hero-zh { font-size: clamp(1.8rem, 3.4vw, 2.7rem); white-space: normal; }
 .duo-grid .intro-inner .hero-logo-sm { width: clamp(60px, 6.5vw, 84px); }
 .duo-grid .intro-inner .hero-slogan { font-size: clamp(1.05rem, 2.2vw, 1.35rem); }
 .duo-grid .intro-inner .hero-points { font-size: clamp(0.95rem, 2vw, 1.1rem); }
