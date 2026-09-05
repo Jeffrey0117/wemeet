@@ -321,11 +321,12 @@ a { color: var(--fizz); }
 .voice-slim { display: grid; gap: 0.7rem; align-content: center; min-width: 0; }
 .voice-slim .voice-heading { text-align: left; font-size: 1rem; margin-bottom: 0.2rem; }
 @media (max-width: 900px) {
-  .duo-grid { grid-template-columns: 1fr; text-align: center; }
-  .duo-grid .intro-inner { justify-items: center; text-align: center; }
-  .duo-grid .intro-inner .hero-title { justify-content: center; }
-  .duo-grid .intro-inner .hero-actions { justify-content: center; }
-  .voice-slim .voice-heading { text-align: center; }
+  /* 疊直時所有元素共用同一條左緣（不置中，置中會讓不同寬度的元素左緣參差） */
+  .duo-grid { grid-template-columns: 1fr; text-align: left; }
+  .duo-grid .intro-inner { justify-items: start; text-align: left; }
+  .duo-grid .intro-inner .hero-title { justify-content: flex-start; }
+  .duo-grid .intro-inner .hero-actions { justify-content: flex-start; }
+  .voice-slim .voice-heading { text-align: left; }
 }
 .voice-slim .voice-card {
   width: 100%;
