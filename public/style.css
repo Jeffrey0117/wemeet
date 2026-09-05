@@ -260,6 +260,26 @@ a { color: var(--fizz); }
   .hero-actions { justify-content: center; }
 }
 
+/* hero 右欄日曆 */
+.hero-cal-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 3vw, 1.7rem);
+  margin-bottom: 0.7rem;
+}
+.hero-calside .cal { max-width: none; margin: 0 0 1.1rem; }
+.hero-calside .hero-actions { margin-top: 0; display: flex; gap: 0.8rem; }
+
+/* intro 區（原 hero 文案搬下來） */
+.intro-section { text-align: center; padding-top: 3rem; padding-bottom: 3rem; }
+.intro-inner { max-width: 720px; margin: 0 auto; display: grid; justify-items: center; gap: 0.2rem; }
+.intro-inner .hero-title { justify-content: center; }
+.intro-inner .hero-points { margin-top: 1rem; justify-items: start; }
+.intro-inner .hero-actions { justify-content: center; margin-top: 1.6rem; }
+
+@media (max-width: 760px) {
+  .hero-calside .hero-actions { justify-content: center; }
+}
+
 /* ---------- 按鈕 ---------- */
 .btn {
   display: inline-block;
