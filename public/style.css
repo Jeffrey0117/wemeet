@@ -308,10 +308,22 @@ a { color: var(--fizz); }
   text-align: left;
 }
 .duo-grid .intro-inner { max-width: none; margin: 0; justify-items: start; text-align: left; min-width: 0; }
-.duo-grid .intro-inner h1 { font-size: clamp(2.2rem, 4vw, 3.4rem); }
-.duo-grid .intro-inner .hero-zh { font-size: clamp(1.8rem, 3.4vw, 2.7rem); white-space: normal; }
+.duo-grid .intro-inner h1 { font-size: clamp(1.7rem, 3vw, 2.8rem); white-space: nowrap; line-height: 1.15; }
+.duo-grid .intro-inner .hero-title { gap: 0.8rem; }
+.duo-grid .intro-inner .hero-tag { margin-bottom: 0.7rem; }
+.duo-grid .intro-inner .hero-points { margin-top: 0.8rem; gap: 0.4rem; }
+.intro-photo {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  margin: 1.1rem 0 0.3rem;
+  display: block;
+}
+.duo-grid .intro-inner .hero-zh { font-size: clamp(1.6rem, 2.8vw, 2.3rem); white-space: nowrap; }
 .duo-grid .intro-inner .hero-brand { display: block; white-space: nowrap; margin-top: 0.15em; }
-.duo-grid .intro-inner .hero-logo-sm { width: clamp(60px, 6.5vw, 84px); }
+.duo-grid .intro-inner .hero-logo-sm { width: clamp(52px, 5.5vw, 72px); }
 .duo-grid .intro-inner .hero-slogan { font-size: clamp(1.05rem, 2.2vw, 1.35rem); }
 .duo-grid .intro-inner .hero-points { font-size: clamp(0.95rem, 2vw, 1.1rem); }
 .duo-grid .intro-inner .hero-title { justify-content: flex-start; }
