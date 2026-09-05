@@ -74,6 +74,12 @@
     </div>
   </div>
 
+  <div class="card" id="edit-card" hidden>
+    <h2>場次快編</h2>
+    <p class="muted">直接改時間、地點（含導航連結），按「存」即生效。其他欄位去下面的活動清單編。</p>
+    <div id="edit-rows"></div>
+  </div>
+
   <div class="card" id="avail-card" hidden>
     <h2>會員空檔重疊</h2>
     <p class="muted">會員在會員中心填的有空日期。數字＝有空人數（白天/晚上），點日期看名單。</p>
@@ -255,6 +261,8 @@ const render = (data) => {
   addOpt("members", "全部會員");
   $("notify-card").hidden = false;
   $("quick-card").hidden = false;
+  $("edit-card").hidden = false;
+  renderQuickEdit();
   if (!$("q-date").value) $("q-date").value = new Date().toISOString().slice(0, 10);
   $("avail-card").hidden = false;
   loadAvail();
@@ -344,6 +352,48 @@ $("n-send").addEventListener("click", async () => {
 });
 
 $("signup-filter").addEventListener("change", renderSignups);
+
+/* ---- 場次快編：時間 + 地點 + 導航 ---- */
+const renderQuickEdit = () => {
+  const box = $("edit-rows");
+  box.innerHTML = "";
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const sorted = eventsCache.slice().sort((a, b) => {
+    const aUp = a.date >= todayIso && !a.ended ? 0 : 1;
+    const bUp = b.date >= todayIso && !b.ended ? 0 : 1;
+    if (aUp !== bUp) return aUp - bUp;
+    return aUp === 0 ? String(a.date).localeCompare(String(b.date)) : String(b.date).localeCompare(String(a.date));
+  });
+  sorted.forEach((ev) => {
+    const row = document.createElement("div");
+    row.className = "row";
+    row.style.cssText = "margin-bottom:0.55rem;align-items:center";
+    const isPastEv = ev.date < todayIso || ev.ended;
+    row.innerHTML = `
+      <span style="min-width:200px;font-size:0.88rem;${isPastEv ? "opacity:0.5" : "font-weight:700"}">${ev.date}｜${ev.title}</span>
+      <input type="text" data-f="time" value="${(ev.time || "").replace(/"/g, "&quot;")}" placeholder="時間" style="width:110px;padding:0.35rem 0.5rem;border:1.5px solid #f3e7d3;border-radius:8px">
+      <input type="text" data-f="location" value="${(ev.location || "").replace(/"/g, "&quot;")}" placeholder="地點" style="flex:1;min-width:180px;padding:0.35rem 0.5rem;border:1.5px solid #f3e7d3;border-radius:8px">
+      <input type="text" data-f="mapUrl" value="${(ev.mapUrl || "").replace(/"/g, "&quot;")}" placeholder="導航連結" style="width:150px;padding:0.35rem 0.5rem;border:1.5px solid #f3e7d3;border-radius:8px">
+      <button class="ghost" style="padding:0.3rem 0.8rem">存</button>
+      <span class="msg" style="min-height:auto"></span>`;
+    row.querySelector("button").addEventListener("click", async () => {
+      const patch = {};
+      row.querySelectorAll("input").forEach((inp) => { patch[inp.dataset.f] = inp.value.trim(); });
+      const msgEl = row.querySelector(".msg");
+      try {
+        const events = eventsCache.map((e) => (e.id === ev.id ? { ...e, ...patch } : e));
+        await api("/api/admin/events", { method: "PUT", body: JSON.stringify({ events }) });
+        eventsCache = events;
+        msgEl.textContent = "✓";
+        msgEl.className = "msg ok";
+      } catch (err) {
+        msgEl.textContent = err.message;
+        msgEl.className = "msg err";
+      }
+    });
+    box.appendChild(row);
+  });
+};
 
 /* ---- 快速開場 ---- */
 const QUICK_TEMPLATES = {
