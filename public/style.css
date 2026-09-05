@@ -291,18 +291,23 @@ a { color: var(--fizz); }
 .hero-events .event-side .btn { padding: 0.45rem 1rem; font-size: 0.9rem; }
 
 /* 聲音細條版：兩行式（上=標註+時間+倍速、下=波形滿寬） */
-/* intro 雙欄：左介紹右聲音（寬版） */
-.intro-section { padding-left: 1.2rem; padding-right: 1.2rem; }
+/* intro 雙欄：左介紹右聲音（欄位對齊 hero：同 max-width/比例/間距 → 右欄直線對下來） */
+.intro-section { padding-left: 1.5rem; padding-right: 1.5rem; }
 .duo-grid {
-  max-width: 1280px;
+  max-width: 1100px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(340px, 5fr) minmax(480px, 7fr);
-  gap: clamp(2rem, 4vw, 3.5rem);
+  grid-template-columns: minmax(280px, 6fr) 7fr;
+  gap: clamp(2rem, 5vw, 4rem);
   align-items: center;
   text-align: left;
 }
-.duo-grid .intro-inner { max-width: none; margin: 0; justify-items: start; text-align: left; }
+.duo-grid .intro-inner { max-width: none; margin: 0; justify-items: start; text-align: left; min-width: 0; }
+.duo-grid .intro-inner h1 { font-size: clamp(2rem, 3.6vw, 3rem); }
+.duo-grid .intro-inner .hero-zh { font-size: clamp(1.6rem, 3vw, 2.4rem); white-space: normal; }
+.duo-grid .intro-inner .hero-logo-sm { width: clamp(60px, 6.5vw, 84px); }
+.duo-grid .intro-inner .hero-slogan { font-size: clamp(1.05rem, 2.2vw, 1.35rem); }
+.duo-grid .intro-inner .hero-points { font-size: clamp(0.95rem, 2vw, 1.1rem); }
 .duo-grid .intro-inner .hero-title { justify-content: flex-start; }
 .duo-grid .intro-inner .hero-actions { justify-content: flex-start; }
 .voice-slim { display: grid; gap: 0.7rem; align-content: center; min-width: 0; }
