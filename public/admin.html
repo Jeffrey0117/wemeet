@@ -56,6 +56,24 @@
     </div>
   </div>
 
+  <div class="card" id="quick-card" hidden>
+    <h2>快速開場</h2>
+    <p class="muted">選類型＋日期＋時間就開場（編號自動接續、名額 8、費用 50、地點先隱藏之後在下面活動清單補）。開場會自動發會員鈴鐺通知。</p>
+    <div class="row" style="margin-top:0.4rem">
+      <select id="q-type" style="padding:0.5rem 0.7rem;border:1.5px solid #f3e7d3;border-radius:10px">
+        <option value="english">英文口說小聚</option>
+        <option value="book">閱讀 Chill 聊</option>
+        <option value="vibe">聊天小聚</option>
+      </select>
+      <input type="date" id="q-date" style="padding:0.45rem 0.7rem;border:1.5px solid #f3e7d3;border-radius:10px">
+      <input type="time" id="q-start" value="15:00" style="padding:0.45rem 0.5rem;border:1.5px solid #f3e7d3;border-radius:10px">
+      <span>–</span>
+      <input type="time" id="q-end" value="16:00" style="padding:0.45rem 0.5rem;border:1.5px solid #f3e7d3;border-radius:10px">
+      <button id="q-create">開場</button>
+      <span class="msg" id="q-msg"></span>
+    </div>
+  </div>
+
   <div class="card" id="avail-card" hidden>
     <h2>會員空檔重疊</h2>
     <p class="muted">會員在會員中心填的有空日期。數字＝有空人數（白天/晚上），點日期看名單。</p>
@@ -236,6 +254,8 @@ const render = (data) => {
   addOpt("waitlist", "先加入名單的人");
   addOpt("members", "全部會員");
   $("notify-card").hidden = false;
+  $("quick-card").hidden = false;
+  if (!$("q-date").value) $("q-date").value = new Date().toISOString().slice(0, 10);
   $("avail-card").hidden = false;
   loadAvail();
 };
@@ -324,6 +344,45 @@ $("n-send").addEventListener("click", async () => {
 });
 
 $("signup-filter").addEventListener("change", renderSignups);
+
+/* ---- 快速開場 ---- */
+const QUICK_TEMPLATES = {
+  english: { type: "english", base: "英文口說小聚", note: "不用很會講，敢開口就好。輕鬆話題、小組練習，全程零壓力。" },
+  book:    { type: "book",    base: "閱讀 Chill 聊", note: "帶一本你正在讀（或想讀）的書來，聊聊書、也聊聊天。什麼書都行，漫畫也可以。" },
+  vibe:    { type: "vibe",    base: "聊天小聚",     note: "下班後找個地方坐下來，聊工作、聊生活、聊最近在追什麼。" },
+};
+
+$("q-create").addEventListener("click", async () => {
+  const tpl = QUICK_TEMPLATES[$("q-type").value];
+  const date = $("q-date").value;
+  const start = $("q-start").value;
+  const end = $("q-end").value;
+  if (!date || !start) { setMsg("q-msg", "日期和開始時間要選", false); return; }
+  // 編號自動接續：同 base 名稱的場次數 +1
+  const n = eventsCache.filter((e) => (e.title || "").startsWith(tpl.base)).length + 1;
+  let id = tpl.type + "-" + date;
+  while (eventsCache.some((e) => e.id === id)) id += "x";
+  const ev = {
+    id, type: tpl.type,
+    title: tpl.base + " #" + n,
+    date, time: end ? start + "–" + end : start,
+    location: "台中（詳細店家報名後通知）", mapUrl: "",
+    capacity: 8, fee: 50, fomo: 8,
+    note: tpl.note, status: "open",
+  };
+  if (!confirm(`開場：${ev.date} ${ev.time}｜${ev.title}？`)) return;
+  $("q-create").disabled = true;
+  try {
+    await api("/api/admin/events", { method: "PUT", body: JSON.stringify({ events: [...eventsCache, ev] }) });
+    setMsg("q-msg", `已開場：${ev.title} ✓（記得補地點）`, true);
+    const data = await api("/api/admin/overview");
+    render(data);
+  } catch (err) {
+    setMsg("q-msg", err.message, false);
+  } finally {
+    $("q-create").disabled = false;
+  }
+});
 
 $("load-btn").addEventListener("click", async () => {
   setMsg("auth-msg", "", true);
