@@ -49,7 +49,7 @@
     </div>
     <div class="table-scroll">
       <table>
-        <thead><tr><th>收款</th><th>時間</th><th>活動</th><th>暱稱</th><th>性別</th><th>LINE/電話</th><th>IG</th><th>想說的話</th><th></th></tr></thead>
+        <thead><tr><th>收款</th><th>時間</th><th>活動</th><th>暱稱</th><th>年紀</th><th>性別</th><th>LINE/電話</th><th>IG</th><th>想說的話</th><th></th></tr></thead>
         <tbody id="signup-rows"></tbody>
       </table>
     </div>
@@ -163,7 +163,7 @@ const render = (data) => {
     tr.appendChild(paidTd);
 
     const ig = (s.igHandle || "") + (s.igFollowed ? "（已追蹤 ✓）" : "");
-    [new Date(s.createdAt).toLocaleString("zh-TW"), eventTitle(s.eventId), s.name, (s.gender === "male" ? "男" : s.gender === "female" ? "女" : "") + (s.waitlisted ? "（候補）" : ""), s.contact, ig, s.note || ""].forEach((v) => {
+    [new Date(s.createdAt).toLocaleString("zh-TW"), eventTitle(s.eventId), s.name, s.age || "", (s.gender === "male" ? "男" : s.gender === "female" ? "女" : "") + (s.waitlisted ? "（候補）" : ""), s.contact, ig, s.note || ""].forEach((v) => {
       const td = document.createElement("td");
       td.textContent = v;
       tr.appendChild(td);

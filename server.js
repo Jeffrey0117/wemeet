@@ -298,11 +298,16 @@ const handleSignup = (req, res) => {
     const igHandle = cleanStr(body.igHandle, 60);
     const igFollowed = body.igFollowed === true;
     const gender = ["male", "female"].includes(body.gender) ? body.gender : "";
+    const age = Number.isInteger(body.age) && body.age >= 12 && body.age <= 99 ? body.age : 0;
     const agreedPayment = body.agreedPayment === true;
     const agreedAttend = body.agreedAttend === true;
     const eventId = cleanStr(body.eventId, 60); // 空字串 = 先加入名單、開團通知
     if (!name || !contact) {
       sendJson(res, 400, { error: "暱稱和聯絡方式都要填喔" });
+      return;
+    }
+    if (!age) {
+      sendJson(res, 400, { error: "年紀要填喔（12–99）" });
       return;
     }
     if (!agreedPayment || !agreedAttend) {
@@ -374,6 +379,7 @@ const handleSignup = (req, res) => {
       igHandle,
       igFollowed,
       gender,
+      age,
       waitlisted,
       agreedPayment,
       agreedAttend,
@@ -390,11 +396,12 @@ const handleSignup = (req, res) => {
       if (entry.memberSub) {
         const members = readJsonFile(MEMBERS_PATH, {});
         const m = members[entry.memberSub];
-        if (m && (!m.contact || !m.igHandle)) {
+        if (m && (!m.contact || !m.igHandle || !m.age)) {
           const patched = {
             ...m,
             contact: m.contact || contact,
             igHandle: m.igHandle || igHandle,
+            age: m.age || age,
             updatedAt: new Date().toISOString(),
           };
           writeJsonAtomic(MEMBERS_PATH, { ...members, [entry.memberSub]: patched }, () => {});
@@ -474,8 +481,8 @@ const handleReelplay = async (res) => {
 const QUICKKY_URL_RE = /^https:\/\/quickky\.(isnowfriend\.com|pipee\.tw)\/\S*$/;
 
 // showOnWall 原樣傳回（undefined = 從未表態，前端拿來決定預設勾選）
-const memberPublic = ({ sub, email, name, nickname, contact, igHandle, quickkyUrl, bio, showOnWall, quickkyAvatar, availability }) => ({
-  sub, email, name, nickname, contact, igHandle, quickkyUrl, bio, showOnWall, quickkyAvatar, availability: availability || {},
+const memberPublic = ({ sub, email, name, nickname, contact, igHandle, quickkyUrl, bio, showOnWall, quickkyAvatar, availability, age }) => ({
+  sub, email, name, nickname, contact, igHandle, quickkyUrl, bio, showOnWall, quickkyAvatar, availability: availability || {}, age: age || 0,
 });
 
 // 從卡片連結去 quickky 撈公開頭貼與自介（撈不到就算了，不擋存檔）
@@ -556,6 +563,7 @@ const handleMe = (req, res) => {
           name: cleanStr(payload.name, 60),
           nickname: cleanStr(body.nickname, 40) || cleanStr(payload.name, 40),
           contact: cleanStr(body.contact, 120),
+          age: Number.isInteger(body.age) && body.age >= 12 && body.age <= 99 ? body.age : base.age || 0,
           igHandle: cleanStr(body.igHandle, 60),
           quickkyUrl,
           quickkyAvatar,

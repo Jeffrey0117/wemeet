@@ -151,11 +151,12 @@ const prefillFromMember = async () => {
     const { member } = await res.json();
     if (member.nickname && !$("f-name").value) $("f-name").value = member.nickname;
     if (member.contact && !$("f-contact").value) $("f-contact").value = member.contact;
+    if (member.age && !$("f-age").value) $("f-age").value = member.age;
     if (member.igHandle && !$("f-ig").value) $("f-ig").value = member.igHandle;
     memberNickname = member.nickname || "";
 
     // 資料齊全 → 秒報名模式（還停在流程開頭才切，避免打斷已在填的人）
-    if (member.nickname && member.contact && flowPos === 0) {
+    if (member.nickname && member.contact && member.age && flowPos === 0) {
       memberExpress = true;
       $("express-banner").hidden = false;
       computeFlow();
@@ -178,6 +179,8 @@ const validate = (step) => {
   if (step === 1) {
     if (!$("f-name").value.trim()) return "暱稱要填喔，不然不知道怎麼叫你";
     if (!$("f-contact").value.trim()) return "留個 LINE ID 或電話，才通知得到你";
+    const age = parseInt($("f-age").value, 10);
+    if (!age || age < 12 || age > 99) return "年紀填一下（12–99），我們好安排同溫層";
     const pickedEv = eventsCache.find((e) => e.id === ((document.querySelector('input[name="eventId"]:checked') || {}).value || ""));
     if (pickedEv && pickedEv.ratio && !(document.querySelector('input[name="gender"]:checked') || {}).value) {
       return "這場會平衡參加組成，性別選一下";
@@ -186,7 +189,7 @@ const validate = (step) => {
   if (step === 2) {
     if (!$("f-agree-pay").checked || !$("f-agree-attend").checked) return "兩個都勾一下，我們才能幫你留位子";
     // 秒報名模式跳過稱呼步，送出前補驗會員資料真的有帶到
-    if (memberExpress && (!$("f-name").value.trim() || !$("f-contact").value.trim())) {
+    if (memberExpress && (!$("f-name").value.trim() || !$("f-contact").value.trim() || !parseInt($("f-age").value, 10))) {
       return "會員資料沒帶齊，請改用完整流程填寫";
     }
   }
@@ -205,6 +208,7 @@ const submit = async () => {
         eventId: (document.querySelector('input[name="eventId"]:checked') || {}).value || "",
         name: $("f-name").value.trim(),
         contact: $("f-contact").value.trim(),
+        age: parseInt($("f-age").value, 10) || 0,
         note: $("f-note").value.trim(),
         igHandle: $("f-ig").value.trim(),
         igFollowed: $("f-followed").checked,
