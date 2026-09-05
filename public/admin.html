@@ -44,6 +44,7 @@
     <h2>報名名單（<span id="signup-count">0</span>）</h2>
     <div id="gender-tally" style="margin-bottom:0.4rem"></div>
     <div class="row" style="margin-bottom:0.6rem">
+      <select id="signup-filter" style="padding:0.45rem 0.7rem;border:1.5px solid #f3e7d3;border-radius:10px"></select>
       <button class="ghost" id="copy-csv">複製 CSV</button>
       <span class="msg" id="copy-msg"></span>
     </div>
@@ -120,9 +121,33 @@ const eventTitle = (id) => {
   return ev ? ev.title : id;
 };
 
-const render = (data) => {
-  eventsCache = data.events || [];
-  const signups = (data.signups || []).slice().reverse();
+let signupsCache = [];
+
+const buildFilterOptions = () => {
+  const sel = $("signup-filter");
+  sel.innerHTML = "";
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const sorted = eventsCache.slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  const upcoming = sorted.filter((e) => e.date >= todayIso && !e.ended).sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  const addOpt = (v, label) => {
+    const o = document.createElement("option");
+    o.value = v; o.textContent = label;
+    sel.appendChild(o);
+  };
+  sorted.forEach((e) => addOpt("event:" + e.id, `${e.date}｜${e.title}`));
+  addOpt("waitlist", "先加入名單");
+  addOpt("all", "全部報名");
+  // 預設鎖最近的即將場次，避免舊資料誤導
+  sel.value = upcoming.length ? "event:" + upcoming[0].id : "all";
+};
+
+const renderSignups = () => {
+  const filter = $("signup-filter").value;
+  const signups = signupsCache.filter((x) => {
+    if (filter === "all") return true;
+    if (filter === "waitlist") return !x.eventId;
+    return x.eventId === filter.replace(/^event:/, "");
+  });
 
   $("signup-count").textContent = signups.length;
   const tally = {};
@@ -188,6 +213,13 @@ const render = (data) => {
     tbody.appendChild(tr);
   });
 
+};
+
+const render = (data) => {
+  eventsCache = data.events || [];
+  signupsCache = (data.signups || []).slice().reverse();
+  buildFilterOptions();
+  renderSignups();
   $("events-json").value = JSON.stringify(eventsCache, null, 2);
   $("signups-card").hidden = false;
   $("events-card").hidden = false;
@@ -290,6 +322,8 @@ $("n-send").addEventListener("click", async () => {
     $("n-send").disabled = false;
   }
 });
+
+$("signup-filter").addEventListener("change", renderSignups);
 
 $("load-btn").addEventListener("click", async () => {
   setMsg("auth-msg", "", true);
