@@ -303,13 +303,14 @@ a { color: var(--fizz); }
   margin: 0 auto;
   display: grid;
   grid-template-columns: minmax(280px, 6fr) 7fr;
-  gap: clamp(2rem, 5vw, 4rem);
+  gap: clamp(3.5rem, 7vw, 6rem);
   align-items: center;
   text-align: left;
 }
 .duo-grid .intro-inner { max-width: none; margin: 0; justify-items: start; text-align: left; min-width: 0; }
 .duo-grid .intro-inner h1 { font-size: clamp(2.2rem, 4vw, 3.4rem); }
 .duo-grid .intro-inner .hero-zh { font-size: clamp(1.8rem, 3.4vw, 2.7rem); white-space: normal; }
+.duo-grid .intro-inner .hero-brand { display: block; white-space: nowrap; margin-top: 0.15em; }
 .duo-grid .intro-inner .hero-logo-sm { width: clamp(60px, 6.5vw, 84px); }
 .duo-grid .intro-inner .hero-slogan { font-size: clamp(1.05rem, 2.2vw, 1.35rem); }
 .duo-grid .intro-inner .hero-points { font-size: clamp(0.95rem, 2vw, 1.1rem); }
