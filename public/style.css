@@ -773,6 +773,24 @@ a { color: var(--fizz); }
 .event-date .w { font-size: 0.85rem; color: var(--cola-soft); }
 .event-info { flex: 1; min-width: 200px; }
 .event-map-link { color: var(--fizz); text-decoration: underline; text-underline-offset: 2px; }
+.cal-pop {
+  position: absolute;
+  width: 260px;
+  background: var(--card);
+  border-radius: 14px;
+  box-shadow: 0 12px 36px rgba(58, 35, 24, 0.22);
+  padding: 0.8rem 0.95rem;
+  z-index: 90;
+  pointer-events: none;
+  animation: popfade 0.15s ease;
+}
+@keyframes popfade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.cal-pop-item + .cal-pop-item { border-top: 1px solid var(--cream-deep); margin-top: 0.55rem; padding-top: 0.55rem; }
+.cal-pop-title { font-weight: 700; font-size: 0.92rem; line-height: 1.4; }
+.cal-pop-meta { font-size: 0.8rem; color: var(--cola-soft); margin-top: 0.15rem; line-height: 1.5; }
+.cal-pop-state { font-size: 0.78rem; color: var(--mint); margin-top: 0.2rem; font-weight: 500; }
+.cal-pop-state.done { color: var(--cola-soft); }
+.cal-pop-hint { font-size: 0.72rem; color: var(--cola-soft); opacity: 0.7; margin-top: 0.5rem; text-align: center; }
 .cal-lower { max-width: 460px; margin-bottom: 1.6rem; }
 .history-loc { font-size: 0.84rem; color: var(--cola-soft); opacity: 0.85; }
 .unlock-note {

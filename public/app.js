@@ -174,6 +174,44 @@ const flashTo = (elId) => {
   return true;
 };
 
+/* 日曆 hover 浮卡：共用一張，跟著游標所在的日期格定位 */
+let calPop = null;
+const getCalPop = () => {
+  if (!calPop) {
+    calPop = el("div", "cal-pop");
+    calPop.hidden = true;
+    document.body.appendChild(calPop);
+  }
+  return calPop;
+};
+
+const showCalPop = (cell, dayEvents) => {
+  const pop = getCalPop();
+  pop.textContent = "";
+  dayEvents.forEach((ev) => {
+    const item = el("div", "cal-pop-item");
+    item.appendChild(el("p", "cal-pop-title", ev.title));
+    const meta = el("p", "cal-pop-meta", (ev.time || "") + (ev.location ? "｜" + ev.location : ""));
+    item.appendChild(meta);
+    item.appendChild(
+      el("p", "cal-pop-state" + (ev.past ? " done" : ""), ev.past ? "已結束" : ev.left != null ? `開放報名中・剩 ${ev.left} 名額` : "開放報名中")
+    );
+    pop.appendChild(item);
+  });
+  pop.appendChild(el("p", "cal-pop-hint", "點日期看完整介紹"));
+  pop.hidden = false;
+  const r = cell.getBoundingClientRect();
+  const popW = 260;
+  let left = r.left + window.scrollX + r.width / 2 - popW / 2;
+  left = Math.max(8, Math.min(left, window.scrollX + document.documentElement.clientWidth - popW - 8));
+  pop.style.left = left + "px";
+  pop.style.top = r.bottom + window.scrollY + 8 + "px";
+};
+
+const hideCalPop = () => {
+  if (calPop) calPop.hidden = true;
+};
+
 const makeCalendar = ({ titleId, gridId, prevId, nextId, onPick }) => {
   let y = today.getFullYear();
   let m = today.getMonth();
@@ -200,9 +238,10 @@ const makeCalendar = ({ titleId, gridId, prevId, nextId, onPick }) => {
       if (dayEvents.length) {
         cell.classList.add("has-event");
         if (dayEvents.every((e) => e.past)) cell.classList.add("was-event");
-        cell.title = dayEvents.map((e) => e.title).join("、");
         cell.appendChild(el("i", "cal-dot"));
-        cell.addEventListener("click", () => onPick(dayEvents[0]));
+        cell.addEventListener("click", () => { hideCalPop(); onPick(dayEvents[0]); });
+        cell.addEventListener("mouseenter", () => showCalPop(cell, dayEvents));
+        cell.addEventListener("mouseleave", hideCalPop);
       }
       grid.appendChild(cell);
     }
