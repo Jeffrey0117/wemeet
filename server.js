@@ -278,8 +278,13 @@ const publicEvents = () => {
       const venue = e.hideVenue ? {} : { location: e.location || "", mapUrl: e.mapUrl || "" };
       if (e.fomo) {
         // 稀缺顯示：對外顯示剩餘 = max(1, fomo - 已報名)，永不顯示滿、永不擋報名
-        const { capacity, fomo, ...noCap } = pub;
-        return { ...noCap, ...venue, past, left: Math.max(1, fomo - (counts[e.id] || 0)) };
+        // buyout: 滿了成行基準（capacity）後翻轉成「一起解鎖包場」敘事
+        const signed = counts[e.id] || 0;
+        const { capacity, fomo, buyout, hardCap, ...noCap } = pub;
+        if (e.buyout && signed >= (e.capacity || 8)) {
+          return { ...noCap, ...venue, past, buyoutMode: { signed, goal: e.buyout, reached: signed >= e.buyout } };
+        }
+        return { ...noCap, ...venue, past, left: Math.max(1, fomo - signed) };
       }
       return { ...pub, ...venue, past, signedUp: counts[e.id] || 0 };
     })
@@ -343,6 +348,10 @@ const handleSignup = (req, res) => {
         return;
       }
       const all = readJsonFile(SIGNUPS_PATH, []);
+      // hardCap = 真上限（包場天花板）：到頂默默進候補，對外永不顯示滿
+      if (event.hardCap && all.filter((x) => x.eventId === eventId && !x.waitlisted).length >= event.hardCap) {
+        waitlisted = true;
+      }
       if (event.ratio) {
         if (!gender) {
           sendJson(res, 400, { error: "這場會平衡參加組成，請選一下性別" });
@@ -352,7 +361,7 @@ const handleSignup = (req, res) => {
         const quota = Math.floor((event.capacity || 20) / 2);
         const genderCount = all.filter((x) => x.eventId === eventId && x.gender === gender && !x.waitlisted).length;
         if (genderCount >= quota) waitlisted = true;
-      } else if (!event.fomo) {
+      } else if (!event.fomo && !event.hardCap) {
         const count = all.filter((x) => x.eventId === eventId).length;
         if (event.capacity && count >= event.capacity) {
           sendJson(res, 409, { error: "這場滿了！可以先留資料，下一場優先通知你" });

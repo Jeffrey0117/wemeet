@@ -879,6 +879,35 @@ a { color: var(--fizz); }
   .wall-cta-body h3 { font-size: 0.78rem; }
 }
 
+/* ---------- 包場挑戰 ---------- */
+.buyout-box { display: grid; gap: 0.4rem; justify-items: end; }
+.buyout-text {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--fizz);
+  text-align: right;
+}
+.buyout-bar {
+  width: 160px;
+  height: 11px;
+  border-radius: 999px;
+  background: var(--cream-deep);
+  border: 1.5px dashed var(--caramel);
+  overflow: hidden;
+}
+.buyout-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--caramel), var(--fizz));
+  transition: width 0.4s ease;
+}
+@media (max-width: 760px) {
+  .buyout-box { justify-items: start; }
+  .buyout-text { text-align: left; }
+}
+
 /* ---------- 下一場預告 ---------- */
 .promo-section { max-width: 980px; }
 .promo-grid {

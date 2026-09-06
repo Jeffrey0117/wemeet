@@ -123,7 +123,7 @@
 
   <div class="card" id="events-card" hidden>
     <h2>活動清單（JSON 直接編輯）</h2>
-    <p class="muted">欄位：id、type、title、date（YYYY-MM-DD）、time、location、mapUrl（導航）、capacity、fee（報名費，預設 50）、feeNote（費用補充說明）、ratio: true（抓男女比例：性別必填、名額不顯示、超額進候補）、fomo: 5（稀缺顯示：對外剩餘=max(1, 5-已報)，永不滿、不擋報名）、ended: true（提前收歷史）、note、status（open / closed / hidden）</p>
+    <p class="muted">欄位：id、type、title、date（YYYY-MM-DD）、time、location、mapUrl（導航）、capacity、fee（報名費，預設 50）、feeNote（費用補充說明）、ratio: true（抓男女比例：性別必填、名額不顯示、超額進候補）、fomo: 5（稀缺顯示：對外剩餘=max(1, 5-已報)，永不滿、不擋報名）、buyout: 15（包場門檻：滿 capacity 後對外翻轉成「再 N 人包下整場」進度條）、hardCap: 20（真上限：到頂默默進候補）、ended: true（提前收歷史）、note、status（open / closed / hidden）</p>
     <textarea id="events-json" spellcheck="false"></textarea>
     <div class="row" style="margin-top:0.6rem">
       <button id="save-events">儲存活動</button>
@@ -426,11 +426,16 @@ const renderQuickEdit = () => {
       <input type="text" data-f="time" value="${(ev.time || "").replace(/"/g, "&quot;")}" placeholder="時間" style="width:110px;padding:0.35rem 0.5rem;border:1.5px solid #f3e7d3;border-radius:8px">
       <input type="text" data-f="location" value="${(ev.location || "").replace(/"/g, "&quot;")}" placeholder="地點" style="flex:1;min-width:180px;padding:0.35rem 0.5rem;border:1.5px solid #f3e7d3;border-radius:8px">
       <input type="text" data-f="mapUrl" value="${(ev.mapUrl || "").replace(/"/g, "&quot;")}" placeholder="導航連結" style="width:150px;padding:0.35rem 0.5rem;border:1.5px solid #f3e7d3;border-radius:8px">
+      <input type="number" data-f="buyout" value="${ev.buyout || ""}" placeholder="包場" title="包場門檻（滿 capacity 後顯示包場挑戰）" style="width:62px;padding:0.35rem 0.5rem;border:1.5px solid #f3e7d3;border-radius:8px">
+      <input type="number" data-f="hardCap" value="${ev.hardCap || ""}" placeholder="上限" title="真上限（到頂默默進候補）" style="width:62px;padding:0.35rem 0.5rem;border:1.5px solid #f3e7d3;border-radius:8px">
       <button class="ghost" style="padding:0.3rem 0.8rem">存</button>
       <span class="msg" style="min-height:auto"></span>`;
     row.querySelector("button").addEventListener("click", async () => {
       const patch = {};
-      row.querySelectorAll("input").forEach((inp) => { patch[inp.dataset.f] = inp.value.trim(); });
+      row.querySelectorAll("input").forEach((inp) => {
+        const v = inp.value.trim();
+        patch[inp.dataset.f] = inp.type === "number" ? (v ? Number(v) : 0) : v;
+      });
       const msgEl = row.querySelector(".msg");
       try {
         const events = eventsCache.map((e) => (e.id === ev.id ? { ...e, ...patch } : e));

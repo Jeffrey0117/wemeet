@@ -97,9 +97,24 @@ const buildEventCard = (ev, full) => {
   if (ev.past) {
     side.appendChild(el("span", "event-slots done", "圓滿結束"));
   } else {
-    side.appendChild(
-      el("span", "event-slots" + (isFull ? " full" : ""), isFull ? "已滿團" : left !== null ? `剩 ${left} 個名額` : "開放報名中")
-    );
+    if (ev.buyoutMode) {
+      // 包場挑戰：成行基準已過，翻轉成集體解鎖敘事
+      const b = ev.buyoutMode;
+      const box = el("div", "buyout-box");
+      box.appendChild(
+        el("span", "buyout-text", b.reached ? "包場達成！剩最後幾個位子" : `已揪 ${b.signed} 人，再 ${b.goal - b.signed} 人包下整場！`)
+      );
+      const bar = el("div", "buyout-bar");
+      const fill = el("i", "buyout-fill");
+      fill.style.width = Math.min(100, Math.round((b.signed / b.goal) * 100)) + "%";
+      bar.appendChild(fill);
+      box.appendChild(bar);
+      side.appendChild(box);
+    } else {
+      side.appendChild(
+        el("span", "event-slots" + (isFull ? " full" : ""), isFull ? "已滿團" : left !== null ? `剩 ${left} 個名額` : "開放報名中")
+      );
+    }
     if (!isFull) {
       const btn = el("a", "btn btn-primary", "報名這場");
       btn.href = "/signup?event=" + encodeURIComponent(ev.id);
@@ -228,7 +243,7 @@ const showCalPop = (cell, dayEvents) => {
     const meta = el("p", "cal-pop-meta", (ev.time || "") + (ev.location ? "｜" + ev.location : ""));
     item.appendChild(meta);
     item.appendChild(
-      el("p", "cal-pop-state" + (ev.past ? " done" : ""), ev.past ? "圓滿結束 ✓" : ev.left != null ? `開放報名中・剩 ${ev.left} 名額` : "開放報名中")
+      el("p", "cal-pop-state" + (ev.past ? " done" : ""), ev.past ? "圓滿結束 ✓" : ev.buyoutMode ? (ev.buyoutMode.reached ? "包場達成！剩最後幾位" : `已揪 ${ev.buyoutMode.signed} 人・包場倒數 ${ev.buyoutMode.goal - ev.buyoutMode.signed} 人`) : ev.left != null ? `開放報名中・剩 ${ev.left} 名額` : "開放報名中")
     );
     pop.appendChild(item);
   });
