@@ -46,7 +46,7 @@ const buildHistoryRow = (ev) => {
   const head = el("p", "history-head");
   head.appendChild(el("span", "history-date", `${md}（${w}）`));
   head.appendChild(document.createTextNode(" " + ev.title));
-  head.appendChild(el("span", "history-done", "已結束"));
+  head.appendChild(el("span", "history-done", "圓滿結束"));
   row.appendChild(head);
   if (ev.location) row.appendChild(el("p", "history-loc", ev.location));
   if (ev.note) row.appendChild(el("p", "history-recap", ev.note));
@@ -95,7 +95,7 @@ const buildEventCard = (ev, full) => {
 
   const side = el("div", "event-side");
   if (ev.past) {
-    side.appendChild(el("span", "event-slots done", "已結束"));
+    side.appendChild(el("span", "event-slots done", "圓滿結束"));
   } else {
     side.appendChild(
       el("span", "event-slots" + (isFull ? " full" : ""), isFull ? "已滿團" : left !== null ? `剩 ${left} 個名額` : "開放報名中")
@@ -194,7 +194,7 @@ const showCalPop = (cell, dayEvents) => {
     const meta = el("p", "cal-pop-meta", (ev.time || "") + (ev.location ? "｜" + ev.location : ""));
     item.appendChild(meta);
     item.appendChild(
-      el("p", "cal-pop-state" + (ev.past ? " done" : ""), ev.past ? "已結束" : ev.left != null ? `開放報名中・剩 ${ev.left} 名額` : "開放報名中")
+      el("p", "cal-pop-state" + (ev.past ? " done" : ""), ev.past ? "圓滿結束 ✓" : ev.left != null ? `開放報名中・剩 ${ev.left} 名額` : "開放報名中")
     );
     pop.appendChild(item);
   });
