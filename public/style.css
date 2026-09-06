@@ -11,7 +11,7 @@
   --card: #fffdf8;
   --radius: 18px;
   --shadow: 0 6px 24px rgba(58, 35, 24, 0.08);
-  --font-display: "LXGW WenKai TC", "Noto Sans TC", sans-serif;
+  --font-display: "Iansui", "LXGW WenKai TC", "Noto Sans TC", sans-serif;
   --font-body: "Noto Sans TC", sans-serif;
 }
 
@@ -33,7 +33,7 @@ body {
   line-height: 1.75;
 }
 
-h1, h2, h3, .nav-logo, .footer-logo { font-family: var(--font-display); font-weight: 400; }
+h1, h2, h3, .nav-logo, .footer-logo { font-family: var(--font-display); font-weight: 400; letter-spacing: 0.04em; }
 
 a { color: var(--fizz); }
 
@@ -946,7 +946,7 @@ a { color: var(--fizz); }
   padding: 1.2rem 1.3rem 0.9rem;
 }
 .pulse-chart-title { font-size: 0.85rem; color: var(--cola-soft); margin-bottom: 0.4rem; }
-#pulse-chart { width: 100%; height: 170px; display: block; }
+#pulse-chart { width: 100%; height: auto; display: block; }
 
 /* ---------- signup CTA ---------- */
 .cta-band { display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }

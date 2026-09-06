@@ -602,24 +602,40 @@ const renderPulse = (d) => {
   tile(d.attendees || 0, "人次報名參加");
   if (d.views) tile(d.views, "次網站瀏覽");
 
-  // 累積曲線（star-history 風）
+  // 累積曲線（手繪風：線段重取樣 + 垂直方向抖動，資料點本身不偏移）
   const series = d.series || [];
   const wrap = document.getElementById("pulse-chart-wrap");
   const svg = document.getElementById("pulse-chart");
   if (!wrap || !svg || series.length < 2) return;
   wrap.hidden = false;
-  const W = 600, H = 200, P = 14;
+  const W = 600, H = 230, PT = 40, PB = 18, PX = 18;
   const maxV = series[series.length - 1].total;
-  const x = (i) => P + (i / (series.length - 1)) * (W - P * 2);
-  const yv = (v) => H - P - (v / maxV) * (H - P * 2);
-  const pts = series.map((p, i) => `${x(i)},${yv(p.total)}`);
+  const x = (i) => PX + (i / (series.length - 1)) * (W - PX * 2);
+  const yv = (v) => H - PB - (v / maxV) * (H - PB - PT);
+  const anchors = series.map((p, i) => ({ x: x(i), y: yv(p.total) }));
+  const wobbly = [];
+  for (let i = 0; i < anchors.length - 1; i++) {
+    const a = anchors[i], b = anchors[i + 1];
+    const dist = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+    const steps = Math.max(4, Math.round(dist / 20));
+    const nx = -(b.y - a.y) / dist, ny = (b.x - a.x) / dist;
+    for (let sIdx = 0; sIdx < steps; sIdx++) {
+      const t = sIdx / steps;
+      const raw = Math.sin((i * 13 + sIdx * 7 + 3) * 12.9898) * 43758.5453;
+      const jit = sIdx === 0 ? 0 : (raw - Math.floor(raw) - 0.5) * 3.6;
+      wobbly.push({ x: a.x + (b.x - a.x) * t + nx * jit, y: a.y + (b.y - a.y) * t + ny * jit });
+    }
+  }
+  wobbly.push(anchors[anchors.length - 1]);
+  const path = wobbly.map((p, i) => `${i ? "L" : "M"}${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(" ");
+  const area = `${path} L${(W - PX).toFixed(1)} ${H - PB} L${PX} ${H - PB} Z`;
   svg.innerHTML =
     `<defs><linearGradient id="pg" x1="0" y1="0" x2="0" y2="1">` +
-    `<stop offset="0%" stop-color="rgba(226,87,43,0.35)"/><stop offset="100%" stop-color="rgba(226,87,43,0)"/></linearGradient></defs>` +
-    `<polygon points="${P},${H - P} ${pts.join(" ")} ${W - P},${H - P}" fill="url(#pg)"/>` +
-    `<polyline points="${pts.join(" ")}" fill="none" stroke="#e2572b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>` +
-    pts.map((p) => `<circle cx="${p.split(",")[0]}" cy="${p.split(",")[1]}" r="3.5" fill="#e2572b"/>`).join("") +
-    `<text x="${W - P}" y="${yv(maxV) - 8}" text-anchor="end" font-size="13" fill="#6b4a38">${maxV} 人次</text>`;
+    `<stop offset="0%" stop-color="rgba(226,87,43,0.28)"/><stop offset="100%" stop-color="rgba(226,87,43,0)"/></linearGradient></defs>` +
+    `<path d="${area}" fill="url(#pg)"/>` +
+    `<path d="${path}" fill="none" stroke="#e2572b" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>` +
+    anchors.map((p) => `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4.5" fill="#faf3e7" stroke="#e2572b" stroke-width="2.5"/>`).join("") +
+    `<text x="${(W - PX - 4).toFixed(1)}" y="${(yv(maxV) - 16).toFixed(1)}" text-anchor="end" font-size="17" font-family="Iansui, sans-serif" fill="#3a2318">${maxV} 人次！</text>`;
 };
 
 const loadPulse = async () => {
