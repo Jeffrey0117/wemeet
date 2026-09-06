@@ -52,13 +52,13 @@ const buildHistoryRow = (ev) => {
   return row;
 };
 
-const buildEventCard = (ev) => {
+const buildEventCard = (ev, full) => {
   const { md, w } = fmtDate(ev.date);
   const left = ev.left != null ? ev.left : (!ev.hideCount && ev.capacity ? Math.max(0, ev.capacity - (ev.signedUp || 0)) : null);
   const isFull = ev.status === "closed" || (left !== null && left <= 0);
 
-  const card = el("div", "event-card" + (ev.past ? " event-past" : ""));
-  card.id = "event-card-" + ev.id;
+  const card = el("div", "event-card" + (ev.past ? " event-past" : "") + (full ? " event-full" : ""));
+  if (!full) card.id = "event-card-" + ev.id;
 
   const dateBox = el("div", "event-date");
   dateBox.appendChild(el("span", "d", md));
@@ -79,8 +79,9 @@ const buildEventCard = (ev) => {
     meta.appendChild(el("span", "unlock-note", "詳細地點報名後解鎖"));
   }
   info.appendChild(meta);
-  // 過往場次的 note 當「回顧」顯示（在 /admin 補一句當天聊了什麼）
-  if (ev.note) info.appendChild(el("p", "event-note", ev.note));
+  if (full && ev.feeNote) info.appendChild(el("p", "event-feenote", ev.feeNote));
+  // 完整版顯示流程文案；hero 緊湊版收起（.hero-events CSS 也會隱藏保險）
+  if (ev.note && (full || ev.past)) info.appendChild(el("p", "event-note", ev.note));
   card.appendChild(info);
 
   const side = el("div", "event-side");
@@ -113,15 +114,26 @@ const renderEvents = (events) => {
     upcoming.forEach((ev) => list.appendChild(buildEventCard(ev)));
   }
 
-  // 過往小聚：獨立區塊（有資料才顯示）
-  const historySection = document.getElementById("events");
+  // 完整版場次卡（下方近期活動區：含流程文案與費用細節，給滑完內容被說服的人）
+  const fullList = document.getElementById("full-event-list");
+  if (fullList) {
+    fullList.textContent = "";
+    if (!upcoming.length) {
+      fullList.appendChild(el("p", "event-empty", "下一場正在籌備中！先報名加入名單，開團第一個通知你。"));
+    } else {
+      upcoming.forEach((ev) => fullList.appendChild(buildEventCard(ev, true)));
+    }
+  }
+
+  // 過往小聚（有資料才顯示）
+  const historyWrap = document.getElementById("history-wrap");
   const historyList = document.getElementById("history-list");
-  if (historySection && historyList && past.length) {
+  if (historyWrap && historyList && past.length) {
     historyList.textContent = "";
     const wrap = el("div", "history-list");
     past.forEach((ev) => wrap.appendChild(buildHistoryRow(ev)));
     historyList.appendChild(wrap);
-    historySection.hidden = false;
+    historyWrap.hidden = false;
   }
 };
 

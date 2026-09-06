@@ -695,6 +695,18 @@ a { color: var(--fizz); }
   border-bottom: 1.5px dashed var(--cream-deep);
 }
 .event-past { opacity: 0.72; }
+.event-full { align-items: flex-start; }
+.event-full .event-note { margin-top: 0.45rem; line-height: 1.7; }
+.event-feenote {
+  display: inline-block;
+  font-size: 0.82rem;
+  color: var(--caramel);
+  background: #fff7f2;
+  border: 1px solid var(--cream-deep);
+  border-radius: 999px;
+  padding: 0.1rem 0.6rem;
+  margin-top: 0.35rem;
+}
 .event-slots.done { color: var(--cola-soft); }
 /* 過往時間軸 */
 .history-list {
