@@ -586,8 +586,53 @@ const initVoicePlayer = () => {
   document.querySelectorAll(".voice-card[data-src]").forEach(initVoiceCard);
 };
 
+/* ---------- 成長數據（真實資料：AdMan 人氣 + 報名人次 + 場次數） ---------- */
+
+const renderPulse = (d) => {
+  const tiles = document.getElementById("pulse-tiles");
+  if (!tiles) return;
+  tiles.textContent = "";
+  const tile = (num, label) => {
+    const t = el("div", "pulse-tile");
+    t.appendChild(el("div", "pulse-num", String(num)));
+    t.appendChild(el("div", "pulse-label", label));
+    tiles.appendChild(t);
+  };
+  tile(d.eventsHeld || 0, "場小聚圓滿結束");
+  tile(d.attendees || 0, "人次報名參加");
+  if (d.views) tile(d.views, "次網站瀏覽");
+
+  // 累積曲線（star-history 風）
+  const series = d.series || [];
+  const wrap = document.getElementById("pulse-chart-wrap");
+  const svg = document.getElementById("pulse-chart");
+  if (!wrap || !svg || series.length < 2) return;
+  wrap.hidden = false;
+  const W = 600, H = 200, P = 14;
+  const maxV = series[series.length - 1].total;
+  const x = (i) => P + (i / (series.length - 1)) * (W - P * 2);
+  const yv = (v) => H - P - (v / maxV) * (H - P * 2);
+  const pts = series.map((p, i) => `${x(i)},${yv(p.total)}`);
+  svg.innerHTML =
+    `<defs><linearGradient id="pg" x1="0" y1="0" x2="0" y2="1">` +
+    `<stop offset="0%" stop-color="rgba(226,87,43,0.35)"/><stop offset="100%" stop-color="rgba(226,87,43,0)"/></linearGradient></defs>` +
+    `<polygon points="${P},${H - P} ${pts.join(" ")} ${W - P},${H - P}" fill="url(#pg)"/>` +
+    `<polyline points="${pts.join(" ")}" fill="none" stroke="#e2572b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>` +
+    pts.map((p) => `<circle cx="${p.split(",")[0]}" cy="${p.split(",")[1]}" r="3.5" fill="#e2572b"/>`).join("") +
+    `<text x="${W - P}" y="${yv(maxV) - 8}" text-anchor="end" font-size="13" fill="#6b4a38">${maxV} 人次</text>`;
+};
+
+const loadPulse = async () => {
+  try {
+    const res = await fetch("/api/pulse");
+    if (!res.ok) return;
+    renderPulse(await res.json());
+  } catch (err) {}
+};
+
 loadEvents();
 loadWall();
+loadPulse();
 loadReel();
 bindReel();
 bindHeroSound();

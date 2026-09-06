@@ -478,6 +478,50 @@ const handleReelplay = async (res) => {
   }
 };
 
+/* ---------- 公開成長數據 /api/pulse ---------- */
+
+let pulseViewsCache = { value: null, at: 0 };
+
+const handlePulse = async (res) => {
+  const events = readJsonFile(EVENTS_PATH, []);
+  const signups = readJsonFile(SIGNUPS_PATH, []);
+  const eventsHeld = events.filter((e) => isPast(e) || e.ended === true).length;
+  const attendees = signups.filter((x) => x.eventId).length;
+
+  // 累積報名人次曲線（依報名時間）
+  const byDay = {};
+  signups
+    .filter((x) => x.eventId)
+    .forEach((x) => {
+      const d = String(x.createdAt || "").slice(0, 10);
+      if (d) byDay[d] = (byDay[d] || 0) + 1;
+    });
+  let cum = 0;
+  const series = Object.keys(byDay)
+    .sort()
+    .map((d) => {
+      cum += byDay[d];
+      return { date: d, total: cum };
+    });
+
+  // AdMan 總瀏覽（快取 10 分鐘；拿不到就不給，前端自動隱藏）
+  let views = pulseViewsCache.value;
+  if (Date.now() - pulseViewsCache.at > 10 * 60 * 1000) {
+    const admanApi = (ENV.ADMAN_API || "").replace(/[/]$/, "");
+    if (admanApi && ENV.ADMAN_TOKEN && ENV.ADMAN_SITE) {
+      try {
+        const d = await fetch(`${admanApi}/api/stats?siteKey=${ENV.ADMAN_SITE}&days=365`, {
+          headers: { Authorization: "Bearer " + ENV.ADMAN_TOKEN },
+        }).then((r) => (r.ok ? r.json() : null));
+        if (d) views = d.views || 0;
+      } catch (err) {}
+    }
+    pulseViewsCache = { value: views, at: Date.now() };
+  }
+
+  sendJson(res, 200, { eventsHeld, attendees, views, series });
+};
+
 /* ---------- 會員 API（LetMeUse 登入） ---------- */
 
 const QUICKKY_URL_RE = /^https:\/\/quickky\.(isnowfriend\.com|pipee\.tw)\/\S*$/;
@@ -926,6 +970,10 @@ const server = http.createServer((req, res) => {
   }
   if (req.method === "GET" && pathname === "/api/icebreaker") {
     handleIcebreaker(res);
+    return;
+  }
+  if (req.method === "GET" && pathname === "/api/pulse") {
+    handlePulse(res);
     return;
   }
   if (req.method === "GET" && pathname === "/api/reelplay") {
