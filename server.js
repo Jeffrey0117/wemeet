@@ -721,6 +721,23 @@ const handleAdmin = (req, res, pathname) => {
     return;
   }
 
+  // 人氣數據：GET /api/admin/stats?days=N（proxy AdMan 站點分析）
+  if (req.method === "GET" && pathname === "/api/admin/stats") {
+    const admanApi = (ENV.ADMAN_API || "").replace(/\/$/, "");
+    if (!admanApi || !ENV.ADMAN_TOKEN || !ENV.ADMAN_SITE) {
+      sendJson(res, 503, { error: "analytics not configured" });
+      return;
+    }
+    const days = Math.min(365, Math.max(1, parseInt(new URL(req.url, "http://x").searchParams.get("days"), 10) || 7));
+    fetch(`${admanApi}/api/stats?siteKey=${ENV.ADMAN_SITE}&days=${days}`, {
+      headers: { Authorization: "Bearer " + ENV.ADMAN_TOKEN },
+    })
+      .then((r) => r.json())
+      .then((d) => sendJson(res, 200, d))
+      .catch(() => sendJson(res, 502, { error: "stats upstream error" }));
+    return;
+  }
+
   // 發通知：POST /api/admin/notify {audience, subject, message}
   // audience: "members"（全會員）| "waitlist"（先加入名單）| "event:{id}"（某場報名者）
   // 有 email（會員）走 mailer 寄信；只有 LINE/電話的回 manual 名單給管理員手動私訊

@@ -27,6 +27,7 @@
     data-locale="zh"
     data-mode="modal">
   </script>
+  <script defer src="https://adman.isnowfriend.com/embed/track.js" data-site="site_vWNeBS43zP"></script>
 </head>
 <body>
 
@@ -41,7 +42,7 @@
   </div>
 </nav>
 
-<header class="hero hero--split" id="top">
+<header class="hero hero--split" id="top" data-track-section="hero">
   <div class="hero-inner">
     <div class="hero-media">
       <div class="video-wrap">
@@ -61,14 +62,14 @@
       </div>
       <div id="event-list" class="event-list hero-events"></div>
       <div class="hero-actions">
-        <a class="btn btn-primary" href="/signup">報名下一場 →</a>
+        <a class="btn btn-primary" href="/signup" data-track-cta="signup-next">報名下一場 →</a>
         <a class="btn btn-ghost" href="https://www.instagram.com/we_i_meet" target="_blank" rel="noopener">追蹤 IG</a>
       </div>
     </div>
   </div>
 </header>
 
-<section class="section intro-section" id="intro">
+<section class="section intro-section" id="intro" data-track-section="intro">
   <div class="duo-grid">
     <div class="intro-inner">
       <p class="hero-tag"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="14" height="14"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> 台中｜做自己的輕鬆小聚</p>
@@ -83,7 +84,7 @@
     <li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg> 絕對不吵鬧也不膚淺，認識新的 Chill 友</li>
   </ul>
       <div class="hero-actions">
-    <a class="btn btn-primary" href="/signup">報名下一場 →</a>
+    <a class="btn btn-primary" href="/signup" data-track-cta="signup-next">報名下一場 →</a>
     <a class="btn btn-ghost" href="#events">看看近期活動</a>
   </div>
     </div>
@@ -154,7 +155,7 @@
 </section>
 
 
-<section class="scene-section" id="scenes">
+<section class="scene-section" id="scenes" data-track-section="scenes">
   <p class="voice-heading">活動場景・現場直擊</p>
   <div class="scene-grid">
     <img src="/media/scene1.jpg?v=__BUILD__" alt="Chill Club 小聚現場" loading="lazy">
@@ -164,7 +165,7 @@
   </div>
 </section>
 
-<section class="section" id="about">
+<section class="section" id="about" data-track-section="story">
   <p class="section-kicker">好事都發生在生活圈以外！</p>
   <h2><span class="squiggle">為什麼有揪可樂？</span></h2>
   <p class="section-lead">
@@ -193,32 +194,37 @@
   </div>
 </section>
 
-<section class="section section-alt" id="wall">
+<section class="section section-alt" id="wall" data-track-section="wall">
   <h2><span class="squiggle">牆上的 Chill 友</span></h2>
   <p class="section-lead">每個人都是一張 Quickky 名片卡：想法、品味、自我介紹。<br>點進去，先認識再見面。</p>
   <div id="wall-list" class="wall-grid"></div>
 </section>
 
-<section class="section" id="events">
+<section class="section" id="events" data-track-section="events">
   <h2><span class="squiggle">近期活動</span></h2>
   <p class="section-lead">每一場的完整介紹都在這，看對頻了就直接報。<br>日曆可以往回翻，過去辦過什麼一目了然。</p>
-  <div class="cal cal-lower" id="calendar2">
-    <div class="cal-head">
-      <button type="button" class="cal-nav" id="cal2-prev" aria-label="上個月">←</button>
-      <span class="cal-title" id="cal2-title"></span>
-      <button type="button" class="cal-nav" id="cal2-next" aria-label="下個月">→</button>
+  <div class="events-duo">
+    <div class="cal cal-lower" id="calendar2">
+      <div class="cal-head">
+        <button type="button" class="cal-nav" id="cal2-prev" aria-label="上個月">←</button>
+        <span class="cal-title" id="cal2-title"></span>
+        <button type="button" class="cal-nav" id="cal2-next" aria-label="下個月">→</button>
+      </div>
+      <div class="cal-grid" id="cal2-grid"></div>
+      <p class="cal-hint">游標移到日期上，右邊會直接切換成那天的活動</p>
     </div>
-    <div class="cal-grid" id="cal2-grid"></div>
-    <p class="cal-hint">游標移到日期上就能看那天的活動</p>
+    <div class="event-panel">
+      <p class="event-panel-head" id="event-panel-head"></p>
+      <div id="full-event-list" class="event-list"></div>
+    </div>
   </div>
-  <div id="full-event-list" class="event-list"></div>
   <div id="history-wrap" hidden>
     <h3 class="event-history-title">過往小聚</h3>
     <div id="history-list" class="event-list"></div>
   </div>
 </section>
 
-<section class="section section-alt" id="vibes">
+<section class="section section-alt" id="vibes" data-track-section="vibes">
   <h2><span class="squiggle">我們都在揪什麼？</span></h2>
   <div class="vibe-grid">
     <div class="vibe-card vibe-featured">
@@ -241,7 +247,7 @@
   </div>
 </section>
 
-<section class="section" id="icebreaker">
+<section class="section" id="icebreaker" data-track-section="learn">
   <p class="section-kicker">小聚都在聊這個</p>
   <h2><span class="squiggle">跟著影片學英文</span></h2>
   <p class="section-lead">真實影片的雙語逐字稿，播到哪句亮哪句。點句子直接跳到那一秒。</p>
@@ -267,7 +273,7 @@
 
 
 
-<section class="section section-alt" id="signup">
+<section class="section section-alt" id="signup" data-track-section="signup-cta">
   <h2><span class="squiggle">來揪一下</span></h2>
   <p class="section-lead">一分鐘填完報名問卷，我們會用 LINE 或電話跟你確認細節。<br>報名費依場次標示（多數場次 50 元），現場繳就好。<br>還沒有想參加的場次？也可以先加入名單，開新團第一個通知你。</p>
   <div class="cta-band">

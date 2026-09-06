@@ -103,6 +103,7 @@ const buildEventCard = (ev, full) => {
     if (!isFull) {
       const btn = el("a", "btn btn-primary", "報名這場");
       btn.href = "/signup?event=" + encodeURIComponent(ev.id);
+      btn.setAttribute("data-track-cta", "signup-" + ev.id);
       side.appendChild(btn);
     }
   }
@@ -123,16 +124,8 @@ const renderEvents = (events) => {
     upcoming.forEach((ev) => list.appendChild(buildEventCard(ev)));
   }
 
-  // 完整版場次卡（下方近期活動區：含流程文案與費用細節，給滑完內容被說服的人）
-  const fullList = document.getElementById("full-event-list");
-  if (fullList) {
-    fullList.textContent = "";
-    if (!upcoming.length) {
-      fullList.appendChild(el("p", "event-empty", "下一場正在籌備中！先報名加入名單，開團第一個通知你。"));
-    } else {
-      upcoming.forEach((ev) => fullList.appendChild(buildEventCard(ev, true)));
-    }
-  }
+  // 右側面板：預設置頂今天的場（沒有就下一場），日曆 hover 會切換
+  renderEventPanel(null);
 
   // 過往小聚（有資料才顯示）
   const historyWrap = document.getElementById("history-wrap");
@@ -158,6 +151,47 @@ const loadEvents = async () => {
     list.textContent = "";
     list.appendChild(el("p", "event-empty", "活動載入失敗，重新整理一下試試"));
   }
+};
+
+/* ---------- 下方活動面板（左日曆右內容） ---------- */
+
+const todayIsoStr = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+
+// dateIso = null → 預設（今天有場次就置頂今天，否則下一場）
+const renderEventPanel = (dateIso) => {
+  const head = document.getElementById("event-panel-head");
+  const list = document.getElementById("full-event-list");
+  if (!head || !list) return;
+  const tIso = todayIsoStr();
+  let shown = [];
+  if (dateIso) {
+    shown = allEvents.filter((e) => e.date === dateIso);
+    const d = new Date(dateIso + "T00:00:00");
+    head.textContent = `${d.getMonth() + 1}/${d.getDate()}（週${WEEKDAYS[d.getDay()]}）的場次`;
+  } else {
+    const todays = allEvents.filter((e) => e.date === tIso && !e.past);
+    if (todays.length) {
+      shown = todays;
+      head.textContent = "今天的場次";
+    } else {
+      const upcoming = allEvents.filter((e) => !e.past);
+      shown = upcoming.slice(0, 2);
+      head.textContent = shown.length ? "下一場" : "";
+    }
+  }
+  list.textContent = "";
+  if (!shown.length) {
+    list.appendChild(el("p", "event-empty", "下一場正在籌備中！先報名加入名單，開團第一個通知你。"));
+    return;
+  }
+  shown.forEach((ev) => {
+    const card = buildEventCard(ev, true);
+    if (ev.past) card.classList.add("event-past");
+    list.appendChild(card);
+  });
 };
 
 /* ---------- 月曆（工廠：hero 與下方各一座） ---------- */
@@ -212,7 +246,7 @@ const hideCalPop = () => {
   if (calPop) calPop.hidden = true;
 };
 
-const makeCalendar = ({ titleId, gridId, prevId, nextId, onPick }) => {
+const makeCalendar = ({ titleId, gridId, prevId, nextId, onPick, onHover, onLeave }) => {
   let y = today.getFullYear();
   let m = today.getMonth();
 
@@ -240,8 +274,8 @@ const makeCalendar = ({ titleId, gridId, prevId, nextId, onPick }) => {
         if (dayEvents.every((e) => e.past)) cell.classList.add("was-event");
         cell.appendChild(el("i", "cal-dot"));
         cell.addEventListener("click", () => { hideCalPop(); onPick(dayEvents[0]); });
-        cell.addEventListener("mouseenter", () => showCalPop(cell, dayEvents));
-        cell.addEventListener("mouseleave", hideCalPop);
+        cell.addEventListener("mouseenter", () => (onHover ? onHover(iso) : showCalPop(cell, dayEvents)));
+        cell.addEventListener("mouseleave", () => (onLeave ? onLeave() : hideCalPop()));
       }
       grid.appendChild(cell);
     }
@@ -258,10 +292,13 @@ const renderHeroCal = makeCalendar({
   titleId: "cal-title", gridId: "cal-grid", prevId: "cal-prev", nextId: "cal-next",
   onPick: (ev) => flashTo("event-card-" + ev.id) || flashTo("full-event-card-" + ev.id),
 });
-// 下方日曆：即將跳完整卡、過往跳歷史列
+// 下方日曆：hover 直接切右側面板內容；點=釘選該天；移開回到預設（今天/下一場）
+let panelPinned = null;
 const renderLowerCal = makeCalendar({
   titleId: "cal2-title", gridId: "cal2-grid", prevId: "cal2-prev", nextId: "cal2-next",
-  onPick: (ev) => flashTo("full-event-card-" + ev.id) || flashTo("event-card-" + ev.id),
+  onPick: (ev) => { panelPinned = panelPinned === ev.date ? null : ev.date; renderEventPanel(panelPinned); },
+  onHover: (iso) => renderEventPanel(iso),
+  onLeave: () => renderEventPanel(panelPinned),
 });
 
 const renderCalendar = () => { renderHeroCal(); renderLowerCal(); };
