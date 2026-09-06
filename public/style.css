@@ -675,8 +675,16 @@ a { color: var(--fizz); }
   border-radius: 10px;
 }
 .cal-day.today { outline: 1.5px solid var(--caramel); }
-.cal-day.has-event { cursor: pointer; background: #fff7f2; font-weight: 700; }
-.cal-day.has-event:hover { background: var(--cream-deep); }
+.cal-day.has-event { cursor: pointer; background: #fff7f2; font-weight: 700; transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease; }
+.cal-day.has-event:hover {
+  background: var(--fizz);
+  color: #fff;
+  transform: scale(1.12);
+  box-shadow: 0 4px 14px rgba(226, 87, 43, 0.35);
+  z-index: 1;
+}
+.cal-day.has-event:hover .cal-dot { background: #fff; }
+.cal-day.was-event:hover { background: var(--cola-soft); box-shadow: 0 4px 14px rgba(58, 35, 24, 0.25); }
 .cal-dot {
   position: absolute; left: 50%; bottom: 6px; transform: translateX(-50%);
   width: 6px; height: 6px; border-radius: 50%; background: var(--fizz);
@@ -764,7 +772,9 @@ a { color: var(--fizz); }
 .event-date .d { font-size: 1.5rem; font-weight: 700; color: var(--caramel); display: block; }
 .event-date .w { font-size: 0.85rem; color: var(--cola-soft); }
 .event-info { flex: 1; min-width: 200px; }
-.blur-text { filter: blur(4px); user-select: none; }
+.event-map-link { color: var(--fizz); text-decoration: underline; text-underline-offset: 2px; }
+.cal-lower { max-width: 460px; margin-bottom: 1.6rem; }
+.history-loc { font-size: 0.84rem; color: var(--cola-soft); opacity: 0.85; }
 .unlock-note {
   font-size: 0.76rem;
   color: var(--caramel);

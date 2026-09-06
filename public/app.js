@@ -48,6 +48,7 @@ const buildHistoryRow = (ev) => {
   head.appendChild(document.createTextNode(" " + ev.title));
   head.appendChild(el("span", "history-done", "已結束"));
   row.appendChild(head);
+  if (ev.location) row.appendChild(el("p", "history-loc", ev.location));
   if (ev.note) row.appendChild(el("p", "history-recap", ev.note));
   return row;
 };
@@ -58,7 +59,7 @@ const buildEventCard = (ev, full) => {
   const isFull = ev.status === "closed" || (left !== null && left <= 0);
 
   const card = el("div", "event-card" + (ev.past ? " event-past" : "") + (full ? " event-full" : ""));
-  if (!full) card.id = "event-card-" + ev.id;
+  card.id = (full ? "full-event-card-" : "event-card-") + ev.id;
 
   const dateBox = el("div", "event-date");
   dateBox.appendChild(el("span", "d", md));
@@ -70,12 +71,20 @@ const buildEventCard = (ev, full) => {
   const meta = el("p", "event-meta");
   meta.appendChild(iconEl("clock", 14));
   meta.appendChild(document.createTextNode(" " + (ev.time || "") + (ev.past ? "" : `　報名費 $${ev.fee != null ? ev.fee : 50}`)));
-  if (!ev.past) {
-    meta.appendChild(document.createTextNode("　"));
-    meta.appendChild(iconEl("map-pin", 14));
-    meta.appendChild(document.createTextNode(" "));
-    meta.appendChild(el("span", "blur-text", "台中市西屯區某某街00巷0號"));
-    meta.appendChild(document.createTextNode(" "));
+  meta.appendChild(document.createTextNode("　"));
+  meta.appendChild(iconEl("map-pin", 14));
+  meta.appendChild(document.createTextNode(" "));
+  if (ev.location) {
+    if (ev.mapUrl && !ev.past) {
+      const a = el("a", "event-map-link", ev.location);
+      a.href = ev.mapUrl;
+      a.target = "_blank";
+      a.rel = "noopener";
+      meta.appendChild(a);
+    } else {
+      meta.appendChild(document.createTextNode(ev.location));
+    }
+  } else if (!ev.past) {
     meta.appendChild(el("span", "unlock-note", "詳細地點報名後解鎖"));
   }
   info.appendChild(meta);
@@ -151,75 +160,73 @@ const loadEvents = async () => {
   }
 };
 
-/* ---------- 月曆 ---------- */
+/* ---------- 月曆（工廠：hero 與下方各一座） ---------- */
 
 const today = new Date();
-let calYear = today.getFullYear();
-let calMonth = today.getMonth(); // 0-based
 
-const jumpToEvent = (ev) => {
-  const card = document.getElementById("event-card-" + ev.id);
-  if (!card) return;
+const flashTo = (elId) => {
+  const card = document.getElementById(elId);
+  if (!card) return false;
   card.scrollIntoView({ behavior: "smooth", block: "center" });
   card.classList.remove("flash");
-  void card.offsetWidth; // 重新觸發動畫
+  void card.offsetWidth;
   card.classList.add("flash");
+  return true;
 };
 
-const renderCalendar = () => {
-  const grid = document.getElementById("cal-grid");
-  const title = document.getElementById("cal-title");
-  if (!grid || !title) return;
+const makeCalendar = ({ titleId, gridId, prevId, nextId, onPick }) => {
+  let y = today.getFullYear();
+  let m = today.getMonth();
 
-  title.textContent = `${calYear} 年 ${calMonth + 1} 月`;
-  grid.textContent = "";
-
-  WEEKDAYS.forEach((w) => grid.appendChild(el("span", "cal-dow", w)));
-
-  const first = new Date(calYear, calMonth, 1);
-  const days = new Date(calYear, calMonth + 1, 0).getDate();
-  for (let i = 0; i < first.getDay(); i++) grid.appendChild(el("span", "cal-day cal-empty"));
-
-  const byDate = {};
-  allEvents.forEach((ev) => {
-    (byDate[ev.date] = byDate[ev.date] || []).push(ev);
-  });
-
-  for (let d = 1; d <= days; d++) {
-    const iso = `${calYear}-${String(calMonth + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-    const dayEvents = byDate[iso] || [];
-    const cell = el("span", "cal-day", String(d));
-    if (
-      d === today.getDate() && calMonth === today.getMonth() && calYear === today.getFullYear()
-    ) {
-      cell.classList.add("today");
+  const render = () => {
+    const grid = document.getElementById(gridId);
+    const title = document.getElementById(titleId);
+    if (!grid || !title) return;
+    title.textContent = `${y} 年 ${m + 1} 月`;
+    grid.textContent = "";
+    WEEKDAYS.forEach((w) => grid.appendChild(el("span", "cal-dow", w)));
+    const first = new Date(y, m, 1);
+    const days = new Date(y, m + 1, 0).getDate();
+    for (let i = 0; i < first.getDay(); i++) grid.appendChild(el("span", "cal-day cal-empty"));
+    const byDate = {};
+    allEvents.forEach((ev) => {
+      (byDate[ev.date] = byDate[ev.date] || []).push(ev);
+    });
+    for (let d = 1; d <= days; d++) {
+      const iso = `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+      const dayEvents = byDate[iso] || [];
+      const cell = el("span", "cal-day", String(d));
+      if (d === today.getDate() && m === today.getMonth() && y === today.getFullYear()) cell.classList.add("today");
+      if (dayEvents.length) {
+        cell.classList.add("has-event");
+        if (dayEvents.every((e) => e.past)) cell.classList.add("was-event");
+        cell.title = dayEvents.map((e) => e.title).join("、");
+        cell.appendChild(el("i", "cal-dot"));
+        cell.addEventListener("click", () => onPick(dayEvents[0]));
+      }
+      grid.appendChild(cell);
     }
-    if (dayEvents.length) {
-      cell.classList.add("has-event");
-      if (dayEvents.every((e) => e.past)) cell.classList.add("was-event");
-      cell.title = dayEvents.map((e) => e.title).join("、");
-      cell.appendChild(el("i", "cal-dot"));
-      cell.addEventListener("click", () => jumpToEvent(dayEvents[0]));
-    }
-    grid.appendChild(cell);
-  }
+  };
+
+  const prev = document.getElementById(prevId);
+  const next = document.getElementById(nextId);
+  if (prev) prev.addEventListener("click", () => { m -= 1; if (m < 0) { m = 11; y -= 1; } render(); });
+  if (next) next.addEventListener("click", () => { m += 1; if (m > 11) { m = 0; y += 1; } render(); });
+  return render;
 };
 
-const bindCalendarNav = () => {
-  const prev = document.getElementById("cal-prev");
-  const next = document.getElementById("cal-next");
-  if (!prev || !next) return;
-  prev.addEventListener("click", () => {
-    calMonth -= 1;
-    if (calMonth < 0) { calMonth = 11; calYear -= 1; }
-    renderCalendar();
-  });
-  next.addEventListener("click", () => {
-    calMonth += 1;
-    if (calMonth > 11) { calMonth = 0; calYear += 1; }
-    renderCalendar();
-  });
-};
+const renderHeroCal = makeCalendar({
+  titleId: "cal-title", gridId: "cal-grid", prevId: "cal-prev", nextId: "cal-next",
+  onPick: (ev) => flashTo("event-card-" + ev.id) || flashTo("full-event-card-" + ev.id),
+});
+// 下方日曆：即將跳完整卡、過往跳歷史列
+const renderLowerCal = makeCalendar({
+  titleId: "cal2-title", gridId: "cal2-grid", prevId: "cal2-prev", nextId: "cal2-next",
+  onPick: (ev) => flashTo("full-event-card-" + ev.id) || flashTo("event-card-" + ev.id),
+});
+
+const renderCalendar = () => { renderHeroCal(); renderLowerCal(); };
+const bindCalendarNav = () => {};
 
 /* ---------- 跟著影片學英文（reelscript 音檔 + 同步逐字稿） ---------- */
 

@@ -110,7 +110,7 @@ const loadEvents = async () => {
       title.textContent = `${fmtDate(ev.date)} ${ev.title}`;
       const sub = document.createElement("span");
       sub.className = "s";
-      sub.textContent = `${ev.time || ""}｜詳細地點報名後解鎖` + (left !== null ? `　剩 ${left} 名額` : "");
+      sub.textContent = `${ev.time || ""}｜${ev.location || "地點確認中"}` + (left !== null ? `　剩 ${left} 名額` : "");
       text.appendChild(title);
       text.appendChild(document.createElement("br"));
       text.appendChild(sub);

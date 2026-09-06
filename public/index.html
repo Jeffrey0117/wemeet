@@ -201,7 +201,16 @@
 
 <section class="section" id="events">
   <h2><span class="squiggle">近期活動</span></h2>
-  <p class="section-lead">每一場的完整介紹都在這，看對頻了就直接報。</p>
+  <p class="section-lead">每一場的完整介紹都在這，看對頻了就直接報。<br>日曆可以往回翻，過去辦過什麼一目了然。</p>
+  <div class="cal cal-lower" id="calendar2">
+    <div class="cal-head">
+      <button type="button" class="cal-nav" id="cal2-prev" aria-label="上個月">←</button>
+      <span class="cal-title" id="cal2-title"></span>
+      <button type="button" class="cal-nav" id="cal2-next" aria-label="下個月">→</button>
+    </div>
+    <div class="cal-grid" id="cal2-grid"></div>
+    <p class="cal-hint">橘點＝開放報名中，灰點＝辦過的場，點日期看詳情</p>
+  </div>
   <div id="full-event-list" class="event-list"></div>
   <div id="history-wrap" hidden>
     <h3 class="event-history-title">過往小聚</h3>

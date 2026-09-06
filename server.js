@@ -274,12 +274,14 @@ const publicEvents = () => {
         const { capacity, ...noCap } = pub;
         return { ...noCap, past, hideCount: true };
       }
+      // 場地預設公開；單場要低調再設 hideVenue: true
+      const venue = e.hideVenue ? {} : { location: e.location || "", mapUrl: e.mapUrl || "" };
       if (e.fomo) {
         // 稀缺顯示：對外顯示剩餘 = max(1, fomo - 已報名)，永不顯示滿、永不擋報名
         const { capacity, fomo, ...noCap } = pub;
-        return { ...noCap, past, left: Math.max(1, fomo - (counts[e.id] || 0)) };
+        return { ...noCap, ...venue, past, left: Math.max(1, fomo - (counts[e.id] || 0)) };
       }
-      return { ...pub, past, signedUp: counts[e.id] || 0 };
+      return { ...pub, ...venue, past, signedUp: counts[e.id] || 0 };
     })
     .sort((a, b) => String(a.date).localeCompare(String(b.date)));
 };
