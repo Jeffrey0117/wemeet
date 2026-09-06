@@ -1021,6 +1021,30 @@ const server = http.createServer((req, res) => {
     sendJson(res, 200, { wall: members });
     return;
   }
+  // 已報名者回查場地：POST /api/venue-lookup {contact} → 未過期場次的場地與導航
+  if (req.method === "POST" && pathname === "/api/venue-lookup") {
+    if (rateLimited(clientIp(req))) {
+      sendJson(res, 429, { error: "查詢太頻繁，休息一下再試" });
+      return;
+    }
+    readJsonBody(req, res, (body) => {
+      const norm = (v) => String(v || "").trim().toLowerCase();
+      const contact = norm(body.contact);
+      if (!contact) {
+        sendJson(res, 400, { error: "輸入你報名時填的 LINE ID 或電話" });
+        return;
+      }
+      const events = readJsonFile(EVENTS_PATH, []);
+      const mine = readJsonFile(SIGNUPS_PATH, [])
+        .filter((x) => x.eventId && norm(x.contact) === contact)
+        .map((x) => events.find((e) => e.id === x.eventId))
+        .filter((e) => e && !(isPast(e) || e.ended === true))
+        .map((e) => ({ title: e.title, date: e.date, time: e.time || "", location: e.location || "", mapUrl: e.mapUrl || "" }));
+      sendJson(res, 200, { found: mine });
+    });
+    return;
+  }
+
   if (req.method === "POST" && pathname === "/api/webhooks/letmeuse") {
     handleLmuWebhook(req, res);
     return;

@@ -100,6 +100,20 @@
     .venue-loc { color: var(--cola-soft); font-size: 0.92rem; margin-bottom: 0.7rem; }
     .done-track { font-size: 0.88rem; color: var(--cola-soft); margin-bottom: 1.2rem; }
     .done-track a { color: var(--fizz); }
+    .lookup-wrap { max-width: 520px; margin: 0 auto 2rem; padding: 0 1.2rem; }
+    .lookup-title { text-align: center; font-size: 0.92rem; color: var(--cola-soft); margin-bottom: 0.6rem; }
+    .lookup-row { display: flex; gap: 0.6rem; }
+    .lookup-row input {
+      flex: 1; font-family: var(--font-body); font-size: 0.95rem;
+      padding: 0.6rem 0.85rem; border: 1.5px solid var(--cream-deep);
+      border-radius: 12px; background: #fff; color: var(--cola);
+    }
+    .lu-item {
+      background: var(--card); border-radius: 12px; box-shadow: var(--shadow);
+      padding: 0.8rem 1rem; margin-top: 0.7rem; font-size: 0.92rem;
+    }
+    .lu-item a { color: var(--fizz); }
+    .lu-none { text-align: center; font-size: 0.88rem; color: var(--cola-soft); margin-top: 0.7rem; }
     .ig-box {
       text-align: center; border: 1.5px dashed var(--caramel);
       border-radius: 14px; padding: 1.4rem 1rem; margin-bottom: 1.2rem;
@@ -257,6 +271,15 @@
     </div>
     <p class="quiz-msg" id="quiz-msg" role="status"></p>
   </div>
+</div>
+
+<div class="lookup-wrap">
+  <p class="lookup-title">已經報名過？在這裡查場地</p>
+  <div class="lookup-row">
+    <input type="text" id="lu-contact" maxlength="120" placeholder="輸入你報名時填的 LINE ID 或電話">
+    <button type="button" class="btn btn-ghost" id="lu-btn">查場地</button>
+  </div>
+  <div id="lu-result"></div>
 </div>
 
 <footer class="footer">

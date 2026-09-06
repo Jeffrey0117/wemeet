@@ -284,3 +284,52 @@ $("btn-prev").addEventListener("click", () => {
 applyFlow();
 loadEvents();
 prefillFromMember();
+
+
+/* ---------- 已報名查場地 ---------- */
+document.getElementById("lu-btn").addEventListener("click", async () => {
+  const box = document.getElementById("lu-result");
+  box.textContent = "";
+  const contact = document.getElementById("lu-contact").value.trim();
+  if (!contact) return;
+  try {
+    const res = await fetch("/api/venue-lookup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ contact }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "查詢失敗");
+    if (!(data.found || []).length) {
+      const p = document.createElement("p");
+      p.className = "lu-none";
+      p.textContent = "查不到報名紀錄，確認一下輸入的是報名時填的聯絡方式";
+      box.appendChild(p);
+      return;
+    }
+    data.found.forEach((ev) => {
+      const item = document.createElement("div");
+      item.className = "lu-item";
+      const t = document.createElement("p");
+      t.innerHTML = "<strong>" + fmtDate(ev.date) + " " + ev.title + "</strong>　" + (ev.time || "");
+      item.appendChild(t);
+      const loc = document.createElement("p");
+      loc.textContent = ev.location || "場地確認中，確定後會通知";
+      item.appendChild(loc);
+      if (ev.mapUrl) {
+        const a = document.createElement("a");
+        a.href = ev.mapUrl;
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.textContent = "開啟導航 →";
+        item.appendChild(a);
+      }
+      box.appendChild(item);
+    });
+  } catch (err) {
+    const p = document.createElement("p");
+    p.className = "lu-none";
+    p.textContent = err.message;
+    box.appendChild(p);
+  }
+});
