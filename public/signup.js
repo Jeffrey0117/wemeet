@@ -28,7 +28,10 @@ const setMsg = (text) => {
 const computeFlow = () => {
   let f = [...ALL_STEPS];
   if (skipEventStep) f = f.filter((s) => s !== 0);
-  if (memberExpress) f = f.filter((s) => s !== 1 && s !== 3 && s !== 4);
+  if (memberExpress) {
+    const ev = typeof currentEvent === "function" ? currentEvent() : null;
+    f = f.filter((s) => (s !== 1 || (ev && ev.poll)) && s !== 3 && s !== 4);
+  }
   flow = f;
   if (flowPos >= flow.length) flowPos = flow.length - 1;
 };
@@ -44,16 +47,52 @@ const renderProgress = (done) => {
 
 let eventsCache = [];
 
+const currentEvent = () =>
+  eventsCache.find((e) => e.id === ((document.querySelector('input[name="eventId"]:checked') || {}).value || ""));
+
+/* 時段投票（event.poll）：可複選，答案跟報名一起送出 */
+const renderPoll = () => {
+  const ev = currentEvent();
+  const box = $("poll-box");
+  if (!box) return;
+  if (!ev || !ev.poll) { box.hidden = true; return; }
+  box.hidden = false;
+  $("poll-q").innerHTML = (ev.poll.question || "哪些時段你可以？") + '<span class="req-star" aria-hidden="true">*</span>（可複選）';
+  const wrap = $("poll-chips");
+  const kept = new Set([...wrap.querySelectorAll("input:checked")].map((c) => c.value));
+  wrap.textContent = "";
+  (ev.poll.options || []).forEach((opt) => {
+    const label = document.createElement("label");
+    label.className = "gchip";
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.name = "poll-pick";
+    cb.value = opt;
+    cb.checked = kept.has(opt);
+    label.appendChild(cb);
+    label.appendChild(document.createTextNode(opt));
+    wrap.appendChild(label);
+  });
+};
+
+document.addEventListener("change", (e) => {
+  if (e.target && e.target.name === "eventId") { computeFlow(); renderPoll(); }
+});
+
 const updateFeeBox = () => {
   const picked = (document.querySelector('input[name="eventId"]:checked') || {}).value || "";
   const ev = eventsCache.find((e) => e.id === picked);
   const fee = ev && ev.fee != null ? ev.fee : 50;
   document.getElementById("fee-num").textContent = `報名費 $${fee}`;
-  document.getElementById("fee-sub").textContent = (ev && ev.feeNote) || "現場繳費就好，不用先匯款";
+  document.getElementById("fee-sub").textContent =
+    (ev && ev.feeNote) || (ev && ev.prepay ? "先匯款鎖定名額（報名完成會給帳號），不方便匯款現場繳也 OK" : "現場繳費就好，不用先匯款");
+  const agreeTxt = document.getElementById("agree-pay-text");
+  if (agreeTxt) agreeTxt.textContent = ev && ev.prepay ? "我了解報名費金額與付款方式（先匯款鎖位，或現場繳）" : "我了解活動報名費金額，當天現場繳費";
 };
 
 const applyFlow = () => {
   const step = flow[flowPos];
+  if (step === 1) renderPoll();
   if (step === 2) updateFeeBox();
   steps.forEach((s) => s.classList.toggle("on", s.dataset.step === String(step)));
   renderProgress(false);
@@ -184,9 +223,12 @@ const validate = (step) => {
     if (!$("f-contact").value.trim()) return "留個 LINE ID 或電話，才通知得到你";
     const age = parseInt($("f-age").value, 10);
     if (!age || age < 12 || age > 99) return "年紀填一下（12–99），我們好安排同溫層";
-    const pickedEv = eventsCache.find((e) => e.id === ((document.querySelector('input[name="eventId"]:checked') || {}).value || ""));
+    const pickedEv = currentEvent();
     if (pickedEv && pickedEv.ratio && !(document.querySelector('input[name="gender"]:checked') || {}).value) {
       return "這場會平衡參加組成，性別選一下";
+    }
+    if (pickedEv && pickedEv.poll && !document.querySelector('input[name="poll-pick"]:checked')) {
+      return "勾一下你可以的時段，我們才排得進去";
     }
   }
   if (step === 2) {
@@ -216,6 +258,7 @@ const submit = async () => {
         igHandle: $("f-ig").value.trim(),
         igFollowed: $("f-followed").checked,
         gender: (document.querySelector('input[name="gender"]:checked') || {}).value || "",
+        picks: [...document.querySelectorAll('input[name="poll-pick"]:checked')].map((c) => c.value),
         agreedPayment: $("f-agree-pay").checked,
         agreedAttend: $("f-agree-attend").checked,
       }),
@@ -244,6 +287,21 @@ const submit = async () => {
           $("venue-nav").hidden = false;
           $("venue-nav").href = ev.mapUrl;
         }
+      }
+      // 先匯款場：揭露轉帳資訊（只有報名成功才看得到）
+      if (data.event && data.event.prepay) {
+        const p = data.event.prepay;
+        $("done-pay").hidden = false;
+        $("pay-bank").textContent = p.bank || "";
+        $("pay-account").textContent = p.account || "";
+        $("pay-name").textContent = p.name ? "戶名：" + p.name : "";
+        $("pay-copy").addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(p.account || "");
+            $("pay-copy").textContent = "已複製 ✓";
+            setTimeout(() => { $("pay-copy").textContent = "複製帳號"; }, 2000);
+          } catch (err) {}
+        });
       }
       // 報名成功的即時回饋：鈴鐺紅點立刻亮、完成頁給「看我的報名」入口
       const loggedIn = !!(window.letmeuse && window.letmeuse.user);

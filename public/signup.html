@@ -154,6 +154,24 @@
     }
     .done-next-alt { margin: 0.7rem 0 0 !important; font-size: 0.88rem; }
     .done-next-alt a { color: var(--fizz); }
+    .poll-chips { flex-wrap: wrap; }
+    .done-pay {
+      background: #fff7f2; border: 1.5px solid var(--fizz); border-radius: 14px;
+      padding: 1.1rem 1.2rem; margin-bottom: 1.4rem;
+    }
+    .pay-title { font-family: var(--font-display); font-weight: 700; color: var(--fizz); margin-bottom: 0.5rem !important; }
+    .pay-bank { margin-bottom: 0.15rem !important; color: var(--cola) !important; }
+    .pay-acct {
+      display: flex; align-items: center; justify-content: center; gap: 0.6rem;
+      font-family: var(--font-display); font-size: 1.35rem; color: var(--cola) !important;
+      margin-bottom: 0.15rem !important; letter-spacing: 0.04em;
+    }
+    .btn-copy {
+      font-family: var(--font-body); font-size: 0.82rem; cursor: pointer;
+      background: var(--fizz); color: #fff; border: none; border-radius: 999px; padding: 0.3rem 0.8rem;
+    }
+    .pay-name { font-size: 0.9rem; margin-bottom: 0.6rem !important; }
+    .pay-hint { font-size: 0.88rem; margin-bottom: 0 !important; }
   </style>
   <script defer src="https://adman.isnowfriend.com/embed/track.js" data-site="site_vWNeBS43zP"></script>
 </head>
@@ -215,6 +233,9 @@
           <label class="gchip"><input type="radio" name="gender" value="female">女</label>
         </div>
       </div>
+      <div class="field" id="poll-box" hidden><span id="poll-q"></span>
+        <div class="gender-chips poll-chips" id="poll-chips"></div>
+      </div>
     </section>
 
     <!-- Step 3：報名須知（費用 + 出席承諾） -->
@@ -228,7 +249,7 @@
       <div class="choice">
         <label>
           <input type="checkbox" id="f-agree-pay">
-          <span class="t">我了解活動報名費金額，當天現場繳費</span>
+          <span class="t" id="agree-pay-text">我了解活動報名費金額，當天現場繳費</span>
         </label>
         <label>
           <input type="checkbox" id="f-agree-attend">
@@ -281,6 +302,13 @@
           <p class="venue-title" id="venue-title"></p>
           <p class="venue-loc" id="venue-loc"></p>
           <a class="btn btn-ghost" id="venue-nav" href="#" target="_blank" rel="noopener" hidden>開啟導航 →</a>
+        </div>
+        <div class="done-pay" id="done-pay" hidden>
+          <p class="pay-title">先轉帳，名額直接鎖定</p>
+          <p class="pay-bank" id="pay-bank"></p>
+          <p class="pay-acct"><span id="pay-account"></span><button type="button" class="btn-copy" id="pay-copy">複製帳號</button></p>
+          <p class="pay-name" id="pay-name"></p>
+          <p class="pay-hint">轉完私訊 IG 附<strong>你帳號的後五碼</strong>，核對後鈴鐺會通知你「名額鎖定」。<br>真的不方便匯款，當天現場繳也 OK。</p>
         </div>
         <div class="done-next">
           <p class="done-next-kicker">最後一步</p>

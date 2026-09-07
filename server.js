@@ -268,11 +268,12 @@ const publicEvents = () => {
       // 地點一律不對外（場地會重複用，過往地址=洩漏未來場地；報名後才解鎖）
       // ended:true = 手動提前收進歷史（當天活動結束、不想等午夜自動下架）
       const past = isPast(e) || e.ended === true;
-      const { location, mapUrl, ...pub } = e;
+      const { location, mapUrl, prepay, ...pub } = e;
+      const payFlag = e.prepay ? { prepay: true } : {};
       if (e.ratio) {
         // 抓比例的場次不洩漏名額與報名數（候補調節不可見）
         const { capacity, ...noCap } = pub;
-        return { ...noCap, past, hideCount: true };
+        return { ...noCap, ...payFlag, past, hideCount: true };
       }
       // 場地預設公開；單場要低調再設 hideVenue: true
       const venue = e.hideVenue ? {} : { location: e.location || "", mapUrl: e.mapUrl || "" };
@@ -282,11 +283,11 @@ const publicEvents = () => {
         const signed = counts[e.id] || 0;
         const { capacity, fomo, buyout, hardCap, ...noCap } = pub;
         if (e.buyout && signed >= (e.capacity || 8)) {
-          return { ...noCap, ...venue, past, buyoutMode: { signed, goal: e.buyout, reached: signed >= e.buyout } };
+          return { ...noCap, ...venue, ...payFlag, past, buyoutMode: { signed, goal: e.buyout, reached: signed >= e.buyout } };
         }
-        return { ...noCap, ...venue, past, left: Math.max(1, fomo - signed) };
+        return { ...noCap, ...venue, ...payFlag, past, left: Math.max(1, fomo - signed) };
       }
-      return { ...pub, ...venue, past, signedUp: counts[e.id] || 0 };
+      return { ...pub, ...venue, ...payFlag, past, signedUp: counts[e.id] || 0 };
     })
     .sort((a, b) => String(a.date).localeCompare(String(b.date)));
 };
@@ -309,6 +310,7 @@ const handleSignup = (req, res) => {
     const agreedPayment = body.agreedPayment === true;
     const agreedAttend = body.agreedAttend === true;
     const eventId = cleanStr(body.eventId, 60); // 空字串 = 先加入名單、開團通知
+    const rawPicks = Array.isArray(body.picks) ? body.picks.slice(0, 8).map((p) => cleanStr(p, 40)).filter(Boolean) : [];
     if (!name || !contact) {
       sendJson(res, 400, { error: "暱稱和聯絡方式都要填喔" });
       return;
@@ -324,7 +326,12 @@ const handleSignup = (req, res) => {
     const events = readJsonFile(EVENTS_PATH, []);
     const memberSub = (lmuUser(req) || {}).sub || null;
     const eventPublicInfo = (e) =>
-      e ? { title: e.title, date: e.date, time: e.time || "", location: e.location || "", mapUrl: e.mapUrl || "" } : null;
+      e
+        ? {
+            title: e.title, date: e.date, time: e.time || "", location: e.location || "", mapUrl: e.mapUrl || "",
+            ...(e.prepay && typeof e.prepay === "object" ? { prepay: e.prepay } : {}),
+          }
+        : null;
 
     let joinedEvent = null;
     let waitlisted = false;
@@ -345,6 +352,11 @@ const handleSignup = (req, res) => {
       );
       if (dup) {
         sendJson(res, 200, { success: true, already: true, event: eventPublicInfo(event) });
+        return;
+      }
+      // 時段投票場：至少勾一個（只收活動定義過的選項）
+      if (event.poll && !rawPicks.some((p) => (event.poll.options || []).includes(p))) {
+        sendJson(res, 400, { error: "勾一下你可以的時段，我們才排得進去" });
         return;
       }
       const all = readJsonFile(SIGNUPS_PATH, []);
@@ -392,6 +404,7 @@ const handleSignup = (req, res) => {
       gender,
       age,
       waitlisted,
+      picks: joinedEvent && joinedEvent.poll ? rawPicks.filter((p) => (joinedEvent.poll.options || []).includes(p)) : [],
       agreedPayment,
       agreedAttend,
       paid: false,

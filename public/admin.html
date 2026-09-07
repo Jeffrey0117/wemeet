@@ -50,7 +50,7 @@
     </div>
     <div class="table-scroll">
       <table>
-        <thead><tr><th>收款</th><th>時間</th><th>活動</th><th>暱稱</th><th>年紀</th><th>性別</th><th>LINE/電話</th><th>IG</th><th>想說的話</th><th></th></tr></thead>
+        <thead><tr><th>收款</th><th>時間</th><th>活動</th><th>暱稱</th><th>年紀</th><th>性別</th><th>時段</th><th>LINE/電話</th><th>IG</th><th>想說的話</th><th></th></tr></thead>
         <tbody id="signup-rows"></tbody>
       </table>
     </div>
@@ -204,6 +204,18 @@ const renderSignups = () => {
     p.textContent = `${eventTitle(eid)}：男 ${t.m}・女 ${t.f}` + (t.w ? `・候補 ${t.w}` : "");
     tallyBox.appendChild(p);
   });
+  const pollTally = {};
+  signups.forEach((x) => {
+    if (!x.eventId || !Array.isArray(x.picks) || !x.picks.length) return;
+    const t = (pollTally[x.eventId] = pollTally[x.eventId] || {});
+    x.picks.forEach((pk) => { t[pk] = (t[pk] || 0) + 1; });
+  });
+  Object.entries(pollTally).forEach(([eid, t]) => {
+    const p = document.createElement("p");
+    p.className = "muted";
+    p.textContent = `${eventTitle(eid)} 時段票：` + Object.entries(t).map(([k, v]) => `${k} ${v} 票`).join("・");
+    tallyBox.appendChild(p);
+  });
   const tbody = $("signup-rows");
   tbody.textContent = "";
   signups.forEach((s) => {
@@ -226,7 +238,7 @@ const renderSignups = () => {
     tr.appendChild(paidTd);
 
     const ig = (s.igHandle || "") + (s.igFollowed ? "（已追蹤 ✓）" : "");
-    [new Date(s.createdAt).toLocaleString("zh-TW"), eventTitle(s.eventId), s.name, s.age || "", (s.gender === "male" ? "男" : s.gender === "female" ? "女" : "") + (s.waitlisted ? "（候補）" : ""), s.contact, ig, s.note || ""].forEach((v) => {
+    [new Date(s.createdAt).toLocaleString("zh-TW"), eventTitle(s.eventId), s.name, s.age || "", (s.gender === "male" ? "男" : s.gender === "female" ? "女" : "") + (s.waitlisted ? "（候補）" : ""), (s.picks || []).join("、"), s.contact, ig, s.note || ""].forEach((v) => {
       const td = document.createElement("td");
       td.textContent = v;
       tr.appendChild(td);
