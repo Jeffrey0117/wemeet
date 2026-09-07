@@ -131,8 +131,29 @@
     }
     .fee-box .fee-num { display: block; font-family: var(--font-display); font-size: 1.6rem; color: var(--fizz); }
     .fee-box .fee-sub { font-size: 0.88rem; color: var(--cola-soft); }
-    .done h2 { text-align: center; margin: 0.6rem 0; }
+    .done h2 { text-align: center; margin: 0.6rem 0; font-size: 2rem; }
     .done p { color: var(--cola-soft); margin-bottom: 1.4rem; }
+    .done-check svg { display: block; margin: 0 auto; }
+    .done-check { animation: dcPop 0.45s cubic-bezier(0.5, 1.6, 0.4, 1) both; }
+    .dc-ring { fill: #eef5ef; stroke: var(--mint); stroke-width: 3; }
+    .dc-tick {
+      stroke: #4d7d61; stroke-width: 5.5; stroke-linecap: round; stroke-linejoin: round;
+      stroke-dasharray: 42; stroke-dashoffset: 42;
+      animation: dcDraw 0.5s 0.3s ease forwards;
+    }
+    @keyframes dcPop { from { transform: scale(0.4); opacity: 0; } }
+    @keyframes dcDraw { to { stroke-dashoffset: 0; } }
+    .done-sub strong { color: #4d7d61; }
+    .done-next {
+      border: 1.5px dashed var(--caramel); border-radius: 14px;
+      padding: 1.3rem 1rem 1.4rem; margin-bottom: 1.4rem;
+    }
+    .done-next-kicker {
+      font-family: var(--font-display); font-weight: 700; color: var(--caramel);
+      letter-spacing: 0.08em; margin-bottom: 0.5rem !important;
+    }
+    .done-next-alt { margin: 0.7rem 0 0 !important; font-size: 0.88rem; }
+    .done-next-alt a { color: var(--fizz); }
   </style>
   <script defer src="https://adman.isnowfriend.com/embed/track.js" data-site="site_vWNeBS43zP"></script>
 </head>
@@ -248,18 +269,27 @@
     <!-- 完成畫面 -->
     <section class="step" data-step="done">
       <div class="done">
-        <div class="big"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="48" height="48"><path d="m6 8 1.75 12.28a2 2 0 0 0 2 1.72h4.54a2 2 0 0 0 2-1.72L18 8"/><path d="M5 8h14"/><path d="M7 15a6.47 6.47 0 0 1 5 0 6.47 6.47 0 0 0 5 0"/><path d="m12 8 1-6h2"/></svg></div>
-        <h2>還差最後一步！</h2>
-        <p>資料收到了。現在<strong>私訊我們的 IG</strong>，跟我們說你報名了，<br>我們確認後<strong>名額就是你的</strong>，報名費 50 元當天現場繳。</p>
+        <div class="done-check" aria-hidden="true">
+          <svg viewBox="0 0 64 64" width="88" height="88" fill="none">
+            <circle class="dc-ring" cx="32" cy="32" r="28"/>
+            <path class="dc-tick" d="M20 33.5 28.5 42 44 24"/>
+          </svg>
+        </div>
+        <h2 id="done-title">報名成功！</h2>
+        <p class="done-sub" id="done-sub">你的資料<strong>已經在名單上</strong>，名額先幫你留著。<br>不用重複報名、也不用怕沒報到。</p>
         <div class="done-venue" id="done-venue" hidden>
           <p class="venue-title" id="venue-title"></p>
           <p class="venue-loc" id="venue-loc"></p>
           <a class="btn btn-ghost" id="venue-nav" href="#" target="_blank" rel="noopener" hidden>開啟導航 →</a>
         </div>
+        <div class="done-next">
+          <p class="done-next-kicker">最後一步</p>
+          <p id="done-next-text">私訊我們的 IG 說聲「我報名了」，<br>我們確認後<strong>名額就是你的</strong>，報名費 50 元當天現場繳。</p>
+          <a class="btn btn-primary" href="https://ig.me/m/we_i_meet" target="_blank" rel="noopener">私訊 @we_i_meet 完成確認 →</a>
+          <p class="done-next-alt">或直接密創辦人 <a href="https://ig.me/m/justmi_ok" target="_blank" rel="noopener">@justmi_ok</a></p>
+        </div>
         <p class="done-track" id="done-track-member" hidden>已記進你的會員帳號，<a href="/me">隨時到會員中心看報名紀錄</a>，確認後鈴鐺會通知你。</p>
         <p class="done-track" id="done-track-guest" hidden><a href="/me">建立會員</a>可以隨時查報名紀錄，確認、開新場都會收到站內通知。</p>
-        <a class="btn btn-primary" href="https://ig.me/m/we_i_meet" target="_blank" rel="noopener">私訊 @we_i_meet 完成報名 →</a>
-        <p style="margin-top:0.6rem;font-size:0.88rem">或直接密創辦人 <a href="https://ig.me/m/justmi_ok" target="_blank" rel="noopener" style="color:var(--fizz)">@justmi_ok</a></p>
         <p style="margin-top:1.6rem;margin-bottom:0.6rem">等確認的空檔，先把你的 <strong>Quickky 名片卡</strong>準備好，<br>小聚現場用掃的交換，不用尷尬地互要 IG。</p>
         <a class="btn btn-ghost" href="/me"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="16" height="16"><path d="M16 10h2"/><path d="M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/></svg> 準備我的名片卡</a>
         <p style="margin-top:1rem"><a href="/">回官網首頁</a></p>

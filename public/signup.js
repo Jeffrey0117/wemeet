@@ -69,8 +69,8 @@ const showDone = () => {
   $("quiz-nav").hidden = true;
   // 會員用暱稱打招呼，秒報名的爽感收尾
   if (memberNickname) {
-    const title = document.querySelector('[data-step="done"] h2');
-    if (title) title.textContent = `${memberNickname}，搞定！`;
+    const title = document.getElementById("done-title");
+    if (title && title.textContent === "報名成功！") title.textContent = `${memberNickname}，報名成功！`;
   }
   setMsg("");
 };
@@ -224,19 +224,15 @@ const submit = async () => {
     if (res.ok && data.success) {
       // 候補：軟文案（不透露額度機制）
       if (data.waitlisted) {
-        const doneEl = document.querySelector('[data-step="done"]');
-        const title = doneEl.querySelector("h2");
-        if (title) title.textContent = "報名收到了！";
-        const firstP = doneEl.querySelector("p");
-        if (firstP) firstP.innerHTML = "這場報名很熱烈，我們會<strong>依序私訊確認名額</strong>。<br>先私訊 IG 跟我們說一聲，確認後會通知你場地細節。";
+        document.getElementById("done-title").textContent = "報名收到了！";
+        document.getElementById("done-sub").innerHTML = "你的資料<strong>已經在名單上</strong>，不用重複報名。<br>這場報名很熱烈，我們會依序私訊確認名額。";
+        document.getElementById("done-next-text").innerHTML = "私訊我們的 IG 說聲「我報名了」，<br>確認到名額後會馬上通知你場地細節。";
       }
       // 重複報名：不新增資料，提示已報過並再次顯示場地
       if (data.already) {
-        const doneEl = document.querySelector('[data-step="done"]');
-        const title = doneEl.querySelector("h2");
-        if (title) title.textContent = "你已經報名過這場了！";
-        const firstP = doneEl.querySelector("p");
-        if (firstP) firstP.innerHTML = "不用重複報名，場地資訊在下面。<br>還沒私訊過的話，記得<strong>私訊 IG 跟我們說一聲</strong>。";
+        document.getElementById("done-title").textContent = "你早就報好了！";
+        document.getElementById("done-sub").innerHTML = "這筆是你之前的報名，<strong>一直都在名單上</strong>。<br>完全不用再報一次，場地資訊在下面。";
+        document.getElementById("done-next-text").innerHTML = "還沒私訊過的話，記得私訊 IG 說一聲，<br>我們確認後<strong>名額就是你的</strong>。";
       }
       // 報名成功揭露場地：顯示地點與導航
       if (data.event && (data.event.location || data.event.mapUrl)) {
