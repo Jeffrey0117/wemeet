@@ -170,8 +170,12 @@ const loadEvents = async () => {
       sq.className = "squiggle";
       sq.textContent = preselected.title;
       t.appendChild(sq);
-      document.getElementById("eh-meta").textContent =
-        `${fmtDate(preselected.date)}・${preselected.time || ""}` + (preselected.location ? `・${preselected.location}` : "");
+      const meta = document.getElementById("eh-meta");
+      meta.textContent = `${fmtDate(preselected.date)}・${preselected.time || ""}`;
+      if (preselected.location) {
+        meta.appendChild(document.createElement("br"));
+        meta.appendChild(document.createTextNode(preselected.location));
+      }
       const poster = $("eh-poster");
       if (preselected.poster) {
         poster.src = preselected.poster;
