@@ -268,7 +268,7 @@ const publicEvents = () => {
       // 地點一律不對外（場地會重複用，過往地址=洩漏未來場地；報名後才解鎖）
       // ended:true = 手動提前收進歷史（當天活動結束、不想等午夜自動下架）
       const past = isPast(e) || e.ended === true;
-      const { location, mapUrl, prepay, waitNote, ...pub } = e;
+      const { location, mapUrl, prepay, waitNote, heatNote, heatFrom, ...pub } = e;
       const payFlag = e.prepay ? { prepay: true } : {};
       if (e.ratio) {
         // 抓比例的場次不洩漏名額與報名數（候補調節不可見）
@@ -434,10 +434,18 @@ const handleSignup = (req, res) => {
         }
       }
       // 報名成功即揭露該場地點與導航連結（完成畫面用）；候補用軟文案、不給地點
+      // heatFrom/heatNote：正取人數到門檻後，完成頁附一行軟提醒（可能分流、名額已保留）
+      const heatNote =
+        !waitlisted && joinedEvent && joinedEvent.heatNote && joinedEvent.heatFrom
+          ? (readJsonFile(SIGNUPS_PATH, []).filter((x) => x.eventId === joinedEvent.id && !x.waitlisted).length >= joinedEvent.heatFrom
+              ? joinedEvent.heatNote
+              : undefined)
+          : undefined;
       sendJson(res, 200, {
         success: true,
         waitlisted,
         waitNote: (waitlisted && joinedEvent && joinedEvent.waitNote) || undefined,
+        heatNote,
         event: waitlisted ? null : eventPublicInfo(joinedEvent),
       });
     });

@@ -317,6 +317,15 @@ const submit = async () => {
           $("venue-nav").href = ev.mapUrl;
         }
       }
+      // 人數到門檻的軟提醒（正取，名額保留，只是先說可能分流）
+      if (data.heatNote && !data.waitlisted && !data.already) {
+        const sub = document.getElementById("done-sub");
+        sub.appendChild(document.createElement("br"));
+        const note = document.createElement("span");
+        note.style.fontSize = "0.9em";
+        note.textContent = data.heatNote;
+        sub.appendChild(note);
+      }
       // 先匯款場：揭露轉帳資訊（只有報名成功才看得到）
       if (data.event && data.event.prepay) {
         const p = data.event.prepay;
