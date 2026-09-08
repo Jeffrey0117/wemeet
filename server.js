@@ -961,7 +961,8 @@ const sendSignupHtml = (req, res) => {
       .join("・");
     if (tail) parts.push(tail);
     const desc = parts.join(" ") || "一分鐘填完報名，下一場小聚見。";
-    const img = ev.poster ? "https://wemeet.pipee.tw" + ev.poster : "https://wemeet.pipee.tw/og.png";
+    // OG 圖：優先用場次專屬橫版 og 圖（1200x630 品牌模板），海報是直式、直接當卡會被裁爛
+    const img = ev.og ? "https://wemeet.pipee.tw" + ev.og : "https://wemeet.pipee.tw/og.png";
     // 一律用 replacer function，避免內容裡的 $ 被當群組參照
     html = html
       .replace(/<title>[^<]*<\/title>/, () => `<title>${escHtml(title)}｜Chill Club 揪可樂</title>`)
@@ -969,12 +970,6 @@ const sendSignupHtml = (req, res) => {
       .replace(/<meta property="og:title" content="[^"]*"/, () => `<meta property="og:title" content="${escHtml(title)}"`)
       .replace(/<meta property="og:description" content="[^"]*"/, () => `<meta property="og:description" content="${escHtml(desc)}"`)
       .replace(/<meta property="og:image" content="[^"]*"/, () => `<meta property="og:image" content="${escHtml(img)}"`);
-    if (ev.poster) {
-      // 海報是直式，拿掉預設 og 圖的 1200x630 尺寸宣告
-      html = html
-        .replace(/\s*<meta property="og:image:width" content="[^"]*">/, "")
-        .replace(/\s*<meta property="og:image:height" content="[^"]*">/, "");
-    }
   }
   res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-cache" });
   res.end(html);
