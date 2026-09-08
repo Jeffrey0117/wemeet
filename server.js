@@ -302,6 +302,7 @@ const handleSignup = (req, res) => {
   readJsonBody(req, res, (body) => {
     const name = cleanStr(body.name, 40);
     const contact = cleanStr(body.contact, 120);
+    const phone = cleanStr(body.phone, 40);
     const note = cleanStr(body.note, 300);
     const igHandle = cleanStr(body.igHandle, 60);
     const igFollowed = body.igFollowed === true;
@@ -398,6 +399,7 @@ const handleSignup = (req, res) => {
       eventId: eventId || null,
       name,
       contact,
+      phone,
       note,
       igHandle,
       igFollowed,

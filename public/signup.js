@@ -233,7 +233,7 @@ $("express-off").addEventListener("click", () => {
 const validate = (step) => {
   if (step === 1) {
     if (!$("f-name").value.trim()) return "暱稱要填喔，不然不知道怎麼叫你";
-    if (!$("f-contact").value.trim()) return "留個 LINE ID 或電話，才通知得到你";
+    if (!$("f-contact").value.trim() && !$("f-phone").value.trim()) return "LINE ID 或電話至少留一個，才通知得到你";
     const age = parseInt($("f-age").value, 10);
     if (!age || age < 12 || age > 99) return "年紀填一下（12–99），我們好安排同溫層";
     const pickedEv = currentEvent();
@@ -247,7 +247,7 @@ const validate = (step) => {
   if (step === 2) {
     if (!$("f-agree-pay").checked || !$("f-agree-attend").checked) return "兩個都勾一下，我們才能幫你留位子";
     // 秒報名模式跳過稱呼步，送出前補驗會員資料真的有帶到
-    if (memberExpress && (!$("f-name").value.trim() || !$("f-contact").value.trim() || !parseInt($("f-age").value, 10))) {
+    if (memberExpress && (!$("f-name").value.trim() || (!$("f-contact").value.trim() && !$("f-phone").value.trim()) || !parseInt($("f-age").value, 10))) {
       return "會員資料沒帶齊，請改用完整流程填寫";
     }
   }
@@ -265,7 +265,8 @@ const submit = async () => {
       body: JSON.stringify({
         eventId: (document.querySelector('input[name="eventId"]:checked') || {}).value || "",
         name: $("f-name").value.trim(),
-        contact: $("f-contact").value.trim(),
+        contact: $("f-contact").value.trim() || $("f-phone").value.trim(),
+        phone: $("f-phone").value.trim(),
         age: parseInt($("f-age").value, 10) || 0,
         note: $("f-note").value.trim(),
         igHandle: $("f-ig").value.trim(),

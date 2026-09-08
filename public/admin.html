@@ -238,7 +238,7 @@ const renderSignups = () => {
     tr.appendChild(paidTd);
 
     const ig = (s.igHandle || "") + (s.igFollowed ? "（已追蹤 ✓）" : "");
-    [new Date(s.createdAt).toLocaleString("zh-TW"), eventTitle(s.eventId), s.name, s.age || "", (s.gender === "male" ? "男" : s.gender === "female" ? "女" : "") + (s.waitlisted ? "（候補）" : ""), (s.picks || []).join("、"), s.contact, ig, s.note || ""].forEach((v) => {
+    [new Date(s.createdAt).toLocaleString("zh-TW"), eventTitle(s.eventId), s.name, s.age || "", (s.gender === "male" ? "男" : s.gender === "female" ? "女" : "") + (s.waitlisted ? "（候補）" : ""), (s.picks || []).join("、"), s.contact + (s.phone && s.phone !== s.contact ? "／" + s.phone : ""), ig, s.note || ""].forEach((v) => {
       const td = document.createElement("td");
       td.textContent = v;
       tr.appendChild(td);
