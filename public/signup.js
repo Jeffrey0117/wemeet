@@ -295,8 +295,10 @@ const submit = async () => {
       // 候補：軟文案（不透露額度機制）
       if (data.waitlisted) {
         document.getElementById("done-title").textContent = "報名收到了！";
-        document.getElementById("done-sub").innerHTML = "你的資料<strong>已經在名單上</strong>，不用重複報名。<br>這場報名很熱烈，我們會依序私訊確認名額。";
-        document.getElementById("done-next-text").innerHTML = "私訊我們的 IG 說聲「我報名了」，<br>確認到名額後會馬上通知你場地細節。";
+        const sub = document.getElementById("done-sub");
+        sub.innerHTML = "你的資料<strong>已經在名單上</strong>，不用重複報名。<br>";
+        sub.appendChild(document.createTextNode(data.waitNote || "這場報名很熱烈，我們會依序私訊確認名額。"));
+        document.getElementById("done-next-text").innerHTML = "私訊我們的 IG 說聲「我報名了」，<br>場次確定後會馬上通知你細節。";
       }
       // 重複報名：不新增資料，提示已報過並再次顯示場地
       if (data.already) {
