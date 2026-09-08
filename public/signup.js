@@ -172,6 +172,15 @@ const loadEvents = async () => {
       t.appendChild(sq);
       document.getElementById("eh-meta").textContent =
         `${fmtDate(preselected.date)}・${preselected.time || ""}` + (preselected.location ? `・${preselected.location}` : "");
+      const poster = $("eh-poster");
+      if (preselected.poster) {
+        poster.src = preselected.poster;
+        poster.hidden = false;
+        $("event-hero").classList.add("has-poster");
+      } else {
+        poster.hidden = true;
+        $("event-hero").classList.remove("has-poster");
+      }
       $("event-hero").hidden = false;
       document.body.classList.add("has-event-hero");
       skipEventStep = true;

@@ -99,6 +99,27 @@
       width: 420px; height: 420px; right: -160px; bottom: -220px;
       background: radial-gradient(circle, rgba(193, 98, 47, 0.4), transparent 70%);
     }
+    .eh-inner {
+      position: relative; z-index: 1;
+      max-width: 980px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: center;
+      gap: clamp(1.6rem, 4vw, 3.2rem);
+    }
+    .eh-poster {
+      width: min(300px, 68vw);
+      border-radius: 14px;
+      border: 5px solid rgba(250, 243, 231, 0.14);
+      box-shadow: 0 20px 44px rgba(0, 0, 0, 0.4);
+      transform: rotate(2deg);
+      flex-shrink: 0;
+    }
+    .event-hero.has-poster .eh-text { text-align: left; }
+    .event-hero.has-poster .eh-title { margin-left: 0; }
+    @media (max-width: 760px) {
+      .eh-inner { flex-direction: column; }
+      .event-hero.has-poster .eh-text { text-align: center; }
+      .eh-poster { width: min(260px, 78vw); }
+    }
     .eh-kicker {
       font-family: var(--font-display);
       letter-spacing: 0.22em;
@@ -247,10 +268,15 @@
 </nav>
 
 <header class="event-hero" id="event-hero" hidden>
-  <p class="eh-kicker">你正在報名</p>
-  <h1 class="eh-title" id="eh-title"></h1>
-  <p class="eh-meta" id="eh-meta"></p>
-  <button type="button" class="eh-change" id="eh-change">換場次</button>
+  <div class="eh-inner">
+    <div class="eh-text">
+      <p class="eh-kicker">你正在報名</p>
+      <h1 class="eh-title" id="eh-title"></h1>
+      <p class="eh-meta" id="eh-meta"></p>
+      <button type="button" class="eh-change" id="eh-change">換場次</button>
+    </div>
+    <img class="eh-poster" id="eh-poster" alt="活動海報" hidden>
+  </div>
 </header>
 
 <div class="quiz-wrap">
