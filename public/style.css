@@ -322,8 +322,7 @@ a { color: var(--fizz); }
 .voice-slim .voice-heading { text-align: left; font-size: 1rem; margin-bottom: 0.2rem; }
 @media (max-width: 900px) {
   /* 疊直時所有元素共用同一條左緣（不置中，置中會讓不同寬度的元素左緣參差） */
-  .duo-grid, #intro .duo-grid { grid-template-columns: 1fr; text-align: left; }
-  .pulse-side .pulse-tiles { flex-wrap: wrap; justify-content: flex-start; gap: 1.2rem 2.2rem; }
+  .duo-grid { grid-template-columns: 1fr; text-align: left; }
   .duo-grid .intro-inner { justify-items: start; text-align: left; }
   .duo-grid .intro-inner .hero-title { justify-content: flex-start; }
   .duo-grid .intro-inner .hero-actions { justify-content: flex-start; }
@@ -1016,4 +1015,15 @@ a { color: var(--fizz); }
   .event-card { flex-direction: column; align-items: flex-start; }
   .event-side { width: 100%; }
   .event-side .btn { width: 100%; }
+}
+
+/* ==================== 手機版終局覆蓋（放檔尾，避免被前面桌機規則以同權重蓋掉） ==================== */
+@media (max-width: 900px) {
+  #intro .duo-grid { grid-template-columns: 1fr; }
+  .pulse-side .pulse-tiles { flex-wrap: wrap; justify-content: flex-start; gap: 1.2rem 2.2rem; }
+  .pulse-side .pulse-chart-wrap { max-width: 100%; }
+}
+/* 手機先收起長區塊（為什麼有揪可樂、Quickky 友牆），之後要恢復刪這條就好 */
+@media (max-width: 760px) {
+  #about, #wall { display: none; }
 }
