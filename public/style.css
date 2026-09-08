@@ -956,10 +956,18 @@ a { color: var(--fizz); }
 }
 
 /* ---------- 成長數據（duo 左欄版） ---------- */
+/* 進行式在左時給寬欄（數據要開展，聲音條窄一點沒差） */
+#intro .duo-grid { grid-template-columns: minmax(0, 11fr) 9fr; }
 .pulse-side { min-width: 0; }
 .pulse-side .section-kicker { text-align: left; }
-.pulse-side h2 { text-align: left; margin-bottom: 1.2rem; }
-.pulse-side .pulse-tiles { justify-content: flex-start; gap: clamp(1.4rem, 3vw, 2.6rem); margin-bottom: 1.4rem; }
+.pulse-side h2 { text-align: left; margin-bottom: 1.4rem; }
+.pulse-side .pulse-tiles {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.6rem;
+}
 .pulse-side .pulse-tile { text-align: left; }
 .pulse-side .pulse-chart-wrap { margin: 0; max-width: none; }
 .scene-col { min-width: 0; }
