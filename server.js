@@ -935,6 +935,51 @@ const sendFile = (res, filePath, longCache) => {
   fs.createReadStream(filePath).pipe(res);
 };
 
+// /signup?event=xxx：該場標題/介紹/海報動態塞進 OG，分享連結有專屬預覽卡
+const escHtml = (v) =>
+  String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const OG_WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"];
+const sendSignupHtml = (req, res) => {
+  const file = path.join(PUBLIC_DIR, "signup.html");
+  if (!fs.existsSync(file)) {
+    res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" }).end("Not Found");
+    return;
+  }
+  let html = fs.readFileSync(file, "utf8").replace(/__BUILD__/g, BUILD_ID);
+  const evId = new URL(req.url, "http://x").searchParams.get("event") || "";
+  const ev = readJsonFile(EVENTS_PATH, []).find(
+    (e) => e.id === evId && e.status === "open" && !isPast(e) && e.ended !== true
+  );
+  if (ev) {
+    const d = new Date(String(ev.date) + "T00:00:00");
+    const md = Number.isNaN(d.getTime()) ? ev.date : `${d.getMonth() + 1}/${d.getDate()}（週${OG_WEEKDAYS[d.getDay()]}）`;
+    const title = `${ev.title}｜${md} ${ev.time || ""}`.trim();
+    const parts = [];
+    if (ev.note) parts.push(String(ev.note).slice(0, 100));
+    const tail = [!ev.hideVenue && ev.location ? ev.location : "", ev.fee != null ? `報名費 $${ev.fee}` : ""]
+      .filter(Boolean)
+      .join("・");
+    if (tail) parts.push(tail);
+    const desc = parts.join(" ") || "一分鐘填完報名，下一場小聚見。";
+    const img = ev.poster ? "https://wemeet.pipee.tw" + ev.poster : "https://wemeet.pipee.tw/og.png";
+    // 一律用 replacer function，避免內容裡的 $ 被當群組參照
+    html = html
+      .replace(/<title>[^<]*<\/title>/, () => `<title>${escHtml(title)}｜Chill Club 揪可樂</title>`)
+      .replace(/<meta name="description" content="[^"]*"/, () => `<meta name="description" content="${escHtml(desc)}"`)
+      .replace(/<meta property="og:title" content="[^"]*"/, () => `<meta property="og:title" content="${escHtml(title)}"`)
+      .replace(/<meta property="og:description" content="[^"]*"/, () => `<meta property="og:description" content="${escHtml(desc)}"`)
+      .replace(/<meta property="og:image" content="[^"]*"/, () => `<meta property="og:image" content="${escHtml(img)}"`);
+    if (ev.poster) {
+      // 海報是直式，拿掉預設 og 圖的 1200x630 尺寸宣告
+      html = html
+        .replace(/\s*<meta property="og:image:width" content="[^"]*">/, "")
+        .replace(/\s*<meta property="og:image:height" content="[^"]*">/, "");
+    }
+  }
+  res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-cache" });
+  res.end(html);
+};
+
 // 影音串流：支援 Range（iOS/Safari 播 mp4/mp3 與 seek 必要）
 const sendVideo = (req, res, filePath) => {
   if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
@@ -1149,7 +1194,7 @@ const server = http.createServer((req, res) => {
     return;
   }
   if (pathname === "/signup") {
-    sendFile(res, path.join(PUBLIC_DIR, "signup.html"));
+    sendSignupHtml(req, res);
     return;
   }
   if (pathname === "/me") {
