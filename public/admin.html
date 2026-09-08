@@ -50,7 +50,7 @@
     </div>
     <div class="table-scroll">
       <table>
-        <thead><tr><th>收款</th><th>時間</th><th>活動</th><th>暱稱</th><th>年紀</th><th>性別</th><th>時段</th><th>LINE/電話</th><th>IG</th><th>想說的話</th><th></th></tr></thead>
+        <thead><tr><th>繳費</th><th>時間</th><th>活動</th><th>暱稱</th><th>年紀</th><th>性別</th><th>時段</th><th>LINE/電話</th><th>IG</th><th>想說的話</th><th></th></tr></thead>
         <tbody id="signup-rows"></tbody>
       </table>
     </div>
@@ -191,7 +191,9 @@ const renderSignups = () => {
   const tally = {};
   signups.forEach((x) => {
     if (!x.eventId) return;
-    const t = (tally[x.eventId] = tally[x.eventId] || { m: 0, f: 0, w: 0 });
+    const t = (tally[x.eventId] = tally[x.eventId] || { m: 0, f: 0, w: 0, p: 0, n: 0 });
+    t.n += 1;
+    if (x.paid) t.p += 1;
     if (x.waitlisted) t.w += 1;
     else if (x.gender === "male") t.m += 1;
     else if (x.gender === "female") t.f += 1;
@@ -201,7 +203,7 @@ const renderSignups = () => {
   Object.entries(tally).forEach(([eid, t]) => {
     const p = document.createElement("p");
     p.className = "muted";
-    p.textContent = `${eventTitle(eid)}：男 ${t.m}・女 ${t.f}` + (t.w ? `・候補 ${t.w}` : "");
+    p.textContent = `${eventTitle(eid)}：男 ${t.m}・女 ${t.f}` + (t.w ? `・候補 ${t.w}` : "") + `・已繳 ${t.p}/${t.n}`;
     tallyBox.appendChild(p);
   });
   const pollTally = {};
@@ -222,19 +224,41 @@ const renderSignups = () => {
     const tr = document.createElement("tr");
 
     const paidTd = document.createElement("td");
+    paidTd.style.whiteSpace = "nowrap";
     const paidCb = document.createElement("input");
     paidCb.type = "checkbox";
     paidCb.checked = !!s.paid;
-    paidCb.title = "已收款／已確認";
+    paidCb.title = "勾＝已收到錢（匯款核對到或現場收訖），會員鈴鐺會收到「款項確認」";
+    const paidLabel = document.createElement("span");
+    paidLabel.style.marginLeft = "0.3rem";
+    const evOfRow = eventsCache.find((e) => e.id === s.eventId);
+    const setPaidLabel = () => {
+      if (paidCb.checked) {
+        paidLabel.textContent = "已繳 ✓";
+        paidLabel.style.color = "#4d7d61";
+        paidLabel.style.fontWeight = "700";
+      } else if (evOfRow && evOfRow.prepay) {
+        paidLabel.textContent = "待匯款";
+        paidLabel.style.color = "#e2572b";
+        paidLabel.style.fontWeight = "700";
+      } else {
+        paidLabel.textContent = "現場收";
+        paidLabel.style.color = "#9b8574";
+        paidLabel.style.fontWeight = "400";
+      }
+    };
+    setPaidLabel();
     paidCb.addEventListener("change", async () => {
       try {
         await api("/api/admin/signups/" + s.id, { method: "PATCH", body: JSON.stringify({ paid: paidCb.checked }) });
+        setPaidLabel();
       } catch (err) {
         paidCb.checked = !paidCb.checked;
         alert("更新失敗：" + err.message);
       }
     });
     paidTd.appendChild(paidCb);
+    paidTd.appendChild(paidLabel);
     tr.appendChild(paidTd);
 
     const ig = (s.igHandle || "") + (s.igFollowed ? "（已追蹤 ✓）" : "");

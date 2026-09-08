@@ -1070,7 +1070,9 @@ const server = http.createServer((req, res) => {
           {
             id: "su-" + s.id,
             title: "報名成功",
-            body: ev ? `已收到你的報名：${evName}。記得私訊 IG 跟我們說一聲，報名費 50 元現場繳就好。` : "已加入開團通知名單，下次開團第一個告訴你。",
+            body: ev
+              ? `已收到你的報名：${evName}。記得私訊 IG 跟我們說一聲，報名費 ${ev.fee != null ? ev.fee : 50} 元${ev.prepay ? "先匯款鎖定名額（報名完成頁有帳號）" : "現場繳就好"}。`
+              : "已加入開團通知名單，下次開團第一個告訴你。",
             createdAt: s.createdAt,
             kind: "personal",
           },
@@ -1078,8 +1080,8 @@ const server = http.createServer((req, res) => {
         if (s.paid && s.paidAt) {
           list.push({
             id: "pd-" + s.id,
-            title: "報名確認 ✓",
-            body: `${evName || "你的報名"} 名額保留成功，到時見！`,
+            title: "款項確認・名額鎖定 ✓",
+            body: `${evName || "你的報名"} 費用已確認，名額鎖定，到時見！`,
             createdAt: s.paidAt,
             kind: "personal",
           });
