@@ -955,6 +955,17 @@ a { color: var(--fizz); }
   .founder-photo { max-width: 220px; margin: 0 auto; }
 }
 
+/* ---------- 成長數據（duo 左欄版） ---------- */
+.pulse-side { min-width: 0; }
+.pulse-side .section-kicker { text-align: left; }
+.pulse-side h2 { text-align: left; margin-bottom: 1.2rem; }
+.pulse-side .pulse-tiles { justify-content: flex-start; gap: clamp(1.4rem, 3vw, 2.6rem); margin-bottom: 1.4rem; }
+.pulse-side .pulse-tile { text-align: left; }
+.pulse-side .pulse-chart-wrap { margin: 0; max-width: none; }
+.scene-col { min-width: 0; }
+.scene-col .voice-heading { text-align: left; margin-bottom: 0.9rem; }
+.scene-col .scene-grid { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
+
 /* ---------- 成長數據 ---------- */
 .pulse-tiles { display: flex; justify-content: center; gap: clamp(2rem, 6vw, 4.5rem); flex-wrap: wrap; margin-bottom: 1.8rem; }
 .pulse-tile { text-align: center; }
