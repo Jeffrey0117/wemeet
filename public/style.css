@@ -322,7 +322,8 @@ a { color: var(--fizz); }
 .voice-slim .voice-heading { text-align: left; font-size: 1rem; margin-bottom: 0.2rem; }
 @media (max-width: 900px) {
   /* 疊直時所有元素共用同一條左緣（不置中，置中會讓不同寬度的元素左緣參差） */
-  .duo-grid { grid-template-columns: 1fr; text-align: left; }
+  .duo-grid, #intro .duo-grid { grid-template-columns: 1fr; text-align: left; }
+  .pulse-side .pulse-tiles { flex-wrap: wrap; justify-content: flex-start; gap: 1.2rem 2.2rem; }
   .duo-grid .intro-inner { justify-items: start; text-align: left; }
   .duo-grid .intro-inner .hero-title { justify-content: flex-start; }
   .duo-grid .intro-inner .hero-actions { justify-content: flex-start; }
