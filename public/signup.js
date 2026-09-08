@@ -163,8 +163,17 @@ const loadEvents = async () => {
     });
 
     if (preselected) {
-      $("picked-text").textContent = `報名場次：${fmtDate(preselected.date)} ${preselected.title}`;
-      $("picked-banner").hidden = false;
+      // 滿版場次看板（破格主視覺）；標題手寫底線用 squiggle
+      const t = document.getElementById("eh-title");
+      t.textContent = "";
+      const sq = document.createElement("span");
+      sq.className = "squiggle";
+      sq.textContent = preselected.title;
+      t.appendChild(sq);
+      document.getElementById("eh-meta").textContent =
+        `${fmtDate(preselected.date)}・${preselected.time || ""}` + (preselected.location ? `・${preselected.location}` : "");
+      $("event-hero").hidden = false;
+      document.body.classList.add("has-event-hero");
       skipEventStep = true;
       computeFlow();
       applyFlow();
@@ -174,13 +183,17 @@ const loadEvents = async () => {
   }
 };
 
-$("picked-change").addEventListener("click", () => {
+const exitPickedMode = () => {
   $("picked-banner").hidden = true;
+  $("event-hero").hidden = true;
+  document.body.classList.remove("has-event-hero");
   skipEventStep = false;
   flowPos = 0;
   computeFlow();
   applyFlow();
-});
+};
+$("picked-change").addEventListener("click", exitPickedMode);
+$("eh-change").addEventListener("click", exitPickedMode);
 
 /* ---------- 會員秒報名 ---------- */
 

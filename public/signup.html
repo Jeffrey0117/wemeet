@@ -77,6 +77,66 @@
     }
     .gchip:has(input:checked) { border-color: var(--fizz); background: #fff7f2; }
     .gchip input { accent-color: var(--fizz); }
+    .event-hero {
+      position: relative;
+      overflow: hidden;
+      background: var(--cola);
+      color: var(--cream);
+      text-align: center;
+      padding: 2.6rem 1.2rem 4.2rem;
+    }
+    .event-hero::before, .event-hero::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .event-hero::before {
+      width: 340px; height: 340px; left: -120px; top: -140px;
+      background: radial-gradient(circle, rgba(226, 87, 43, 0.35), transparent 70%);
+    }
+    .event-hero::after {
+      width: 420px; height: 420px; right: -160px; bottom: -220px;
+      background: radial-gradient(circle, rgba(193, 98, 47, 0.4), transparent 70%);
+    }
+    .eh-kicker {
+      font-family: var(--font-display);
+      letter-spacing: 0.22em;
+      font-size: 0.95rem;
+      color: rgba(250, 243, 231, 0.75);
+      margin-bottom: 0.5rem;
+    }
+    .eh-title {
+      position: relative; z-index: 1;
+      font-family: var(--font-display);
+      font-weight: 400;
+      font-size: clamp(2rem, 6.5vw, 3.4rem);
+      line-height: 1.25;
+      margin: 0 auto 0.7rem;
+      max-width: 820px;
+    }
+    .eh-title .squiggle { background-image: linear-gradient(transparent 70%, rgba(226, 87, 43, 0.65) 70%); }
+    .eh-meta {
+      position: relative; z-index: 1;
+      font-size: clamp(0.95rem, 2.4vw, 1.1rem);
+      color: rgba(250, 243, 231, 0.85);
+      margin-bottom: 1rem;
+    }
+    .eh-change {
+      position: relative; z-index: 1;
+      background: none;
+      border: 1.5px solid rgba(250, 243, 231, 0.45);
+      color: rgba(250, 243, 231, 0.9);
+      border-radius: 999px;
+      padding: 0.35rem 1.1rem;
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .eh-change:hover { border-color: var(--fizz); color: #fff; background: rgba(226, 87, 43, 0.35); }
+    /* 破格：卡片往上疊進看板 */
+    body.has-event-hero .quiz-wrap { margin-top: -2.6rem; padding-top: 0; }
+    body.has-event-hero .quiz-card { position: relative; z-index: 2; }
     .picked-banner {
       display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; flex-wrap: wrap;
       background: var(--cream-deep); border-radius: 12px;
@@ -185,6 +245,13 @@
     <span id="nav-auth"></span>
   </div>
 </nav>
+
+<header class="event-hero" id="event-hero" hidden>
+  <p class="eh-kicker">你正在報名</p>
+  <h1 class="eh-title" id="eh-title"></h1>
+  <p class="eh-meta" id="eh-meta"></p>
+  <button type="button" class="eh-change" id="eh-change">換場次</button>
+</header>
 
 <div class="quiz-wrap">
   <div class="quiz-card">
