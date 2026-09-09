@@ -295,7 +295,9 @@ const publicEvents = () => {
 const cleanStr = (v, max) => String(v == null ? "" : v).trim().slice(0, max);
 
 const handleSignup = (req, res) => {
-  if (rateLimited(clientIp(req))) {
+  const ip = clientIp(req);
+  const ua = cleanStr(req.headers["user-agent"], 200);
+  if (rateLimited(ip)) {
     sendJson(res, 429, { error: "報名太頻繁了，休息一下再試" });
     return;
   }
@@ -322,6 +324,16 @@ const handleSignup = (req, res) => {
     }
     if (!agreedPayment || !agreedAttend) {
       sendJson(res, 400, { error: "要先同意報名須知（費用與準時出席）才能報名喔" });
+      return;
+    }
+    // 防灌單（持久層，補 in-memory rate limit 重啟就忘的洞）：
+    // 同 IP 24 小時內對同一活動最多 3 筆、全站最多 8 筆
+    const guardAll = readJsonFile(SIGNUPS_PATH, []);
+    const dayAgo = Date.now() - 24 * 3600 * 1000;
+    const mine = guardAll.filter((x) => x.ip && x.ip === ip && new Date(x.createdAt).getTime() > dayAgo);
+    const evId0 = cleanStr(body.eventId, 60);
+    if (mine.length >= 8 || (evId0 && mine.filter((x) => x.eventId === evId0).length >= 3)) {
+      sendJson(res, 429, { error: "這個網路今天報名很多次了，先休息一下；有問題私訊 IG 小編" });
       return;
     }
     const events = readJsonFile(EVENTS_PATH, []);
@@ -411,6 +423,8 @@ const handleSignup = (req, res) => {
       agreedAttend,
       paid: false,
       memberSub,
+      ip,
+      ua,
       createdAt: new Date().toISOString(),
     };
     writeJsonAtomic(SIGNUPS_PATH, [...signups, entry], (err) => {
