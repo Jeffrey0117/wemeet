@@ -393,15 +393,14 @@ const renderDash = async () => {
   const upcoming = eventsCache
     .filter((e) => e.date >= todayIso && !e.ended && e.status === "open")
     .sort((a, b) => String(a.date).localeCompare(String(b.date)));
-  tile(signupsCache.filter((s) => s.eventId).length, "總報名人次");
-  tile(eventsCache.filter((e) => e.date < todayIso || e.ended).length, "已辦場次");
   tile(upcoming.length, "即將到來場次");
   if (upcoming[0]) tile(String(upcoming[0].date).slice(5).replace("-", "/"), "下一場：" + upcoming[0].title);
   try {
     const p = await (await fetch("/api/pulse")).json();
-    if (p.threadsViews) tile(Number(p.threadsViews).toLocaleString("en-US"), "Threads 檢視");
     if (p.views) tile(p.views, "網站瀏覽");
   } catch (err) {}
+  tile(signupsCache.filter((s) => s.eventId).length, "總報名人次");
+  tile(eventsCache.filter((e) => e.date < todayIso || e.ended).length, "已辦場次");
 
   // 即將場次：真實報名數 + 相對條（上限取 hardCap > capacity）
   const list = $("dash-upcoming");
