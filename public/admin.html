@@ -477,6 +477,10 @@ const loadStats = async () => {
     tile("不重複訪客", d.sessions || 0);
     tile("平均停留", (d.avgDwellSeconds || 0) + " 秒");
     tile("平均滑動深度", (d.avgMaxScroll || 0) + "%");
+    if (d.devices && (d.devices.mobile || d.devices.desktop)) {
+      tile("手機訪客", d.devices.mobile || 0);
+      tile("桌機訪客", d.devices.desktop || 0);
+    }
     const parts = [];
     if ((d.daily || []).length) {
       parts.push("每日：" + d.daily.map((x) => `${String(x.date || x.day || "").slice(5)} ${x.views ?? x.count ?? 0}`).join("、"));
@@ -485,7 +489,7 @@ const loadStats = async () => {
       parts.push("來源：" + d.referrers.slice(0, 5).map((r) => `${r.referrer || r.source || "直接"}(${r.count ?? r.views ?? 0})`).join("、"));
     }
     const ctas = Object.entries(d.ctas || {});
-    if (ctas.length) parts.push("CTA 點擊：" + ctas.map(([k, v]) => `${k}(${v})`).join("、"));
+    if (ctas.length) parts.push("CTA 點擊：" + ctas.map(([k, v]) => `${k}(${v && v.clicks != null ? v.clicks : v})`).join("、"));
     const secs = Object.entries(d.sections || {});
     if (secs.length) parts.push("區塊觸及：" + secs.map(([k, v]) => `${k}(${v})`).join("、"));
     $("st-detail").textContent = parts.join("　｜　") || "還沒有數據，等訪客進來。";
