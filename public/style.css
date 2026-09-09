@@ -964,10 +964,13 @@ a { color: var(--fizz); }
 .pulse-side .pulse-tiles {
   display: flex;
   width: 100%;
-  justify-content: space-between;
-  gap: 1rem;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: clamp(1.6rem, 3.5vw, 3.2rem);
   margin-bottom: 1.6rem;
 }
+.pulse-side .pulse-num { font-size: clamp(2rem, 3.4vw, 3.2rem); white-space: nowrap; }
 .pulse-side .pulse-tile { text-align: left; }
 .pulse-side .pulse-chart-wrap { margin: 0; max-width: none; }
 .pulse-follow { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 1.6rem; }
