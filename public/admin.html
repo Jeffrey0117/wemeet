@@ -92,6 +92,10 @@
     <section class="panel on" id="p-dash">
       <h1>數據總覽</h1>
       <div class="dash-tiles" id="dash-tiles"></div>
+      <div class="card">
+        <h2>即將場次報名狀況</h2>
+        <div id="dash-upcoming"></div>
+      </div>
       <div class="card" id="stats-card">
     <h2>人氣數據</h2>
     <div class="row" style="margin-bottom:0.5rem">
@@ -373,6 +377,35 @@ const renderDash = async () => {
     if (p.threadsViews) tile(Number(p.threadsViews).toLocaleString("en-US"), "Threads 檢視");
     if (p.views) tile(p.views, "網站瀏覽");
   } catch (err) {}
+
+  // 即將場次：真實報名數 + 相對條（上限取 hardCap > capacity）
+  const list = $("dash-upcoming");
+  list.innerHTML = "";
+  if (!upcoming.length) {
+    list.innerHTML = '<p class="muted">目前沒有開放中的場次。</p>';
+    return;
+  }
+  upcoming.forEach((e) => {
+    const rows = signupsCache.filter((x) => x.eventId === e.id);
+    const signed = rows.filter((x) => !x.waitlisted).length;
+    const waiting = rows.length - signed;
+    const cap = e.hardCap || e.capacity || Math.max(signed, 1);
+    const pct = Math.min(100, Math.round((signed / cap) * 100));
+    const row = document.createElement("div");
+    row.style.cssText = "display:grid;grid-template-columns:minmax(220px,1fr) 220px auto;gap:0.8rem;align-items:center;padding:0.5rem 0;border-bottom:1px solid #f3e7d3";
+    const name = document.createElement("div");
+    name.innerHTML = `<strong>${e.date.slice(5).replace("-", "/")}</strong>　${e.title}`;
+    const barWrap = document.createElement("div");
+    barWrap.style.cssText = "height:10px;background:#f3e7d3;border-radius:999px;overflow:hidden";
+    const bar = document.createElement("i");
+    bar.style.cssText = `display:block;height:100%;width:${pct}%;background:linear-gradient(90deg,#c1622f,#e2572b);border-radius:999px`;
+    barWrap.appendChild(bar);
+    const num = document.createElement("div");
+    num.style.cssText = "font-size:0.9rem;white-space:nowrap";
+    num.innerHTML = `<strong style="color:#e2572b">${signed}</strong> / ${cap} 人` + (waiting ? `　<span class="muted">候補 ${waiting}</span>` : "");
+    row.appendChild(name); row.appendChild(barWrap); row.appendChild(num);
+    list.appendChild(row);
+  });
 };
 
 /* ---- 會員空檔重疊月曆 ---- */
