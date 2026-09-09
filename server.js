@@ -552,7 +552,8 @@ const handlePulse = async (res) => {
     pulseViewsCache = { value: views, at: Date.now() };
   }
 
-  sendJson(res, 200, { eventsHeld, attendees, views, series });
+  const threads = readJsonFile(path.join(DATA_DIR, "threads.json"), null);
+  sendJson(res, 200, { eventsHeld, attendees, views, threadsViews: threads ? threads.views : null, series });
 };
 
 /* ---------- 會員 API（LetMeUse 登入） ---------- */

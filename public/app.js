@@ -615,7 +615,8 @@ const renderPulse = (d) => {
   };
   tile(d.eventsHeld || 0, "場小聚圓滿結束");
   tile(d.attendees || 0, "人次報名參加");
-  if (d.views) tile(d.views, "次網站瀏覽");
+  if (d.threadsViews) tile(Number(d.threadsViews).toLocaleString("en-US"), "Threads 檢視次數");
+  else if (d.views) tile(d.views, "次網站瀏覽");
 
   // 累積曲線（手繪風：線段重取樣 + 垂直方向抖動，資料點本身不偏移）
   const series = d.series || [];

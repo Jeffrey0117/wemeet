@@ -970,6 +970,7 @@ a { color: var(--fizz); }
 }
 .pulse-side .pulse-tile { text-align: left; }
 .pulse-side .pulse-chart-wrap { margin: 0; max-width: none; }
+.pulse-follow { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 1.6rem; }
 .scene-col { min-width: 0; }
 .scene-col .voice-heading { text-align: left; margin-bottom: 0.9rem; }
 .scene-col .scene-grid { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
