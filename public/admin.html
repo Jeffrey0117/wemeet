@@ -137,6 +137,7 @@
     <div class="row" style="margin-bottom:0.6rem">
       <select id="signup-filter" style="padding:0.45rem 0.7rem;border:1.5px solid #f3e7d3;border-radius:10px"></select>
       <button class="ghost" id="copy-csv">複製 CSV</button>
+      <button class="ghost" id="print-list">列印名單</button>
       <span class="msg" id="copy-msg"></span>
     </div>
     <div class="table-scroll">
@@ -270,27 +271,38 @@ const buildFilterOptions = () => {
   const sel = $("signup-filter");
   sel.innerHTML = "";
   const todayIso = new Date().toISOString().slice(0, 10);
-  const sorted = eventsCache.slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
-  const upcoming = sorted.filter((e) => e.date >= todayIso && !e.ended).sort((a, b) => String(a.date).localeCompare(String(b.date)));
-  const addOpt = (v, label) => {
+  const upcoming = eventsCache.filter((e) => e.date >= todayIso && !e.ended).sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  const past = eventsCache.filter((e) => e.date < todayIso || e.ended).sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  const addOpt = (parent, v, label) => {
     const o = document.createElement("option");
     o.value = v; o.textContent = label;
-    sel.appendChild(o);
+    parent.appendChild(o);
   };
-  sorted.forEach((e) => addOpt("event:" + e.id, `${e.date}｜${e.title}`));
-  addOpt("waitlist", "先加入名單");
-  addOpt("all", "全部報名");
+  upcoming.forEach((e) => addOpt(sel, "event:" + e.id, `${e.date}｜${e.title}`));
+  addOpt(sel, "waitlist", "先加入名單");
+  addOpt(sel, "all", "全部報名");
+  if (past.length) {
+    const g = document.createElement("optgroup");
+    g.label = "歷史";
+    past.forEach((e) => addOpt(g, "event:" + e.id, `${e.date}｜${e.title}`));
+    sel.appendChild(g);
+  }
   // 預設鎖最近的即將場次，避免舊資料誤導
   sel.value = upcoming.length ? "event:" + upcoming[0].id : "all";
 };
 
-const renderSignups = () => {
+const filteredSignups = () => {
   const filter = $("signup-filter").value;
-  const signups = signupsCache.filter((x) => {
+  return signupsCache.filter((x) => {
     if (filter === "all") return true;
     if (filter === "waitlist") return !x.eventId;
     return x.eventId === filter.replace(/^event:/, "");
   });
+};
+
+const renderSignups = () => {
+  const filter = $("signup-filter").value;
+  const signups = filteredSignups();
 
   $("signup-count").textContent = signups.length;
   const tally = {};
@@ -721,6 +733,36 @@ $("save-events").addEventListener("click", async () => {
   } catch (err) {
     setMsg("save-msg", err.message, false);
   }
+});
+
+$("print-list").addEventListener("click", () => {
+  const filter = $("signup-filter").value;
+  const rows = filteredSignups();
+  const evName = filter.startsWith("event:") ? eventTitle(filter.replace(/^event:/, "")) : filter === "waitlist" ? "先加入名單" : "全部報名";
+  const ev = eventsCache.find((e) => "event:" + e.id === filter);
+  const esc = (v) => String(v == null ? "" : v).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  const body = rows.map((x) => `<tr>
+      <td>${esc(x.name)}${x.waitlisted ? "（候補）" : ""}</td>
+      <td>${esc(x.age || "")}</td>
+      <td>${x.gender === "male" ? "男" : x.gender === "female" ? "女" : ""}</td>
+      <td>${esc(x.contact)}${x.phone && x.phone !== x.contact ? "／" + esc(x.phone) : ""}</td>
+    </tr>`).join("");
+  const w = window.open("", "_blank");
+  w.document.write(`<!DOCTYPE html><html lang="zh-Hant-TW"><head><meta charset="UTF-8"><title>${esc(evName)}｜名單</title><style>
+    body { font-family: "Noto Sans TC", sans-serif; color: #222; padding: 24px; }
+    h1 { font-size: 18px; margin-bottom: 2px; }
+    p { font-size: 12px; color: #666; margin-bottom: 14px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { border: 1px solid #bbb; padding: 6px 10px; text-align: left; }
+    th { background: #f3f3f3; }
+  </style></head><body>
+    <h1>${esc(evName)}</h1>
+    <p>${ev ? esc(ev.date + "　" + (ev.time || "")) + "　" : ""}共 ${rows.length} 人</p>
+    <table><thead><tr><th>暱稱</th><th>年紀</th><th>性別</th><th>聯絡資訊</th></tr></thead><tbody>${body}</tbody></table>
+  </body></html>`);
+  w.document.close();
+  w.focus();
+  setTimeout(() => w.print(), 300);
 });
 
 $("copy-csv").addEventListener("click", async () => {
