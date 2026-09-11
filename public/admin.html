@@ -419,8 +419,9 @@ const renderDash = async () => {
     box.appendChild(d);
   };
   const todayIso = new Date().toISOString().slice(0, 10);
+  // 後台要看全貌：額滿收單（closed）的場次照樣列，只有 hidden 和已收歷史的不列
   const upcoming = eventsCache
-    .filter((e) => e.date >= todayIso && !e.ended && e.status === "open")
+    .filter((e) => e.date >= todayIso && !e.ended && e.status !== "hidden")
     .sort((a, b) => String(a.date).localeCompare(String(b.date)));
   tile(upcoming.length, "即將到來場次");
   if (upcoming[0]) tile(String(upcoming[0].date).slice(5).replace("-", "/"), "下一場：" + upcoming[0].title);
@@ -447,7 +448,8 @@ const renderDash = async () => {
     const row = document.createElement("div");
     row.className = "up-row";
     const name = document.createElement("div");
-    name.innerHTML = `<strong>${e.date.slice(5).replace("-", "/")}</strong>　${e.title}`;
+    name.innerHTML = `<strong>${e.date.slice(5).replace("-", "/")}</strong>　${e.title}` +
+      (e.status === "closed" ? '　<span style="color:#c74a22;font-weight:700;font-size:0.85rem">額滿收單</span>' : "");
     const barWrap = document.createElement("div");
     barWrap.style.cssText = "height:10px;background:#f3e7d3;border-radius:999px;overflow:hidden";
     const bar = document.createElement("i");
