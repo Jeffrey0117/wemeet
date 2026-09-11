@@ -745,7 +745,7 @@ $("print-list").addEventListener("click", () => {
       <td>${esc(x.name)}${x.waitlisted ? "（候補）" : ""}</td>
       <td>${esc(x.age || "")}</td>
       <td>${x.gender === "male" ? "男" : x.gender === "female" ? "女" : ""}</td>
-      <td>${esc(x.contact)}${x.phone && x.phone !== x.contact ? "／" + esc(x.phone) : ""}</td>
+      <td></td>
     </tr>`).join("");
   const w = window.open("", "_blank");
   w.document.write(`<!DOCTYPE html><html lang="zh-Hant-TW"><head><meta charset="UTF-8"><title>${esc(evName)}｜名單</title><style>
@@ -754,11 +754,12 @@ $("print-list").addEventListener("click", () => {
     p { font-size: 12px; color: #666; margin-bottom: 14px; }
     table { width: 100%; border-collapse: collapse; font-size: 14px; }
     th, td { border: 1px solid #bbb; padding: 6px 10px; text-align: left; }
+    td:last-child { width: 45%; }
     th { background: #f3f3f3; }
   </style></head><body>
     <h1>${esc(evName)}</h1>
     <p>${ev ? esc(ev.date + "　" + (ev.time || "")) + "　" : ""}共 ${rows.length} 人</p>
-    <table><thead><tr><th>暱稱</th><th>年紀</th><th>性別</th><th>聯絡資訊</th></tr></thead><tbody>${body}</tbody></table>
+    <table><thead><tr><th>暱稱</th><th>年紀</th><th>性別</th><th>備註</th></tr></thead><tbody>${body}</tbody></table>
   </body></html>`);
   w.document.close();
   w.focus();
