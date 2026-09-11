@@ -149,7 +149,9 @@ const loadEvents = async () => {
       title.textContent = `${fmtDate(ev.date)} ${ev.title}`;
       const sub = document.createElement("span");
       sub.className = "s";
-      const slotTxt = ev.buyoutMode
+      const slotTxt = isFull
+        ? "　" + (ev.fullText || "已滿團")
+        : ev.buyoutMode
         ? (ev.buyoutMode.reached ? "　包場達成！剩最後幾位" : `　已揪 ${ev.buyoutMode.signed} 人・再 ${ev.buyoutMode.goal - ev.buyoutMode.signed} 人包場`)
         : left !== null ? `　剩 ${left} 名額` : "";
       sub.textContent = `${ev.time || ""}｜${ev.location || "地點確認中"}` + slotTxt;
