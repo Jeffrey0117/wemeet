@@ -211,8 +211,8 @@ const verifyLmuToken = (token) => {
     if (!payload) return null;
     payload.sub = payload.sub || payload.userId;
     if (!payload.sub) return null;
-    if (payload.app && LMU_APP_ID && payload.app !== LMU_APP_ID) return null;
-    if (payload.exp && payload.exp * 1000 < Date.now()) return null;
+    if (LMU_APP_ID && payload.app !== LMU_APP_ID) return null; // 別的 app 的 token 不準借用，沒帶 app 也擋
+    if (!payload.exp || payload.exp * 1000 < Date.now()) return null; // 沒有效期的 token 一律不收
     return payload;
   } catch (err) {
     return null;
@@ -733,16 +733,30 @@ const handleLmuWebhook = (req, res) => {
 
 /* ---------- Admin API（Bearer ADMIN_TOKEN） ---------- */
 
+const adminFails = new Map(); // ip -> [timestamps]，防 token 暴力嘗試
+const ADMIN_FAIL_LIMIT = 10;
+const ADMIN_FAIL_WINDOW = 10 * 60 * 1000;
+
 const requireAdmin = (req, res) => {
   if (!ADMIN_TOKEN) {
     sendJson(res, 503, { error: "ADMIN_TOKEN not configured" });
     return false;
   }
+  const ip = clientIp(req);
+  const now = Date.now();
+  const fails = (adminFails.get(ip) || []).filter((t) => now - t < ADMIN_FAIL_WINDOW);
+  if (fails.length >= ADMIN_FAIL_LIMIT) {
+    adminFails.set(ip, fails);
+    sendJson(res, 429, { error: "too many attempts" });
+    return false;
+  }
   const token = bearerToken(req);
   if (!token || !timingSafeEqual(token, ADMIN_TOKEN)) {
+    adminFails.set(ip, [...fails, now]);
     sendJson(res, 401, { error: "unauthorized" });
     return false;
   }
+  if (fails.length) adminFails.delete(ip);
   return true;
 };
 
@@ -1026,7 +1040,7 @@ const sendVideo = (req, res, filePath) => {
 
 const serveStatic = (req, res, urlPath, longCache) => {
   let filePath = path.normalize(path.join(PUBLIC_DIR, urlPath));
-  if (!filePath.startsWith(PUBLIC_DIR)) {
+  if (filePath !== PUBLIC_DIR && !filePath.startsWith(PUBLIC_DIR + path.sep)) {
     res.writeHead(403).end("Forbidden");
     return;
   }
@@ -1043,7 +1057,7 @@ const serveStatic = (req, res, urlPath, longCache) => {
 
 /* ---------- 路由 ---------- */
 
-const server = http.createServer((req, res) => {
+const handleRequest = (req, res) => {
   let pathname;
   try {
     pathname = decodeURIComponent(new URL(req.url, "http://x").pathname);
@@ -1231,7 +1245,26 @@ const server = http.createServer((req, res) => {
     return;
   }
   serveStatic(req, res, pathname, /[?&]v=/.test(req.url || ""));
+};
+
+const server = http.createServer((req, res) => {
+  // 全域安全標頭
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  try {
+    handleRequest(req, res);
+  } catch (err) {
+    console.error("request error:", err);
+    if (!res.headersSent) sendJson(res, 500, { error: "internal error" });
+    else res.end();
+  }
 });
+
+// 單一非同步錯誤不讓整台掛掉（記錄後續命）
+process.on("uncaughtException", (err) => console.error("uncaught:", err));
+process.on("unhandledRejection", (err) => console.error("unhandled:", err));
 
 ensureData();
 server.listen(PORT, () => {
