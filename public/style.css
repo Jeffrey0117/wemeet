@@ -154,7 +154,7 @@ a { color: var(--fizz); }
   text-align: center;
 }
 .pb-frame {
-  max-width: 1240px;
+  max-width: 960px;
   margin: 0 auto;
 }
 .pb-frame img {
