@@ -164,21 +164,31 @@ a { color: var(--fizz); }
   border-radius: clamp(14px, 2vw, 24px);
   box-shadow: 0 30px 80px rgba(58, 35, 24, 0.32);
 }
-.photo-banner-text { margin-top: clamp(1.1rem, 2.5vw, 1.8rem); }
+.pb-frame { position: relative; }
+.pb-overlay {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  padding: clamp(2.6rem, 7vw, 4.5rem) clamp(1.1rem, 3vw, 2.2rem) clamp(1rem, 2.5vw, 1.6rem);
+  background: linear-gradient(to top, rgba(26, 17, 12, 0.82) 0%, rgba(26, 17, 12, 0.45) 55%, transparent 100%);
+  border-radius: 0 0 clamp(14px, 2vw, 24px) clamp(14px, 2vw, 24px);
+  color: #fff;
+  text-align: center;
+}
 .pb-kicker {
   font-family: var(--font-display);
   letter-spacing: 0.18em;
-  font-size: clamp(0.85rem, 2vw, 1rem);
-  color: var(--caramel);
-  margin-bottom: 0.2rem;
+  font-size: clamp(0.82rem, 2vw, 1rem);
+  color: rgba(250, 243, 231, 0.88);
+  margin-bottom: 0.15rem;
 }
 .pb-title {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(1.8rem, 5vw, 3.1rem);
+  font-size: clamp(1.6rem, 4.6vw, 2.8rem);
   line-height: 1.2;
+  text-shadow: 0 3px 14px rgba(0, 0, 0, 0.4);
 }
-.pb-sub { font-size: clamp(0.95rem, 2.2vw, 1.1rem); color: var(--cola-soft); margin-top: 0.35rem; }
+.pb-sub { font-size: clamp(0.9rem, 2.1vw, 1.05rem); color: rgba(250, 243, 231, 0.92); margin-top: 0.3rem; }
 .pb-sub a { color: var(--fizz); font-weight: 700; text-decoration: none; }
 .pb-sub a:hover { text-decoration: underline; }
 
