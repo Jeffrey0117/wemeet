@@ -165,22 +165,23 @@ a { color: var(--fizz); }
   box-shadow: 0 30px 80px rgba(58, 35, 24, 0.32);
 }
 .pb-frame { position: relative; }
-.pb-overlay-top {
-  position: absolute;
-  left: 0; right: 0; top: 0;
-  padding: clamp(1.1rem, 2.8vw, 2rem) 1rem clamp(2.4rem, 6vw, 4rem);
-  background: linear-gradient(to bottom, rgba(26, 17, 12, 0.72) 0%, rgba(26, 17, 12, 0.3) 55%, transparent 100%);
-  border-radius: clamp(14px, 2vw, 24px) clamp(14px, 2vw, 24px) 0 0;
-  text-align: center;
-}
+.pb-heading { text-align: center; margin-bottom: clamp(1rem, 2.5vw, 1.8rem); }
 .pb-top-title {
   font-family: var(--font-display);
   font-weight: 400;
-  color: #fff;
+  color: var(--cola);
   font-size: clamp(1.9rem, 5.5vw, 3.4rem);
   letter-spacing: 0.06em;
   line-height: 1.15;
-  text-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+}
+.pb-top-title::after {
+  content: "";
+  display: block;
+  width: clamp(120px, 22vw, 260px);
+  height: 8px;
+  margin: 0.45rem auto 0;
+  border-radius: 999px;
+  background: var(--fizz);
 }
 .pb-overlay {
   position: absolute;
