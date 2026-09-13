@@ -246,6 +246,9 @@ $("express-off").addEventListener("click", () => {
 /* ---------- 驗證與送出 ---------- */
 
 const validate = (step) => {
+  if (step === 4 && !document.querySelector('input[name="why-pick"]:checked')) {
+    return "點一個想來的原因就好，我們真的會照這個調整活動";
+  }
   if (step === 1) {
     if (!$("f-name").value.trim()) return "暱稱要填喔，不然不知道怎麼叫你";
     if (!$("f-contact").value.trim() && !$("f-phone").value.trim()) return "LINE ID 或電話至少留一個，才通知得到你";
@@ -258,6 +261,8 @@ const validate = (step) => {
     if (pickedEv && pickedEv.poll && !document.querySelector('input[name="poll-pick"]:checked')) {
       return "勾一下你可以的時段，我們才排得進去";
     }
+    if (!$("f-job").value.trim()) return "職業寫一下（大概就好），幫你排同溫層座位";
+    if (!$("f-city").value.trim()) return "住哪一帶寫一下，之後選場地會參考";
   }
   if (step === 2) {
     if (!$("f-agree-pay").checked || !$("f-agree-attend").checked) return "兩個都勾一下，我們才能幫你留位子";
@@ -284,6 +289,9 @@ const submit = async () => {
         phone: $("f-phone").value.trim(),
         age: parseInt($("f-age").value, 10) || 0,
         note: $("f-note").value.trim(),
+        job: $("f-job").value.trim(),
+        city: $("f-city").value.trim(),
+        whyPicks: [...document.querySelectorAll('input[name="why-pick"]:checked')].map((c) => c.value),
         igHandle: $("f-ig").value.trim(),
         igFollowed: $("f-followed").checked,
         gender: (document.querySelector('input[name="gender"]:checked') || {}).value || "",

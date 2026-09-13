@@ -237,7 +237,7 @@
     }
     .done-next-alt { margin: 0.7rem 0 0 !important; font-size: 0.88rem; }
     .done-next-alt a { color: var(--fizz); }
-    .poll-chips { flex-wrap: wrap; }
+    .poll-chips, .why-chips { flex-wrap: wrap; }
     .done-pay {
       background: #fff7f2; border: 1.5px solid var(--fizz); border-radius: 14px;
       padding: 1.1rem 1.2rem; margin-bottom: 1.4rem;
@@ -331,6 +331,12 @@
           <label class="gchip"><input type="radio" name="gender" value="female">女</label>
         </div>
       </div>
+      <label class="field"><span>職業<span class="req-star" aria-hidden="true">*</span></span>
+        <input type="text" id="f-job" maxlength="40" placeholder="例：工程師、學生、行銷｜幫你排同溫層座位">
+      </label>
+      <label class="field"><span>住哪一帶<span class="req-star" aria-hidden="true">*</span></span>
+        <input type="text" id="f-city" maxlength="40" placeholder="例：台中西屯｜之後選場地會參考">
+      </label>
       <div class="field" id="poll-box" hidden><span id="poll-q"></span>
         <div class="gender-chips poll-chips" id="poll-chips"></div>
       </div>
@@ -379,10 +385,20 @@
 
     <!-- Step 5：想說的話 -->
     <section class="step" data-step="4">
-      <h2>最後，想說點什麼嗎?</h2>
-      <p class="hint">選填。第一次參加？想聊的話題？都可以寫。</p>
-      <label class="field">
-        <textarea id="f-note" maxlength="300" rows="4" placeholder="嗨嗨，我是⋯"></textarea>
+      <h2>最後，為什麼想來揪可樂?</h2>
+      <p class="hint">點一點就好，我們照這個把活動辦得更像你要的。</p>
+      <div class="field"><span>想來的原因<span class="req-star" aria-hidden="true">*</span>（可複選）</span>
+        <div class="gender-chips why-chips">
+          <label class="gchip"><input type="checkbox" name="why-pick" value="想認識新朋友">想認識新朋友</label>
+          <label class="gchip"><input type="checkbox" name="why-pick" value="對這場主題有興趣">對這場主題有興趣</label>
+          <label class="gchip"><input type="checkbox" name="why-pick" value="想練英文口說">想練英文口說</label>
+          <label class="gchip"><input type="checkbox" name="why-pick" value="想脫離同溫層">想脫離同溫層</label>
+          <label class="gchip"><input type="checkbox" name="why-pick" value="朋友揪我來的">朋友揪我來的</label>
+          <label class="gchip"><input type="checkbox" name="why-pick" value="單純好奇">單純好奇</label>
+        </div>
+      </div>
+      <label class="field" style="margin-top:1rem">想對揪可樂說的話（選填）
+        <textarea id="f-note" maxlength="300" rows="3" placeholder="期待的主題、給我們的建議，或想說的都行"></textarea>
       </label>
     </section>
 

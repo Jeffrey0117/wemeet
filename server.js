@@ -305,6 +305,9 @@ const handleSignup = (req, res) => {
     const name = cleanStr(body.name, 40);
     const contact = cleanStr(body.contact, 120);
     const phone = cleanStr(body.phone, 40);
+    const job = cleanStr(body.job, 40);
+    const city = cleanStr(body.city, 40);
+    const whyPicks = Array.isArray(body.whyPicks) ? body.whyPicks.slice(0, 6).map((p) => cleanStr(p, 30)).filter(Boolean) : [];
     const note = cleanStr(body.note, 300);
     const igHandle = cleanStr(body.igHandle, 60);
     const igFollowed = body.igFollowed === true;
@@ -412,6 +415,9 @@ const handleSignup = (req, res) => {
       name,
       contact,
       phone,
+      job,
+      city,
+      whyPicks,
       note,
       igHandle,
       igFollowed,
