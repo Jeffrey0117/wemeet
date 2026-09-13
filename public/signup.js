@@ -253,7 +253,7 @@ const validate = (step) => {
     if (!$("f-name").value.trim()) return "暱稱要填喔，不然不知道怎麼叫你";
     if (!$("f-contact").value.trim() && !$("f-phone").value.trim()) return "LINE ID 或電話至少留一個，才通知得到你";
     const age = parseInt($("f-age").value, 10);
-    if (!age || age < 12 || age > 99) return "年紀填一下（12–99），我們好安排同溫層";
+    if (!age || age < 12 || age > 99) return "年紀填一下（12–99），方便我們簡單安排";
     const pickedEv = currentEvent();
     if (pickedEv && pickedEv.ratio && !(document.querySelector('input[name="gender"]:checked') || {}).value) {
       return "這場會平衡參加組成，性別選一下";
@@ -261,7 +261,7 @@ const validate = (step) => {
     if (pickedEv && pickedEv.poll && !document.querySelector('input[name="poll-pick"]:checked')) {
       return "勾一下你可以的時段，我們才排得進去";
     }
-    if (!$("f-job").value.trim()) return "職業寫一下（大概就好），幫你排同溫層座位";
+    if (!$("f-job").value.trim()) return "職業寫一下（大概就好），方便我們簡單安排";
     if (!$("f-city").value.trim()) return "住哪一帶寫一下，之後選場地會參考";
   }
   if (step === 2) {
