@@ -689,7 +689,7 @@ a { color: var(--fizz); }
   border-radius: 14px;
   transition: background 0.15s ease, transform 0.15s ease;
 }
-.reel-learn:hover { background: var(--fizz-dark); transform: translateY(-2px); }
+.reel-learn:hover { background: var(--fizz-dark); box-shadow: 0 6px 18px rgba(58, 35, 24, 0.22); }
 .reel-watch-link { text-align: center; font-size: 0.85rem; color: var(--cola-soft); }
 .reel-watch-link:hover { color: var(--fizz); }
 .reel-transcript {
@@ -909,6 +909,8 @@ a { color: var(--fizz); }
   color: var(--cola);
   transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
+.wall-card { position: relative; }
+.wall-card::after { content: ""; position: absolute; left: 0; right: 0; bottom: -7px; height: 7px; }
 .wall-card:hover { transform: translateY(-5px); box-shadow: 0 12px 32px rgba(58, 35, 24, 0.14); }
 .wall-photo {
   width: 100%;
@@ -986,6 +988,8 @@ a { color: var(--fizz); }
   align-items: start;
 }
 .promo-card { display: block; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); transition: transform 0.18s ease; }
+.promo-card { position: relative; }
+.promo-card::after { content: ""; position: absolute; left: 0; right: 0; bottom: -5px; height: 5px; }
 .promo-card:hover { transform: translateY(-3px); }
 .promo-card img { display: block; width: 100%; height: auto; }
 .promo-side { display: grid; gap: 0.9rem; justify-items: start; }
