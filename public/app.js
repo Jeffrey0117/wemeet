@@ -462,9 +462,7 @@ const loadWall = async () => {
 
 /* ---------- hero 影片聲音開關（自動播放必須靜音，點一下開聲） ---------- */
 
-const bindHeroSound = () => {
-  const video = document.querySelector(".hero-video");
-  const btn = document.getElementById("video-sound");
+const bindVideoSound = (video, btn) => {
   if (!video || !btn) return;
 
   const renderBtn = () => {
@@ -480,6 +478,11 @@ const bindHeroSound = () => {
   btn.addEventListener("click", toggle);
   video.addEventListener("click", toggle);
   renderBtn();
+};
+
+const bindHeroSound = () => {
+  bindVideoSound(document.querySelector(".hero-video"), document.getElementById("video-sound"));
+  bindVideoSound(document.querySelector(".pb-video"), document.getElementById("pb-sound"));
 };
 
 /* ---------- 會員心得語音條（真實波形 + 點擊跳轉） ---------- */

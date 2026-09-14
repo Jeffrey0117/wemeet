@@ -158,6 +158,8 @@ a { color: var(--fizz); }
   margin: 0 auto;
 }
 .pb-live { margin-top: clamp(1.4rem, 3vw, 2.2rem); }
+.pb-video-wrap { position: relative; display: inline-block; }
+.pb-sound { right: 10px; bottom: 10px; padding: 0.45rem 0.8rem; font-size: 0.82rem; }
 .pb-video {
   width: min(240px, 62vw);
   aspect-ratio: 9 / 16;
