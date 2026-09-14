@@ -281,11 +281,11 @@ const publicEvents = () => {
         // 稀缺顯示：對外顯示剩餘 = max(3, fomo - 已報名)，最低卡在 3、永不顯示滿、永不擋報名
         // buyout: 滿了成行基準（capacity）後翻轉成「一起解鎖包場」敘事
         const signed = counts[e.id] || 0;
-        const { capacity, fomo, buyout, hardCap, ...noCap } = pub;
+        const { capacity, fomo, buyout, hardCap, fomoFloor, ...noCap } = pub;
         if (e.buyout && signed >= (e.capacity || 8)) {
           return { ...noCap, ...venue, ...payFlag, past, buyoutMode: { signed, goal: e.buyout, reached: signed >= e.buyout } };
         }
-        return { ...noCap, ...venue, ...payFlag, past, left: Math.max(3, fomo - signed) };
+        return { ...noCap, ...venue, ...payFlag, past, left: Math.max(e.fomoFloor || 3, fomo - signed) };
       }
       return { ...pub, ...venue, ...payFlag, past, signedUp: counts[e.id] || 0 };
     })
