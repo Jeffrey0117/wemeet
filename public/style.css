@@ -996,6 +996,8 @@ a { color: var(--fizz); }
 }
 
 /* ---------- 下一場預告 ---------- */
+.promo-single { display: grid; gap: 1rem; justify-items: center; max-width: 860px; margin: 0 auto; }
+.promo-single .promo-card { width: 100%; }
 .promo-section { max-width: 980px; }
 .promo-grid {
   display: grid;
