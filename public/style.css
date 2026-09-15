@@ -998,6 +998,29 @@ a { color: var(--fizz); }
 }
 
 /* ---------- 下一場預告 ---------- */
+.promo-ai {
+  max-width: 860px;
+  margin: 0 auto clamp(2.4rem, 5vw, 3.6rem);
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  gap: clamp(1rem, 3vw, 2rem);
+  padding: clamp(1.2rem, 3vw, 1.8rem) clamp(1.2rem, 3vw, 2rem);
+}
+.promo-ai-text { flex: 1; text-align: left; display: grid; gap: 0.7rem; justify-items: start; }
+.promo-ai-meta { color: var(--cola-soft); font-size: 0.95rem; }
+.promo-prize { font-family: var(--font-display); font-size: clamp(1.1rem, 2.6vw, 1.4rem); line-height: 1.5; }
+.promo-prize strong { color: var(--fizz); }
+.promo-prize span { font-family: var(--font-body); font-size: 0.88rem; color: var(--cola-soft); }
+.promo-ai-img { width: min(300px, 40%); height: auto; border-radius: 14px; background: #fff; }
+.promo-second { margin-top: 0.5rem; }
+@media (max-width: 700px) {
+  .promo-ai { flex-direction: column; }
+  .promo-ai-text { justify-items: center; text-align: center; }
+  .promo-ai-img { width: min(320px, 85vw); }
+}
 .promo-single { display: grid; gap: 1rem; justify-items: center; max-width: 860px; margin: 0 auto; }
 .promo-single .promo-card { width: 100%; }
 .promo-section { max-width: 980px; }
