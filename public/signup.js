@@ -324,13 +324,13 @@ const submit = async () => {
         const sub = document.getElementById("done-sub");
         sub.innerHTML = "你的資料<strong>已經在名單上</strong>，不用重複報名。<br>";
         sub.appendChild(document.createTextNode(data.waitNote || "這場報名很熱烈，我們會依序私訊確認名額。"));
-        document.getElementById("done-next-text").innerHTML = "私訊我們的 IG 說聲「我報名了」，<br>場次確定後會馬上通知你細節。";
+        document.getElementById("done-next-text").innerHTML = "場次確定會<strong>第一時間通知你</strong>；<br>想問進度，私訊 IG 小編會直接回你 ✓";
       }
       // 重複報名：不新增資料，提示已報過並再次顯示場地
       if (data.already) {
         document.getElementById("done-title").textContent = "你早就報好了！";
         document.getElementById("done-sub").innerHTML = "這筆是你之前的報名，<strong>一直都在名單上</strong>。<br>完全不用再報一次，場地資訊在下面。";
-        document.getElementById("done-next-text").innerHTML = "還沒私訊過的話，記得私訊 IG 說一聲，<br>我們確認後<strong>名額就是你的</strong>。";
+        document.getElementById("done-next-text").innerHTML = "你的名額<strong>一直都在</strong>，不用做任何事；<br>有問題私訊 IG 小編會直接回你 ✓";
       }
       // 報名成功揭露場地：顯示地點與導航
       if (data.event && (data.event.location || data.event.mapUrl)) {

@@ -1121,7 +1121,7 @@ const handleRequest = (req, res) => {
             id: "su-" + s.id,
             title: "報名成功",
             body: ev
-              ? `已收到你的報名：${evName}。記得私訊 IG 跟我們說一聲，報名費 ${ev.fee != null ? ev.fee : 50} 元${ev.prepay ? "先匯款鎖定名額（報名完成頁有帳號）" : "現場繳就好"}。`
+              ? `已收到你的報名：${evName}，名額已保留。報名費 ${ev.fee != null ? ev.fee : 50} 元${ev.prepay ? "先匯款鎖定名額（報名完成頁有帳號）" : "當天現場繳就好"}，到時見！`
               : "已加入開團通知名單，下次開團第一個告訴你。",
             createdAt: s.createdAt,
             kind: "personal",
