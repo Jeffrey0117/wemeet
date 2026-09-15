@@ -375,6 +375,11 @@ const handleSignup = (req, res) => {
         sendJson(res, 400, { error: "勾一下你可以的時段，我們才排得進去" });
         return;
       }
+      // 報名前置任務（如：去 Threads 貼文留言）：必須勾確認
+      if (event.preTask && body.preTaskDone !== true) {
+        sendJson(res, 400, { error: "先完成任務再勾確認，報名才算數喔" });
+        return;
+      }
       const all = readJsonFile(SIGNUPS_PATH, []);
       // hardCap = 真上限（包場天花板）：到頂默默進候補，對外永不顯示滿
       if (event.hardCap && all.filter((x) => x.eventId === eventId && !x.waitlisted).length >= event.hardCap) {
@@ -425,6 +430,7 @@ const handleSignup = (req, res) => {
       age,
       waitlisted,
       picks: joinedEvent && joinedEvent.poll ? rawPicks.filter((p) => (joinedEvent.poll.options || []).includes(p)) : [],
+      preTaskDone: joinedEvent && joinedEvent.preTask ? body.preTaskDone === true : undefined,
       agreedPayment,
       agreedAttend,
       paid: false,

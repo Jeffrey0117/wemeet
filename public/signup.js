@@ -30,7 +30,7 @@ const computeFlow = () => {
   if (skipEventStep) f = f.filter((s) => s !== 0);
   if (memberExpress) {
     const ev = typeof currentEvent === "function" ? currentEvent() : null;
-    f = f.filter((s) => (s !== 1 || (ev && ev.poll)) && s !== 3 && s !== 4);
+    f = f.filter((s) => (s !== 1 || (ev && (ev.poll || ev.preTask))) && s !== 3 && s !== 4);
   }
   flow = f;
   if (flowPos >= flow.length) flowPos = flow.length - 1;
@@ -75,8 +75,20 @@ const renderPoll = () => {
   });
 };
 
+/* 報名前置任務（event.preTask）：連結＋必勾確認 */
+const renderTask = () => {
+  const ev = currentEvent();
+  const box = $("task-box");
+  if (!box) return;
+  if (!ev || !ev.preTask) { box.hidden = true; return; }
+  box.hidden = false;
+  $("task-text").textContent = ev.preTask.text || "先完成小任務再報名";
+  $("task-link").href = ev.preTask.url || "#";
+  $("task-confirm").textContent = ev.preTask.confirmLabel || "我完成了";
+};
+
 document.addEventListener("change", (e) => {
-  if (e.target && e.target.name === "eventId") { computeFlow(); renderPoll(); }
+  if (e.target && e.target.name === "eventId") { computeFlow(); renderPoll(); renderTask(); }
 });
 
 const updateFeeBox = () => {
@@ -92,7 +104,7 @@ const updateFeeBox = () => {
 
 const applyFlow = () => {
   const step = flow[flowPos];
-  if (step === 1) renderPoll();
+  if (step === 1) { renderPoll(); renderTask(); }
   if (step === 2) updateFeeBox();
   steps.forEach((s) => s.classList.toggle("on", s.dataset.step === String(step)));
   renderProgress(false);
@@ -261,6 +273,9 @@ const validate = (step) => {
     if (pickedEv && pickedEv.poll && !document.querySelector('input[name="poll-pick"]:checked')) {
       return "勾一下你可以的時段，我們才排得進去";
     }
+    if (pickedEv && pickedEv.preTask && !$("f-task").checked) {
+      return "先去連結那邊留個言，回來勾「" + (pickedEv.preTask.confirmLabel || "我完成了") + "」才算報名喔";
+    }
     if (!$("f-job").value.trim()) return "職業寫一下（大概就好），方便我們簡單安排";
     if (!$("f-city").value.trim()) return "住哪一帶寫一下，之後選場地會參考";
   }
@@ -296,6 +311,7 @@ const submit = async () => {
         igFollowed: $("f-followed").checked,
         gender: (document.querySelector('input[name="gender"]:checked') || {}).value || "",
         picks: [...document.querySelectorAll('input[name="poll-pick"]:checked')].map((c) => c.value),
+        preTaskDone: $("f-task") ? $("f-task").checked : false,
         agreedPayment: $("f-agree-pay").checked,
         agreedAttend: $("f-agree-attend").checked,
       }),

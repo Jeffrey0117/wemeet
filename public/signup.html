@@ -238,6 +238,13 @@
     .done-next-alt { margin: 0.7rem 0 0 !important; font-size: 0.88rem; }
     .done-next-alt a { color: var(--fizz); }
     .poll-chips, .why-chips { flex-wrap: wrap; }
+    .task-box {
+      border: 1.5px dashed var(--fizz); border-radius: 14px;
+      padding: 1rem 1.1rem; margin-bottom: 1rem;
+      display: grid; gap: 0.6rem; justify-items: start;
+    }
+    .task-text { font-weight: 700; }
+    .task-chip { display: inline-flex; align-items: center; gap: 0.4rem; }
     .done-pay {
       background: #fff7f2; border: 1.5px solid var(--fizz); border-radius: 14px;
       padding: 1.1rem 1.2rem; margin-bottom: 1.4rem;
@@ -339,6 +346,11 @@
       </label>
       <div class="field" id="poll-box" hidden><span id="poll-q"></span>
         <div class="gender-chips poll-chips" id="poll-chips"></div>
+      </div>
+      <div class="task-box" id="task-box" hidden>
+        <p class="task-text" id="task-text"></p>
+        <a class="btn btn-ghost" id="task-link" href="#" target="_blank" rel="noopener">前往留言 →</a>
+        <label class="gchip task-chip"><input type="checkbox" id="f-task"><span id="task-confirm">我留言好了</span></label>
       </div>
     </section>
 
