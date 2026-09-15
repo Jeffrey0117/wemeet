@@ -222,6 +222,44 @@ const exitPickedMode = () => {
 $("picked-change").addEventListener("click", exitPickedMode);
 $("eh-change").addEventListener("click", exitPickedMode);
 
+/* ---------- 完成頁一鍵入會：登入/註冊 → 資料自動寫進會員檔案（含認親） ---------- */
+
+let submittedProfile = null;
+
+const wireJoin = () => {
+  const btn = document.getElementById("btn-join");
+  if (!btn) return;
+  btn.addEventListener("click", async () => {
+    const sdk = await waitForLetMeUse();
+    if (!sdk) {
+      $("join-msg").textContent = "登入元件載入中，再按一次試試";
+      return;
+    }
+    sdk.login();
+    // 等註冊/登入完成，把剛填的資料存進會員檔案
+    const timer = setInterval(async () => {
+      if (!sdk.user) return;
+      clearInterval(timer);
+      btn.disabled = true;
+      $("join-msg").textContent = "建立中⋯";
+      try {
+        await fetch("/api/me", { headers: lmuAuthHeaders() }); // 先建檔
+        await fetch("/api/me", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", ...lmuAuthHeaders() },
+          body: JSON.stringify(submittedProfile || {}),
+        });
+        $("join-msg").innerHTML = '會員建好了 ✓ 這次報名已掛進你的帳號，<a href="/me">去會員中心看看 →</a>';
+        btn.hidden = true;
+        if (window.__wemeetBellRefresh) setTimeout(window.__wemeetBellRefresh, 600);
+      } catch (err) {
+        $("join-msg").textContent = "資料同步沒成功，去會員中心補一下就好";
+      }
+    }, 800);
+  });
+};
+wireJoin();
+
 /* ---------- 會員秒報名 ---------- */
 
 const prefillFromMember = async () => {
@@ -372,6 +410,15 @@ const submit = async () => {
       if (loggedIn && window.__wemeetBellRefresh) setTimeout(window.__wemeetBellRefresh, 600);
       $("done-track-member").hidden = !loggedIn;
       $("done-track-guest").hidden = loggedIn;
+      if (!loggedIn) {
+        // 一鍵入會用：留住剛送出的資料，入會後直接寫進會員檔案
+        submittedProfile = {
+          nickname: $("f-name").value.trim(),
+          contact: $("f-contact").value.trim() || $("f-phone").value.trim(),
+          age: parseInt($("f-age").value, 10) || 0,
+          igHandle: $("f-ig").value.trim(),
+        };
+      }
       showDone();
     } else {
       setMsg(data.error || "送出失敗，再試一次");

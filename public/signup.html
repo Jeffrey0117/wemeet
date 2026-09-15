@@ -237,6 +237,13 @@
     }
     .done-next-alt { margin: 0.7rem 0 0 !important; font-size: 0.88rem; }
     .done-next-alt a { color: var(--fizz); }
+    .done-join {
+      background: #eef5ef; border: 1.5px solid var(--mint); border-radius: 14px;
+      padding: 1.2rem 1rem 1.3rem; margin-bottom: 1.4rem;
+    }
+    .done-join .done-next-kicker { color: #4d7d61; }
+    .done-join p { margin-bottom: 0.8rem; }
+    .done-join .done-next-alt { margin: 0.6rem 0 0 !important; color: #4d7d61; font-weight: 700; }
     .poll-chips, .why-chips { flex-wrap: wrap; }
     .task-box {
       border: 1.5px dashed var(--fizz); border-radius: 14px;
@@ -444,8 +451,13 @@
           <p class="done-next-alt">或直接密創辦人 <a href="https://ig.me/m/justmi_ok" target="_blank" rel="noopener">@justmi_ok</a></p>
         </div>
         <p class="done-track" id="done-track-member" hidden>已記進你的會員帳號，<a href="/me">隨時到會員中心看報名紀錄</a>，確認後鈴鐺會通知你。</p>
-        <p class="done-track" id="done-track-guest" hidden><a href="/me">建立會員</a>可以隨時查報名紀錄，確認、開新場都會收到站內通知。</p>
-        <p style="margin-top:1.6rem;margin-bottom:0.6rem">等確認的空檔，先把你的 <strong>Quickky 名片卡</strong>準備好，<br>小聚現場用掃的交換，不用尷尬地互要 IG。</p>
+        <div class="done-join" id="done-track-guest" hidden>
+          <p class="done-next-kicker">10 秒變會員</p>
+          <p>把這次填的資料直接變成會員檔案：<strong>下次報名免重填</strong>、開新場第一時間通知、報名紀錄隨時查。</p>
+          <button class="btn btn-primary" id="btn-join" type="button">一鍵建立會員 →</button>
+          <p class="done-next-alt" id="join-msg" role="status"></p>
+        </div>
+        <p style="margin-top:1.6rem;margin-bottom:0.6rem">開場前先把你的 <strong>Quickky 名片卡</strong>建好——<br>有頭貼、上首頁 Chill 友牆，現場用掃的交換，不用尷尬互要 IG。</p>
         <a class="btn btn-ghost" href="/me"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="16" height="16"><path d="M16 10h2"/><path d="M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/></svg> 準備我的名片卡</a>
         <p style="margin-top:1rem"><a href="/">回官網首頁</a></p>
       </div>

@@ -682,8 +682,25 @@ const handleMe = (req, res) => {
         // 撈頭貼期間名冊可能被別的請求改過，重讀避免蓋掉
         const fresh = readJsonFile(MEMBERS_PATH, {});
         writeJsonAtomic(MEMBERS_PATH, { ...fresh, [payload.sub]: next }, (err) => {
-          if (err) sendJson(res, 500, { error: "write failed" });
-          else sendJson(res, 200, { member: memberPublic(next) });
+          if (err) {
+            sendJson(res, 500, { error: "write failed" });
+            return;
+          }
+          // 認親：把同聯絡方式（LINE/電話）的訪客報名掛進這個帳號，入會即看到參加史
+          if (next.contact) {
+            const norm = (v) => String(v || "").trim().toLowerCase();
+            const rows = readJsonFile(SIGNUPS_PATH, []);
+            let changed = false;
+            const adopted = rows.map((x) => {
+              if (!x.memberSub && (norm(x.contact) === norm(next.contact) || (x.phone && norm(x.phone) === norm(next.contact)))) {
+                changed = true;
+                return { ...x, memberSub: payload.sub };
+              }
+              return x;
+            });
+            if (changed) writeJsonAtomic(SIGNUPS_PATH, adopted, () => {});
+          }
+          sendJson(res, 200, { member: memberPublic(next) });
         });
       })();
     });
