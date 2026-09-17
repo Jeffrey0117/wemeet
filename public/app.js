@@ -620,6 +620,8 @@ const renderPulse = (d) => {
   else if (d.views) tile(d.views, "次網站瀏覽");
   tile(d.attendees || 0, "人次報名參加");
   tile(d.eventsHeld || 0, "場小聚圓滿結束");
+  const heroStat = document.getElementById("hero-stat");
+  if (heroStat && d.eventsHeld) heroStat.textContent = `已辦 ${d.eventsHeld} 場・${d.attendees || 0} 人次參加`;
 
   // 累積曲線（手繪風：線段重取樣 + 垂直方向抖動，資料點本身不偏移）
   const series = d.series || [];
