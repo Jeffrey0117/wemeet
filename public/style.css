@@ -379,7 +379,8 @@ a { color: var(--fizz); }
 
 /* 聲音細條版：兩行式（上=標註+時間+倍速、下=波形滿寬） */
 /* intro 雙欄：左介紹右聲音（欄位對齊 hero：同 max-width/比例/間距 → 右欄直線對下來） */
-.intro-section {
+/* .section.intro-section 權重 (0,2,0) > .section (0,1,0)：880px 上限解除不再靠檔案順序 */
+.section.intro-section {
   max-width: none;
   padding-left: clamp(1.2rem, 4vw, 3rem);
   padding-right: clamp(1.2rem, 4vw, 3rem);
