@@ -1086,22 +1086,20 @@ a { color: var(--fizz); }
 .hero-bg {
   position: absolute;
   inset: 0;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  gap: 4px;
   z-index: 0;
 }
 .hero-bg img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* 焦點推右：臉都在右半邊露出來，左邊留給文字面板 */
+  object-position: 72% 30%;
 }
 .hero-bg::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(100deg, rgba(250, 243, 231, 0.6) 0%, rgba(250, 243, 231, 0.28) 45%, rgba(26, 17, 12, 0.18) 100%);
+  background: linear-gradient(95deg, rgba(250, 243, 231, 0.82) 0%, rgba(250, 243, 231, 0.35) 42%, rgba(250, 243, 231, 0) 68%);
 }
 .brand-panel {
   position: relative;
@@ -1130,7 +1128,7 @@ a { color: var(--fizz); }
 }
 @media (max-width: 900px) {
   .brand-hero { min-height: 0; padding: clamp(1.6rem, 5vw, 2.5rem) 1rem; }
-  .hero-bg { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr); }
+  .hero-bg img { object-position: 60% 30%; }
   .brand-panel { max-width: none; }
 }
 
