@@ -1072,6 +1072,20 @@ a { color: var(--fizz); }
   .founder-photo { max-width: 220px; margin: 0 auto; }
 }
 
+/* ---------- 品牌 hero（真滿版 50/50，兩欄各自鎖死不互撞） ---------- */
+.brand-hero {
+  padding: clamp(2.6rem, 5vw, 4.2rem) clamp(1.2rem, 5vw, 5rem);
+}
+.brand-hero .duo-grid {
+  max-width: none;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(2rem, 5vw, 5.5rem);
+}
+.brand-hero .intro-inner { overflow: hidden; }
+.brand-hero .intro-inner h1 { font-size: clamp(2.2rem, 3.2vw, 3.4rem); }
+.brand-hero .intro-inner .hero-zh { font-size: clamp(1.8rem, 2.8vw, 2.8rem); }
+.brand-hero .intro-inner .hero-logo-sm { width: clamp(72px, 7vw, 104px); }
+
 /* ---------- 成長數據（duo 左欄版） ---------- */
 /* 進行式在左時給寬欄（數據要開展，聲音條窄一點沒差） */
 #intro .duo-grid { grid-template-columns: minmax(0, 11fr) 9fr; }
@@ -1140,7 +1154,7 @@ a { color: var(--fizz); }
 
 /* ==================== 手機版終局覆蓋（放檔尾，避免被前面桌機規則以同權重蓋掉） ==================== */
 @media (max-width: 900px) {
-  #intro .duo-grid { grid-template-columns: 1fr; }
+  #intro .duo-grid, .brand-hero .duo-grid { grid-template-columns: 1fr; }
   .pulse-side .pulse-tiles { flex-wrap: wrap; justify-content: flex-start; gap: 1.2rem 2.2rem; }
   .pulse-side .pulse-chart-wrap { max-width: 100%; }
 }
