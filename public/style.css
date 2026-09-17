@@ -1113,8 +1113,10 @@ a { color: var(--fizz); }
   color: var(--cream);
 }
 .bh-slogan {
-  font-family: var(--font-display);
-  font-size: clamp(1.4rem, 3.2vw, 2.1rem);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: clamp(1.3rem, 3vw, 1.9rem);
+  letter-spacing: 0.02em;
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
 }
 .bh-slogan em { color: var(--fizz); font-style: normal; }
@@ -1128,7 +1130,7 @@ a { color: var(--fizz); }
 .bh-ghost:hover { border-color: var(--fizz); color: #fff; }
 .hero-stat-line {
   margin-top: 0.8rem;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: 0.92rem;
   color: rgba(250, 243, 231, 0.72);
 }
