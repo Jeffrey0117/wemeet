@@ -1077,10 +1077,10 @@ a { color: var(--fizz); }
 .brand-hero {
   position: relative;
   overflow: hidden;
-  min-height: min(78vh, 760px);
+  min-height: min(80vh, 780px);
   display: flex;
-  align-items: center;
-  padding: clamp(2.5rem, 5vw, 4rem) clamp(1.2rem, 4vw, 4rem);
+  align-items: flex-end;
+  padding: clamp(2.5rem, 5vw, 4rem) clamp(1.2rem, 4vw, 4rem) clamp(1.6rem, 3.5vw, 2.8rem);
   max-width: none;
 }
 .hero-bg {
@@ -1092,25 +1092,34 @@ a { color: var(--fizz); }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* 焦點推右：臉都在右半邊露出來，左邊留給文字面板 */
-  object-position: 72% 30%;
+  object-position: center 28%;
 }
+/* 跟戰報同語言：照片全裸，下緣深色漸層扛可讀性 */
 .hero-bg::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(95deg, rgba(250, 243, 231, 0.82) 0%, rgba(250, 243, 231, 0.35) 42%, rgba(250, 243, 231, 0) 68%);
+  background: linear-gradient(to top, rgba(26, 17, 12, 0.82) 0%, rgba(26, 17, 12, 0.42) 34%, rgba(26, 17, 12, 0.05) 62%, transparent 100%);
 }
 .brand-panel {
   position: relative;
   z-index: 1;
-  max-width: 620px;
-  background: rgba(250, 243, 231, 0.95);
-  border-radius: var(--radius);
-  box-shadow: 0 24px 64px rgba(26, 17, 12, 0.28);
-  padding: clamp(1.8rem, 3.5vw, 2.8rem) clamp(1.5rem, 3vw, 2.6rem);
+  max-width: 760px;
+  align-self: flex-end;
+  color: var(--cream);
   text-align: left;
+  padding: 0 0 clamp(0.6rem, 2vh, 1.6rem);
 }
+.brand-panel h1, .brand-panel .hero-zh { color: #fff; text-shadow: 0 3px 16px rgba(0, 0, 0, 0.45); }
+.brand-panel .hero-brand { color: rgba(250, 243, 231, 0.85); }
+.brand-panel .hero-tag { background: rgba(26, 17, 12, 0.55); color: rgba(250, 243, 231, 0.92); }
+.brand-panel .hero-slogan { color: var(--cream); text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4); }
+.brand-panel .hero-slogan em { color: var(--fizz); }
+.brand-panel .hero-points { color: rgba(250, 243, 231, 0.92); }
+.brand-panel .hero-points .icon { color: var(--peach, #e1b28a); }
+.brand-panel .btn-ghost { border-color: rgba(250, 243, 231, 0.65); color: var(--cream); }
+.brand-panel .btn-ghost:hover { border-color: var(--fizz); color: #fff; }
+.brand-panel .hero-logo-sm { filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.4)); }
 .brand-panel .hero-title { justify-content: flex-start; gap: 0.9rem; }
 .brand-panel h1 { font-size: clamp(2.1rem, 3.2vw, 3.1rem); white-space: nowrap; line-height: 1.12; }
 .brand-panel .hero-zh { font-size: clamp(1.8rem, 2.7vw, 2.6rem); white-space: nowrap; }
@@ -1124,11 +1133,11 @@ a { color: var(--fizz); }
   margin-top: 1rem;
   font-family: var(--font-display);
   font-size: 0.95rem;
-  color: var(--cola-soft);
+  color: rgba(250, 243, 231, 0.75);
 }
 @media (max-width: 900px) {
-  .brand-hero { min-height: 0; padding: clamp(1.6rem, 5vw, 2.5rem) 1rem; }
-  .hero-bg img { object-position: 60% 30%; }
+  .brand-hero { min-height: 68vh; padding: 1.4rem 1rem 1.2rem; }
+  .hero-bg::after { background: linear-gradient(to top, rgba(26, 17, 12, 0.88) 0%, rgba(26, 17, 12, 0.5) 42%, rgba(26, 17, 12, 0.08) 70%, transparent 100%); }
   .brand-panel { max-width: none; }
 }
 
