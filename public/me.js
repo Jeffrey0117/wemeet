@@ -207,6 +207,102 @@ const init = async () => {
   $("btn-login").addEventListener("click", () => sdk.login());
   $("btn-logout").addEventListener("click", () => sdk.logout());
 
+  /* ---- 站內 30 秒建卡：SSO 換 Quickky token → 上傳頭貼 → 建卡 → 回寫檔案 ---- */
+  const QK_API = "https://quickky.isnowfriend.com";
+  const qkMsg = (text, ok) => {
+    const node = $("qk-msg");
+    node.textContent = text;
+    node.className = "me-msg " + (ok ? "ok" : "err");
+  };
+  const qkGetToken = async () => {
+    const ex = await fetch("https://letmeuse.isnowfriend.com/api/auth/sso/exchange", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + sdk.getToken() },
+      body: JSON.stringify({ targetAppId: "app_DddZG5K0" }),
+    });
+    const exJson = await ex.json();
+    const code = (exJson.data || exJson).code;
+    if (!ex.ok || !code) throw new Error("SSO exchange failed");
+    const rd = await fetch("https://letmeuse.isnowfriend.com/api/auth/sso/redeem", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code, appId: "app_DddZG5K0" }),
+    });
+    const rdJson = await rd.json();
+    const token = ((rdJson.data || rdJson).accessToken) || "";
+    if (!rd.ok || !token) throw new Error("SSO redeem failed");
+    return token;
+  };
+
+  if ($("qk-build")) {
+    $("qk-build").addEventListener("click", async () => {
+      if (!sdk.user) return;
+      const btn = $("qk-build");
+      btn.disabled = true;
+      try {
+        qkMsg("連接 Quickky 帳號中⋯", true);
+        const token = await qkGetToken();
+        const auth = { Authorization: "Bearer " + token };
+
+        // 頭貼（選填）
+        let avatarUrl = "";
+        const file = $("qk-avatar").files[0];
+        if (file) {
+          qkMsg("上傳頭貼中⋯", true);
+          const fd = new FormData();
+          fd.append("file", file);
+          const up = await fetch(QK_API + "/api/upload", { method: "POST", headers: auth, body: fd });
+          const upJson = await up.json();
+          if (up.ok && upJson.data && upJson.data.url) avatarUrl = upJson.data.url;
+        }
+
+        const nickname = $("m-nickname").value.trim() || (sdk.user.name || "Chill 友");
+        const line = $("qk-line").value.trim() || "揪可樂小聚認識的朋友，來掃我的卡！";
+
+        qkMsg("建立卡片中⋯", true);
+        if (avatarUrl || nickname) {
+          await fetch(QK_API + "/api/profile", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json", ...auth },
+            body: JSON.stringify({ displayName: nickname, ...(avatarUrl ? { avatarUrl } : {}) }),
+          }).catch(() => {});
+        }
+        const cardRes = await fetch(QK_API + "/api/cards", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", ...auth },
+          body: JSON.stringify({
+            title: nickname.slice(0, 14),
+            subtitle: line.slice(0, 60),
+            blocks: [{ type: "text", content: line }],
+            visibility: "public",
+          }),
+        });
+        const cardJson = await cardRes.json();
+        const card = cardJson.data || {};
+        if (!cardRes.ok || !card.id) throw new Error((cardJson && cardJson.error) || "建卡失敗");
+
+        // 卡片網址：有 slug 用 /{slug}/{id}，否則 /c/{id}
+        let slug = "";
+        try {
+          const pf = await (await fetch(QK_API + "/api/profile", { headers: auth })).json();
+          slug = (pf.data || {}).slug || "";
+        } catch (err) {}
+        const cardUrl = QK_API + "/" + (slug ? encodeURIComponent(slug) + "/" : "c/") + card.id;
+
+        // 回寫會員檔案（連結 + 上牆），存檔會自動同步 Quickky 頭貼
+        $("m-quickky").value = cardUrl;
+        $("m-wall").checked = $("qk-wall2").checked;
+        await saveMember();
+        qkMsg("卡片建好了 ✓ 頭貼已同步、已掛進你的檔案", true);
+      } catch (err) {
+        console.error("quick card failed:", err);
+        qkMsg("沒建成：" + (err.message || "再試一次") + "，或走下面的進階編輯", false);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  }
+
   // 去 Quickky 建卡：已登入就走 SSO（免重新登入），失敗退回普通連結
   const QUICKKY_APP_ID = "app_DddZG5K0";
   $("quickky-create").addEventListener("click", async (e) => {
