@@ -654,7 +654,7 @@ const renderPulse = (d) => {
     `<path d="${area}" fill="url(#pg)"/>` +
     `<path d="${path}" fill="none" stroke="#e2572b" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>` +
     anchors.map((p) => `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4.5" fill="#faf3e7" stroke="#e2572b" stroke-width="2.5"/>`).join("") +
-    `<text x="${(W - PX - 4).toFixed(1)}" y="${(yv(maxV) - 16).toFixed(1)}" text-anchor="end" font-size="17" font-family="Iansui, sans-serif" fill="#3a2318">${maxV} 人次！</text>`;
+    `<text x="${(W - PX - 4).toFixed(1)}" y="${(yv(maxV) - 16).toFixed(1)}" text-anchor="end" font-size="17" font-family="Iansui, sans-serif" fill="currentColor">${maxV} 人次！</text>`;
 };
 
 const loadPulse = async () => {
@@ -668,6 +668,25 @@ const loadPulse = async () => {
 loadEvents();
 loadWall();
 loadPulse();
+
+/* ---------- 滾動進場（尊重減少動態偏好） ---------- */
+if (!matchMedia("(prefers-reduced-motion: reduce)").matches && "IntersectionObserver" in window) {
+  const rvObs = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((en) => {
+        if (en.isIntersecting) {
+          en.target.classList.add("rv-in");
+          rvObs.unobserve(en.target);
+        }
+      });
+    },
+    { threshold: 0.1 }
+  );
+  document.querySelectorAll("section").forEach((el) => {
+    el.classList.add("rv");
+    rvObs.observe(el);
+  });
+}
 loadReel();
 bindReel();
 bindHeroSound();
