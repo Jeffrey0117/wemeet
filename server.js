@@ -33,6 +33,7 @@ const LMU_APP_ID = ENV.LETMEUSE_APP_ID || "";
 const LMU_SECRET = ENV.LETMEUSE_APP_SECRET || "";
 const MEMBERS_PATH = path.join(DATA_DIR, "members.json");
 const NOTICES_PATH = path.join(DATA_DIR, "notices.json");
+const UPLOADS_DIR = path.join(DATA_DIR, "uploads");
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -140,6 +141,7 @@ const ensureData = () => {
   if (!fs.existsSync(SIGNUPS_PATH)) fs.writeFileSync(SIGNUPS_PATH, "[]", "utf8");
   if (!fs.existsSync(MEMBERS_PATH)) fs.writeFileSync(MEMBERS_PATH, "{}", "utf8");
   if (!fs.existsSync(NOTICES_PATH)) fs.writeFileSync(NOTICES_PATH, "[]", "utf8");
+  if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 };
 
 /* ---------- LetMeUse JWT 驗簽（ES256 via JWKS，HS256 過渡期相容） ---------- */
@@ -248,6 +250,53 @@ const clientIp = (req) =>
     .split(",")[0]
     .trim();
 
+/* ---------- 報名附件照片（base64 上傳，僅後台可讀） ---------- */
+
+const PHOTO_MAX = 6 * 1024 * 1024; // base64 請求上限（約 4MB 原圖）
+
+const handleSignupPhoto = (req, res) => {
+  const ip = clientIp(req);
+  if (rateLimited(ip)) {
+    sendJson(res, 429, { error: "上傳太頻繁，休息一下再試" });
+    return;
+  }
+  let body = "";
+  let tooLarge = false;
+  req.on("data", (chunk) => {
+    body += chunk;
+    if (body.length > PHOTO_MAX) {
+      tooLarge = true;
+      req.destroy();
+    }
+  });
+  req.on("close", () => {
+    if (tooLarge) sendJson(res, 413, { error: "照片太大了，換一張或截圖書櫃就好" });
+  });
+  req.on("end", () => {
+    if (tooLarge) return;
+    try {
+      const parsed = JSON.parse(body);
+      const m = /^data:image\/(jpeg|png|webp);base64,([A-Za-z0-9+/=]+)$/.exec(String(parsed.data || ""));
+      if (!m) {
+        sendJson(res, 400, { error: "照片格式不對，重選一次" });
+        return;
+      }
+      const buf = Buffer.from(m[2], "base64");
+      if (!buf.length || buf.length > 5 * 1024 * 1024) {
+        sendJson(res, 400, { error: "照片太大了，換一張試試" });
+        return;
+      }
+      const id = "sp_" + crypto.randomBytes(10).toString("hex") + "." + (m[1] === "png" ? "png" : m[1] === "webp" ? "webp" : "jpg");
+      fs.writeFile(path.join(UPLOADS_DIR, id), buf, (err) => {
+        if (err) sendJson(res, 500, { error: "存檔失敗，再試一次" });
+        else sendJson(res, 200, { id });
+      });
+    } catch (err) {
+      sendJson(res, 400, { error: "上傳資料解析失敗" });
+    }
+  });
+};
+
 /* ---------- 公開 API ---------- */
 
 const countByEvent = (signups) =>
@@ -308,6 +357,8 @@ const handleSignup = (req, res) => {
     const job = cleanStr(body.job, 40);
     const city = cleanStr(body.city, 40);
     const whyPicks = Array.isArray(body.whyPicks) ? body.whyPicks.slice(0, 6).map((p) => cleanStr(p, 30)).filter(Boolean) : [];
+    const answer = cleanStr(body.answer, 200);
+    const photoId = /^sp_[a-f0-9]{20}\.(jpg|png|webp)$/.test(String(body.photoId || "")) ? String(body.photoId) : "";
     const note = cleanStr(body.note, 300);
     const igHandle = cleanStr(body.igHandle, 60);
     const igFollowed = body.igFollowed === true;
@@ -380,6 +431,16 @@ const handleSignup = (req, res) => {
         sendJson(res, 400, { error: "先完成任務再勾確認，報名才算數喔" });
         return;
       }
+      // 場次自訂問答（如：要帶哪本書）
+      if (event.ask && event.ask.required && !answer) {
+        sendJson(res, 400, { error: (event.ask.label || "問題") + "要填一下喔" });
+        return;
+      }
+      // 場次照片（如：書櫃照）
+      if (event.photoAsk && event.photoAsk.required && (!photoId || !fs.existsSync(path.join(UPLOADS_DIR, photoId)))) {
+        sendJson(res, 400, { error: "照片要上傳喔，拍一張就好" });
+        return;
+      }
       const all = readJsonFile(SIGNUPS_PATH, []);
       // hardCap = 真上限（包場天花板）：到頂默默進候補，對外永不顯示滿
       if (event.hardCap && all.filter((x) => x.eventId === eventId && !x.waitlisted).length >= event.hardCap) {
@@ -431,6 +492,8 @@ const handleSignup = (req, res) => {
       waitlisted,
       picks: joinedEvent && joinedEvent.poll ? rawPicks.filter((p) => (joinedEvent.poll.options || []).includes(p)) : [],
       preTaskDone: joinedEvent && joinedEvent.preTask ? body.preTaskDone === true : undefined,
+      answer: answer || undefined,
+      photoId: photoId || undefined,
       agreedPayment,
       agreedAttend,
       paid: false,
@@ -1109,6 +1172,16 @@ const handleRequest = (req, res) => {
   }
   if (req.method === "GET" && pathname === "/api/reelplay") {
     handleReelplay(res);
+    return;
+  }
+  if (req.method === "POST" && pathname === "/api/signup-photo") {
+    handleSignupPhoto(req, res);
+    return;
+  }
+  const mp = pathname.match(/^\/api\/admin\/photo\/(sp_[a-f0-9]{20}\.(?:jpg|png|webp))$/);
+  if (req.method === "GET" && mp) {
+    if (!requireAdmin(req, res)) return;
+    sendFile(res, path.join(UPLOADS_DIR, mp[1]));
     return;
   }
   if (req.method === "POST" && pathname === "/api/signup") {

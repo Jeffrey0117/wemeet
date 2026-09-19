@@ -30,7 +30,7 @@ const computeFlow = () => {
   if (skipEventStep) f = f.filter((s) => s !== 0);
   if (memberExpress) {
     const ev = typeof currentEvent === "function" ? currentEvent() : null;
-    f = f.filter((s) => (s !== 1 || (ev && (ev.poll || ev.preTask))) && s !== 3 && s !== 4);
+    f = f.filter((s) => (s !== 1 || (ev && (ev.poll || ev.preTask || ev.ask || ev.photoAsk))) && s !== 3 && s !== 4);
   }
   flow = f;
   if (flowPos >= flow.length) flowPos = flow.length - 1;
@@ -75,6 +75,73 @@ const renderPoll = () => {
   });
 };
 
+/* 場次自訂問答 + 照片（event.ask / event.photoAsk） */
+let uploadedPhotoId = "";
+let photoUploading = false;
+
+const renderExtras = () => {
+  const ev = currentEvent();
+  const askBox = $("ask-box");
+  const photoBox = $("photo-box");
+  if (askBox) {
+    if (ev && ev.ask) {
+      askBox.hidden = false;
+      $("ask-label").innerHTML = (ev.ask.label || "問題") + (ev.ask.required ? '<span class="req-star" aria-hidden="true">*</span>' : "");
+      $("f-answer").placeholder = ev.ask.placeholder || "";
+    } else {
+      askBox.hidden = true;
+    }
+  }
+  if (photoBox) {
+    if (ev && ev.photoAsk) {
+      photoBox.hidden = false;
+      $("photo-label").innerHTML = (ev.photoAsk.label || "上傳照片") + (ev.photoAsk.required ? '<span class="req-star" aria-hidden="true">*</span>' : "");
+      $("photo-msg").textContent = ev.photoAsk.hint || "";
+    } else {
+      photoBox.hidden = true;
+    }
+  }
+};
+
+const uploadPhoto = async (file) => {
+  photoUploading = true;
+  uploadedPhotoId = "";
+  $("photo-msg").textContent = "照片處理中⋯";
+  try {
+    // 前端縮圖：最長邊 1280、JPEG 0.82，手機大圖也秒傳
+    const bmp = await createImageBitmap(file);
+    const scale = Math.min(1, 1280 / Math.max(bmp.width, bmp.height));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(bmp.width * scale);
+    canvas.height = Math.round(bmp.height * scale);
+    canvas.getContext("2d").drawImage(bmp, 0, 0, canvas.width, canvas.height);
+    const data = canvas.toDataURL("image/jpeg", 0.82);
+    $("photo-msg").textContent = "上傳中⋯";
+    const res = await fetch("/api/signup-photo", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data }),
+    });
+    const d = await res.json();
+    if (res.ok && d.id) {
+      uploadedPhotoId = d.id;
+      $("photo-msg").textContent = "照片上傳好了 ✓";
+    } else {
+      $("photo-msg").textContent = d.error || "上傳失敗，再選一次";
+    }
+  } catch (err) {
+    $("photo-msg").textContent = "照片處理失敗，換一張試試";
+  } finally {
+    photoUploading = false;
+  }
+};
+
+document.addEventListener("change", (e) => {
+  if (e.target && e.target.id === "f-photo" && e.target.files && e.target.files[0]) {
+    uploadPhoto(e.target.files[0]);
+  }
+});
+
 /* 報名前置任務（event.preTask）：連結＋必勾確認 */
 const renderTask = () => {
   const ev = currentEvent();
@@ -88,7 +155,7 @@ const renderTask = () => {
 };
 
 document.addEventListener("change", (e) => {
-  if (e.target && e.target.name === "eventId") { computeFlow(); renderPoll(); renderTask(); }
+  if (e.target && e.target.name === "eventId") { computeFlow(); renderPoll(); renderTask(); renderExtras(); }
 });
 
 const updateFeeBox = () => {
@@ -104,7 +171,7 @@ const updateFeeBox = () => {
 
 const applyFlow = () => {
   const step = flow[flowPos];
-  if (step === 1) { renderPoll(); renderTask(); }
+  if (step === 1) { renderPoll(); renderTask(); renderExtras(); }
   if (step === 2) updateFeeBox();
   steps.forEach((s) => s.classList.toggle("on", s.dataset.step === String(step)));
   renderProgress(false);
@@ -314,6 +381,13 @@ const validate = (step) => {
     if (pickedEv && pickedEv.preTask && !$("f-task").checked) {
       return "先去連結那邊留個言，回來勾「" + (pickedEv.preTask.confirmLabel || "我完成了") + "」才算報名喔";
     }
+    if (pickedEv && pickedEv.ask && pickedEv.ask.required && !$("f-answer").value.trim()) {
+      return (pickedEv.ask.label || "問題") + "填一下，大家才知道有什麼書可以換";
+    }
+    if (pickedEv && pickedEv.photoAsk && pickedEv.photoAsk.required) {
+      if (photoUploading) return "照片還在上傳，等它一下";
+      if (!uploadedPhotoId) return "上傳一張照片，拍一下就好";
+    }
     if (!$("f-job").value.trim()) return "職業寫一下（大概就好），方便我們簡單安排";
     if (!$("f-city").value.trim()) return "住哪一帶寫一下，之後選場地會參考";
   }
@@ -350,6 +424,8 @@ const submit = async () => {
         gender: (document.querySelector('input[name="gender"]:checked') || {}).value || "",
         picks: [...document.querySelectorAll('input[name="poll-pick"]:checked')].map((c) => c.value),
         preTaskDone: $("f-task") ? $("f-task").checked : false,
+        answer: $("f-answer") ? $("f-answer").value.trim() : "",
+        photoId: uploadedPhotoId,
         agreedPayment: $("f-agree-pay").checked,
         agreedAttend: $("f-agree-attend").checked,
       }),

@@ -358,13 +358,30 @@ const renderSignups = () => {
     // 繳費欄已移除（統一現場收，不追蹤）
 
     const ig = (s.igHandle || "") + (s.igFollowed ? "（已追蹤 ✓）" : "");
-    [new Date(s.createdAt).toLocaleString("zh-TW"), eventTitle(s.eventId), s.name, s.age || "", s.job || "", s.city || "", (s.gender === "male" ? "男" : s.gender === "female" ? "女" : "") + (s.waitlisted ? "（候補）" : ""), (s.picks || []).join("、"), s.contact + (s.phone && s.phone !== s.contact ? "／" + s.phone : ""), ig, [(s.whyPicks || []).join("、"), s.note || ""].filter(Boolean).join("｜")].forEach((v) => {
+    [new Date(s.createdAt).toLocaleString("zh-TW"), eventTitle(s.eventId), s.name, s.age || "", s.job || "", s.city || "", (s.gender === "male" ? "男" : s.gender === "female" ? "女" : "") + (s.waitlisted ? "（候補）" : ""), (s.picks || []).join("、"), s.contact + (s.phone && s.phone !== s.contact ? "／" + s.phone : ""), ig, [s.answer ? "帶書：" + s.answer : "", (s.whyPicks || []).join("、"), s.note || ""].filter(Boolean).join("｜")].forEach((v) => {
       const td = document.createElement("td");
       td.textContent = v;
       tr.appendChild(td);
     });
 
     const delTd = document.createElement("td");
+    if (s.photoId) {
+      const pBtn = document.createElement("button");
+      pBtn.className = "ghost";
+      pBtn.textContent = "書櫃照";
+      pBtn.style.cssText = "padding:0.15rem 0.5rem;margin-right:0.3rem";
+      pBtn.addEventListener("click", async () => {
+        try {
+          const r = await fetch("/api/admin/photo/" + s.photoId, { headers: { Authorization: "Bearer " + token() } });
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          const blob = await r.blob();
+          window.open(URL.createObjectURL(blob), "_blank");
+        } catch (err) {
+          alert("照片載入失敗：" + err.message);
+        }
+      });
+      delTd.appendChild(pBtn);
+    }
     const delBtn = document.createElement("button");
     delBtn.className = "ghost";
     delBtn.textContent = "刪";
