@@ -2,7 +2,7 @@
 // 完整流程 [0選場次, 1稱呼, 2須知, 3IG, 4想說的話]
 // 帶場次進來 → 跳過 0；會員資料齊全 → 跳過 1/3/4（會員秒報名：勾須知就送出）
 const WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"];
-const ALL_STEPS = [0, 1, 2, 3, 4];
+const ALL_STEPS = [0, 1, 2, 3, 4, 5, 6];
 
 const $ = (id) => document.getElementById(id);
 const steps = [...document.querySelectorAll(".step")];
@@ -25,13 +25,14 @@ const setMsg = (text) => {
   node.className = "quiz-msg" + (text ? " err" : "");
 };
 
+const eventHasExtras = (ev) => !!(ev && (ev.poll || ev.preTask || ev.ask || ev.photoAsk));
+
 const computeFlow = () => {
   let f = [...ALL_STEPS];
+  const ev = typeof currentEvent === "function" ? currentEvent() : null;
   if (skipEventStep) f = f.filter((s) => s !== 0);
-  if (memberExpress) {
-    const ev = typeof currentEvent === "function" ? currentEvent() : null;
-    f = f.filter((s) => (s !== 1 || (ev && (ev.poll || ev.preTask || ev.ask || ev.photoAsk))) && s !== 3 && s !== 4);
-  }
+  if (!eventHasExtras(ev)) f = f.filter((s) => s !== 3); // 沒場次專屬問題就跳過
+  if (memberExpress) f = f.filter((s) => s !== 1 && s !== 2 && s !== 5 && s !== 6);
   flow = f;
   if (flowPos >= flow.length) flowPos = flow.length - 1;
 };
@@ -171,8 +172,8 @@ const updateFeeBox = () => {
 
 const applyFlow = () => {
   const step = flow[flowPos];
-  if (step === 1) { renderPoll(); renderTask(); renderExtras(); }
-  if (step === 2) updateFeeBox();
+  if (step === 3) { renderPoll(); renderTask(); renderExtras(); }
+  if (step === 4) updateFeeBox();
   steps.forEach((s) => s.classList.toggle("on", s.dataset.step === String(step)));
   renderProgress(false);
   $("quiz-nav").hidden = false;
@@ -363,35 +364,40 @@ $("express-off").addEventListener("click", () => {
 /* ---------- 驗證與送出 ---------- */
 
 const validate = (step) => {
-  if (step === 4 && !document.querySelector('input[name="why-pick"]:checked')) {
+  if (step === 6 && !document.querySelector('input[name="why-pick"]:checked')) {
     return "點一個想來的原因就好，我們真的會照這個調整活動";
   }
   if (step === 1) {
     if (!$("f-name").value.trim()) return "暱稱要填喔，不然不知道怎麼叫你";
     if (!$("f-contact").value.trim() && !$("f-phone").value.trim()) return "LINE ID 或電話至少留一個，才通知得到你";
+  }
+  if (step === 2) {
     const age = parseInt($("f-age").value, 10);
     if (!age || age < 12 || age > 99) return "年紀填一下（12–99），方便我們簡單安排";
     const pickedEv = currentEvent();
     if (pickedEv && pickedEv.ratio && !(document.querySelector('input[name="gender"]:checked') || {}).value) {
       return "這場會平衡參加組成，性別選一下";
     }
+    if (!$("f-job").value.trim()) return "職業寫一下（大概就好），方便我們簡單安排";
+    if (!$("f-city").value.trim()) return "住哪一帶寫一下，之後選場地會參考";
+  }
+  if (step === 3) {
+    const pickedEv = currentEvent();
     if (pickedEv && pickedEv.poll && !document.querySelector('input[name="poll-pick"]:checked')) {
       return "勾一下你可以的時段，我們才排得進去";
     }
     if (pickedEv && pickedEv.preTask && !$("f-task").checked) {
-      return "先去連結那邊留個言，回來勾「" + (pickedEv.preTask.confirmLabel || "我完成了") + "」才算報名喔";
+      return "完成小任務再勾「" + (pickedEv.preTask.confirmLabel || "我完成了") + "」就能繼續";
     }
     if (pickedEv && pickedEv.ask && pickedEv.ask.required && !$("f-answer").value.trim()) {
-      return (pickedEv.ask.label || "問題") + "填一下，大家才知道有什麼書可以換";
+      return (pickedEv.ask.label || "問題") + "填一下就能繼續";
     }
     if (pickedEv && pickedEv.photoAsk && pickedEv.photoAsk.required) {
       if (photoUploading) return "照片還在上傳，等它一下";
       if (!uploadedPhotoId) return "上傳一張照片，拍一下就好";
     }
-    if (!$("f-job").value.trim()) return "職業寫一下（大概就好），方便我們簡單安排";
-    if (!$("f-city").value.trim()) return "住哪一帶寫一下，之後選場地會參考";
   }
-  if (step === 2) {
+  if (step === 4) {
     if (!$("f-agree-pay").checked || !$("f-agree-attend").checked) return "兩個都勾一下，我們才能幫你留位子";
     // 秒報名模式跳過稱呼步，送出前補驗會員資料真的有帶到
     if (memberExpress && (!$("f-name").value.trim() || (!$("f-contact").value.trim() && !$("f-phone").value.trim()) || !parseInt($("f-age").value, 10))) {

@@ -298,7 +298,7 @@
 <div class="quiz-wrap">
   <div class="quiz-card">
     <div class="quiz-progress" id="progress" aria-hidden="true">
-      <span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
     </div>
 
     <div class="picked-banner" id="picked-banner" hidden>
@@ -336,6 +336,11 @@
       <label class="field"><span>電話（選填，沒有 LINE 才必填）</span>
         <input type="tel" id="f-phone" maxlength="40" placeholder="例：0912345678" autocomplete="tel">
       </label>
+    </section>
+
+    <section class="step" data-step="2">
+      <h2>多認識你一點</h2>
+      <p class="hint">30 秒就好，方便我們簡單安排。</p>
       <label class="field"><span>年紀<span class="req-star" aria-hidden="true">*</span></span>
         <input type="number" id="f-age" min="12" max="99" inputmode="numeric" placeholder="方便我們簡單安排">
       </label>
@@ -346,11 +351,16 @@
         </div>
       </div>
       <label class="field"><span>職業<span class="req-star" aria-hidden="true">*</span></span>
-        <input type="text" id="f-job" maxlength="40" placeholder="例：工程師、學生、行銷｜方便我們簡單安排">
+        <input type="text" id="f-job" maxlength="40" placeholder="例：工程師、學生、行銷">
       </label>
       <label class="field"><span>住哪一帶<span class="req-star" aria-hidden="true">*</span></span>
         <input type="text" id="f-city" maxlength="40" placeholder="例：台中西屯｜之後選場地會參考">
       </label>
+    </section>
+
+    <section class="step" data-step="3">
+      <h2 id="step3-title">這場想問你的</h2>
+      <p class="hint">跟這一場有關的小問題。</p>
       <div class="field" id="poll-box" hidden><span id="poll-q"></span>
         <div class="gender-chips poll-chips" id="poll-chips"></div>
       </div>
@@ -363,13 +373,13 @@
       </div>
       <div class="task-box" id="task-box" hidden>
         <p class="task-text" id="task-text"></p>
-        <a class="btn btn-ghost" id="task-link" href="#" target="_blank" rel="noopener">前往留言 →</a>
-        <label class="gchip task-chip"><input type="checkbox" id="f-task"><span id="task-confirm">我留言好了</span></label>
+        <a class="btn btn-ghost" id="task-link" href="#" target="_blank" rel="noopener">前往 →</a>
+        <label class="gchip task-chip"><input type="checkbox" id="f-task"><span id="task-confirm">我完成了</span></label>
       </div>
     </section>
 
-    <!-- Step 3：報名須知（費用 + 出席承諾） -->
-    <section class="step" data-step="2">
+    <!-- 報名須知（費用 + 出席承諾） -->
+    <section class="step" data-step="4">
       <h2>報名須知</h2>
       <p class="hint">場地和座位都是先訂好的，所以我們收一點點費用，確保大家都會出現。</p>
       <div class="fee-box">
@@ -389,7 +399,7 @@
     </section>
 
     <!-- Step 4：追蹤 IG -->
-    <section class="step" data-step="3">
+    <section class="step" data-step="5">
       <h2>順手追蹤一下 IG</h2>
       <p class="hint">活動照片、下一場預告都會發在這裡，追蹤才不會漏接。</p>
       <div class="ig-box">
@@ -410,7 +420,7 @@
     </section>
 
     <!-- Step 5：想說的話 -->
-    <section class="step" data-step="4">
+    <section class="step" data-step="6">
       <h2>最後，為什麼想來揪可樂?</h2>
       <p class="hint">點一點就好，我們照這個把活動辦得更像你要的。</p>
       <div class="field"><span>想來的原因<span class="req-star" aria-hidden="true">*</span>（可複選）</span>
