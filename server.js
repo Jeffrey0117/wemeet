@@ -460,8 +460,9 @@ const handleSignup = (req, res) => {
           sendJson(res, 400, { error: "這場會平衡參加組成，請選一下性別" });
           return;
         }
-        // 性別額度 = capacity 對半；超額不拒絕，默默進候補（主辦人私訊時調節）
-        const quota = Math.floor((event.capacity || 20) / 2);
+        // 性別額度：預設 capacity 對半，可用 quotaM/quotaF 各自覆蓋（如 1 男 2 女）；超額默默進候補
+        const half = Math.floor((event.capacity || 20) / 2);
+        const quota = gender === "male" ? (Number.isInteger(event.quotaM) ? event.quotaM : half) : (Number.isInteger(event.quotaF) ? event.quotaF : half);
         const genderCount = all.filter((x) => x.eventId === eventId && x.gender === gender && !x.waitlisted).length;
         if (genderCount >= quota) waitlisted = true;
       } else if (!event.fomo && !event.hardCap) {
