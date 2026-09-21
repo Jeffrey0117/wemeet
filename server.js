@@ -358,6 +358,7 @@ const handleSignup = (req, res) => {
     const city = cleanStr(body.city, 40);
     const whyPicks = Array.isArray(body.whyPicks) ? body.whyPicks.slice(0, 6).map((p) => cleanStr(p, 30)).filter(Boolean) : [];
     const answer = cleanStr(body.answer, 200);
+    const answers = Array.isArray(body.answers) ? body.answers.slice(0, 5).map((v) => cleanStr(v, 200)) : [];
     const photoId = /^sp_[a-f0-9]{20}\.(jpg|png|webp)$/.test(String(body.photoId || "")) ? String(body.photoId) : "";
     const note = cleanStr(body.note, 300);
     const igHandle = cleanStr(body.igHandle, 60);
@@ -431,10 +432,18 @@ const handleSignup = (req, res) => {
         sendJson(res, 400, { error: "先完成任務再勾確認，報名才算數喔" });
         return;
       }
-      // 場次自訂問答（如：要帶哪本書）
+      // 場次自訂問答（單題 ask 或多題 asks）
       if (event.ask && event.ask.required && !answer) {
         sendJson(res, 400, { error: (event.ask.label || "問題") + "要填一下喔" });
         return;
+      }
+      if (Array.isArray(event.asks)) {
+        for (let qi = 0; qi < event.asks.length; qi++) {
+          if (event.asks[qi] && event.asks[qi].required && !(answers[qi] || "").trim()) {
+            sendJson(res, 400, { error: (event.asks[qi].label || "問題") + "要填一下喔" });
+            return;
+          }
+        }
       }
       // 場次照片（如：書櫃照）
       if (event.photoAsk && event.photoAsk.required && (!photoId || !fs.existsSync(path.join(UPLOADS_DIR, photoId)))) {
@@ -493,6 +502,7 @@ const handleSignup = (req, res) => {
       picks: joinedEvent && joinedEvent.poll ? rawPicks.filter((p) => (joinedEvent.poll.options || []).includes(p)) : [],
       preTaskDone: joinedEvent && joinedEvent.preTask ? body.preTaskDone === true : undefined,
       answer: answer || undefined,
+      answers: joinedEvent && Array.isArray(joinedEvent.asks) && answers.some(Boolean) ? answers : undefined,
       photoId: photoId || undefined,
       agreedPayment,
       agreedAttend,
@@ -1211,7 +1221,7 @@ const handleRequest = (req, res) => {
             id: "su-" + s.id,
             title: "報名成功",
             body: ev
-              ? `已收到你的報名：${evName}，名額已保留。報名費 ${ev.fee != null ? ev.fee : 50} 元${ev.prepay ? "先匯款鎖定名額（報名完成頁有帳號）" : "當天現場繳就好"}，到時見！`
+              ? `已收到你的報名：${evName}，名額已保留。${ev.fee === 0 ? "免報名費（餐點自付）" : `報名費 ${ev.fee != null ? ev.fee : 50} 元${ev.prepay ? "先匯款鎖定名額（報名完成頁有帳號）" : "當天現場繳就好"}`}，到時見！`
               : "已加入開團通知名單，下次開團第一個告訴你。",
             createdAt: s.createdAt,
             kind: "personal",

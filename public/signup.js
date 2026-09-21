@@ -25,7 +25,7 @@ const setMsg = (text) => {
   node.className = "quiz-msg" + (text ? " err" : "");
 };
 
-const eventHasExtras = (ev) => !!(ev && (ev.poll || ev.preTask || ev.ask || ev.photoAsk));
+const eventHasExtras = (ev) => !!(ev && (ev.poll || ev.preTask || ev.ask || ev.photoAsk || (Array.isArray(ev.asks) && ev.asks.length)));
 
 const computeFlow = () => {
   let f = [...ALL_STEPS];
@@ -84,6 +84,32 @@ const renderExtras = () => {
   const ev = currentEvent();
   const askBox = $("ask-box");
   const photoBox = $("photo-box");
+  const asksBox = $("asks-box");
+  if (asksBox) {
+    if (ev && Array.isArray(ev.asks) && ev.asks.length) {
+      const kept = [...asksBox.querySelectorAll("input")].map((i) => i.value);
+      asksBox.hidden = false;
+      asksBox.innerHTML = "";
+      ev.asks.forEach((q, i) => {
+        const label = document.createElement("label");
+        label.className = "field";
+        const span = document.createElement("span");
+        span.innerHTML = (q.label || "問題") + (q.required ? '<span class="req-star" aria-hidden="true">*</span>' : "");
+        const inp = document.createElement("input");
+        inp.type = "text";
+        inp.maxLength = 200;
+        inp.className = "f-ask-input";
+        inp.placeholder = q.placeholder || "";
+        if (kept[i]) inp.value = kept[i];
+        label.appendChild(span);
+        label.appendChild(inp);
+        asksBox.appendChild(label);
+      });
+    } else {
+      asksBox.hidden = true;
+      asksBox.innerHTML = "";
+    }
+  }
   if (askBox) {
     if (ev && ev.ask) {
       askBox.hidden = false;
@@ -163,11 +189,17 @@ const updateFeeBox = () => {
   const picked = (document.querySelector('input[name="eventId"]:checked') || {}).value || "";
   const ev = eventsCache.find((e) => e.id === picked);
   const fee = ev && ev.fee != null ? ev.fee : 50;
-  document.getElementById("fee-num").textContent = `報名費 $${fee}`;
+  document.getElementById("fee-num").textContent = fee === 0 ? "免報名費" : `報名費 $${fee}`;
   document.getElementById("fee-sub").textContent =
     (ev && ev.feeNote) || (ev && ev.prepay ? "先匯款鎖定名額（報名完成會給帳號），不方便匯款現場繳也 OK" : "現場繳費就好，不用先匯款");
   const agreeTxt = document.getElementById("agree-pay-text");
-  if (agreeTxt) agreeTxt.textContent = ev && ev.prepay ? "我了解報名費金額與付款方式（先匯款鎖位，或現場繳）" : "我了解活動報名費金額，當天現場繳費";
+  if (agreeTxt)
+    agreeTxt.textContent =
+      ev && ev.fee === 0
+        ? "我了解餐點／消費自己點自己付"
+        : ev && ev.prepay
+        ? "我了解報名費金額與付款方式（先匯款鎖位，或現場繳）"
+        : "我了解活動報名費金額，當天現場繳費";
 };
 
 const applyFlow = () => {
@@ -392,6 +424,12 @@ const validate = (step) => {
     if (pickedEv && pickedEv.ask && pickedEv.ask.required && !$("f-answer").value.trim()) {
       return (pickedEv.ask.label || "問題") + "填一下就能繼續";
     }
+    if (pickedEv && Array.isArray(pickedEv.asks)) {
+      const vals = [...document.querySelectorAll(".f-ask-input")].map((i) => i.value.trim());
+      for (let qi = 0; qi < pickedEv.asks.length; qi++) {
+        if (pickedEv.asks[qi].required && !vals[qi]) return (pickedEv.asks[qi].label || "問題") + "填一下就能繼續";
+      }
+    }
     if (pickedEv && pickedEv.photoAsk && pickedEv.photoAsk.required) {
       if (photoUploading) return "照片還在上傳，等它一下";
       if (!uploadedPhotoId) return "上傳一張照片，拍一下就好";
@@ -431,6 +469,7 @@ const submit = async () => {
         picks: [...document.querySelectorAll('input[name="poll-pick"]:checked')].map((c) => c.value),
         preTaskDone: $("f-task") ? $("f-task").checked : false,
         answer: $("f-answer") ? $("f-answer").value.trim() : "",
+        answers: [...document.querySelectorAll(".f-ask-input")].map((i) => i.value.trim()),
         photoId: uploadedPhotoId,
         agreedPayment: $("f-agree-pay").checked,
         agreedAttend: $("f-agree-attend").checked,
