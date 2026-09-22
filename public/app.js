@@ -89,6 +89,18 @@ const buildEventCard = (ev, full) => {
   }
   info.appendChild(meta);
   if (full && ev.feeNote) info.appendChild(el("p", "event-feenote", ev.feeNote));
+  // 活動流程表（agenda: [{t, x}]）
+  if (full && Array.isArray(ev.agenda) && ev.agenda.length && !ev.past) {
+    const ul = el("ul", "event-agenda");
+    ev.agenda.forEach((row) => {
+      const li = el("li");
+      const b = el("b", null, row.t || "");
+      li.appendChild(b);
+      li.appendChild(document.createTextNode(" " + (row.x || "")));
+      ul.appendChild(li);
+    });
+    info.appendChild(ul);
+  }
   // 完整版顯示流程文案；hero 緊湊版收起（.hero-events CSS 也會隱藏保險）
   if (ev.note && (full || ev.past)) info.appendChild(el("p", "event-note", ev.note));
   card.appendChild(info);

@@ -969,6 +969,25 @@ a { color: var(--fizz); }
   .wall-cta-body h3 { font-size: 0.78rem; }
 }
 
+/* ---------- 活動流程表 ---------- */
+.event-agenda {
+  list-style: none;
+  margin: 0.6rem 0 0;
+  padding: 0.7rem 0.9rem;
+  background: var(--cream-deep);
+  border-radius: 12px;
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+}
+.event-agenda b {
+  font-family: var(--font-body);
+  font-weight: 700;
+  color: var(--caramel);
+  margin-right: 0.3rem;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ---------- 讀書會書單 ---------- */
 .book-shelf {
   display: grid;

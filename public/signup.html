@@ -145,6 +145,20 @@
       color: rgba(250, 243, 231, 0.85);
       margin-bottom: 1rem;
     }
+    .eh-agenda {
+      list-style: none;
+      position: relative; z-index: 1;
+      display: inline-grid;
+      gap: 0.25rem;
+      margin: 0 auto 1rem;
+      padding: 0.7rem 1.2rem;
+      background: rgba(250, 243, 231, 0.12);
+      border-radius: 12px;
+      font-size: 0.92rem;
+      color: rgba(250, 243, 231, 0.92);
+      text-align: left;
+    }
+    .eh-agenda b { color: #ffb38a; font-weight: 700; margin-right: 0.35rem; font-variant-numeric: tabular-nums; }
     .eh-change {
       position: relative; z-index: 1;
       background: none;
@@ -289,6 +303,7 @@
       <p class="eh-kicker">你正在報名</p>
       <h1 class="eh-title" id="eh-title"></h1>
       <p class="eh-meta" id="eh-meta"></p>
+  <ul class="eh-agenda" id="eh-agenda" hidden></ul>
       <button type="button" class="eh-change" id="eh-change">換場次</button>
     </div>
     <img class="eh-poster" id="eh-poster" alt="活動海報" hidden>

@@ -299,6 +299,24 @@ const loadEvents = async () => {
         poster.hidden = true;
         $("event-hero").classList.remove("has-poster");
       }
+      // 活動流程表
+      const ag = $("eh-agenda");
+      if (ag) {
+        if (Array.isArray(preselected.agenda) && preselected.agenda.length) {
+          ag.hidden = false;
+          ag.textContent = "";
+          preselected.agenda.forEach((row) => {
+            const li = document.createElement("li");
+            const b = document.createElement("b");
+            b.textContent = row.t || "";
+            li.appendChild(b);
+            li.appendChild(document.createTextNode(" " + (row.x || "")));
+            ag.appendChild(li);
+          });
+        } else {
+          ag.hidden = true;
+        }
+      }
       $("event-hero").hidden = false;
       document.body.classList.add("has-event-hero");
       skipEventStep = true;
