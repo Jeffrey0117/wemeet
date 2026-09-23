@@ -285,7 +285,7 @@ const buildFilterOptions = () => {
   const sel = $("signup-filter");
   sel.innerHTML = "";
   const todayIso = new Date().toISOString().slice(0, 10);
-  const upcoming = eventsCache.filter((e) => e.date >= todayIso && !e.ended).sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  const upcoming = eventsCache.filter((e) => e.date >= todayIso && !e.ended && e.status !== "hidden").sort((a, b) => String(a.date).localeCompare(String(b.date)));
   const past = eventsCache.filter((e) => e.date < todayIso || e.ended).sort((a, b) => String(b.date).localeCompare(String(a.date)));
   const addOpt = (parent, v, label) => {
     const o = document.createElement("option");
