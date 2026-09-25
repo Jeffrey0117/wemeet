@@ -308,12 +308,20 @@ const isPast = (e) => {
   return !Number.isNaN(end.getTime()) && end < new Date();
 };
 
+// signupDeadline（"YYYY-MM-DDTHH:mm"，伺服器本地時間）過了就停止報名
+const isDeadlinePassed = (e) => {
+  if (!e.signupDeadline) return false;
+  const t = new Date(String(e.signupDeadline));
+  return !Number.isNaN(t.getTime()) && t < new Date();
+};
+
 const publicEvents = () => {
   const events = readJsonFile(EVENTS_PATH, []);
   const counts = countByEvent(readJsonFile(SIGNUPS_PATH, []));
   return events
     .filter((e) => e.status !== "hidden")
-    .map((e) => {
+    .map((raw) => {
+      const e = isDeadlinePassed(raw) ? { ...raw, status: "closed", fullText: "已截止報名" } : raw;
       // 地點一律不對外（場地會重複用，過往地址=洩漏未來場地；報名後才解鎖）
       // ended:true = 手動提前收進歷史（當天活動結束、不想等午夜自動下架）
       const past = isPast(e) || e.ended === true;
@@ -409,7 +417,7 @@ const handleSignup = (req, res) => {
         sendJson(res, 404, { error: "找不到這個活動" });
         return;
       }
-      if (event.status === "closed") {
+      if (event.status === "closed" || isDeadlinePassed(event)) {
         sendJson(res, 409, { error: "這場已經截止報名囉" });
         return;
       }

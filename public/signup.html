@@ -202,11 +202,17 @@
     .lookup-title { text-align: center; font-size: 0.92rem; color: var(--cola-soft); margin-bottom: 0.6rem; }
     .lookup-row { display: flex; gap: 0.6rem; }
     .lookup-row input {
-      flex: 1; font-family: var(--font-body); font-size: 0.95rem;
+      flex: 1; min-width: 0; font-family: var(--font-body); font-size: 0.95rem;
       padding: 0.6rem 0.85rem; border: 1.5px solid var(--cream-deep);
       border-radius: 12px; background: #fff; color: var(--cola);
     }
+    .lookup-row .btn { flex-shrink: 0; white-space: nowrap; padding: 0.6rem 1.1rem; font-size: 0.95rem; }
+    @media (max-width: 380px) {
+      .lookup-row { flex-direction: column; }
+      .lookup-row .btn { width: 100%; }
+    }
     .lu-item {
+      overflow-wrap: anywhere;
       background: var(--card); border-radius: 12px; box-shadow: var(--shadow);
       padding: 0.8rem 1rem; margin-top: 0.7rem; font-size: 0.92rem;
     }
