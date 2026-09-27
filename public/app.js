@@ -182,8 +182,6 @@ const renderEvents = (events) => {
     });
     historyList.appendChild(tl);
     historyWrap.hidden = false;
-    // 預設捲到最新（最右）
-    requestAnimationFrame(() => { tl.scrollLeft = tl.scrollWidth; });
   }
 };
 

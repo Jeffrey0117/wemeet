@@ -1021,20 +1021,23 @@ a { color: var(--fizz); }
 .timeline {
   position: relative;
   display: flex;
-  gap: clamp(1.2rem, 3vw, 2.4rem);
-  overflow-x: auto;
-  padding: 3.2rem 1rem 1.2rem;
-  scrollbar-width: thin;
-  scrollbar-color: var(--cream-deep) transparent;
+  flex-wrap: wrap;
+  justify-content: center;
+  row-gap: 1.6rem;
+  column-gap: clamp(1rem, 2.6vw, 2.2rem);
+  padding: 0.6rem 0.5rem 0.4rem;
 }
-.timeline::before {
-  content: "";
-  position: absolute;
-  left: 0; right: 0;
-  top: calc(3.2rem + 7px);
-  height: 3px;
-  background: linear-gradient(90deg, transparent, var(--caramel) 6%, var(--caramel) 94%, transparent);
-  opacity: 0.45;
+/* 單排時的軸線（節點多到換行就收掉，避免線穿過第二排） */
+@media (min-width: 700px) {
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: 0; right: 0;
+    top: calc(0.6rem + 7px);
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--caramel) 6%, var(--caramel) 94%, transparent);
+    opacity: 0.45;
+  }
 }
 .tl-node {
   position: relative;
@@ -1077,9 +1080,9 @@ a { color: var(--fizz); }
 }
 .tl-tip {
   position: absolute;
-  bottom: calc(100% + 2px);
+  top: calc(100% + 8px);
   left: 50%;
-  transform: translateX(-50%) translateY(4px);
+  transform: translateX(-50%) translateY(-4px);
   width: max-content;
   max-width: 260px;
   background: var(--cola);
@@ -1098,20 +1101,23 @@ a { color: var(--fizz); }
 .tl-tip::after {
   content: "";
   position: absolute;
-  top: 100%; left: 50%;
+  bottom: 100%; left: 50%;
   transform: translateX(-50%);
   border: 6px solid transparent;
-  border-top-color: var(--cola);
+  border-bottom-color: var(--cola);
 }
 .tl-tip b { color: #ffb38a; display: block; margin-bottom: 0.15rem; }
 .tl-node:hover .tl-tip, .tl-node:focus .tl-tip {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
-/* 前兩個節點的小卡靠左對齊避免出血 */
-.tl-node:first-child .tl-tip { left: 0; transform: translateX(0) translateY(4px); }
+/* 首尾節點的小卡靠邊對齊避免出血 */
+.tl-node:first-child .tl-tip { left: 0; transform: translateX(0) translateY(-4px); }
 .tl-node:first-child:hover .tl-tip, .tl-node:first-child:focus .tl-tip { transform: translateX(0) translateY(0); }
 .tl-node:first-child .tl-tip::after { left: 24px; }
+.tl-node:last-child .tl-tip { left: auto; right: 0; transform: translateX(0) translateY(-4px); }
+.tl-node:last-child:hover .tl-tip, .tl-node:last-child:focus .tl-tip { transform: translateX(0) translateY(0); }
+.tl-node:last-child .tl-tip::after { left: auto; right: 24px; }
 .album-thumbs {
   display: flex;
   justify-content: center;
