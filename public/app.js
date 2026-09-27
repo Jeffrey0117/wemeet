@@ -679,22 +679,33 @@ const loadPulse = async () => {
   } catch (err) {}
 };
 
-/* ---------- 現場相簿：自動輪播 + 圓點（互動即暫停 8 秒） ---------- */
+/* ---------- 現場相簿：主舞台單張 + 縮圖切換 + 自動輪播（互動暫停 8 秒） ---------- */
 const initAlbum = () => {
   const sw = document.getElementById("album-swiper");
-  const dotsBox = document.getElementById("album-dots");
-  if (!sw || !dotsBox) return;
+  const thumbsBox = document.getElementById("album-thumbs");
+  if (!sw || !thumbsBox) return;
   const slides = [...sw.children];
-  slides.forEach((_, i) => {
-    const d = document.createElement("i");
-    if (i === 0) d.className = "on";
-    dotsBox.appendChild(d);
-  });
-  const dots = [...dotsBox.children];
   let idx = 0;
   let holdUntil = 0;
 
-  const syncDots = () => {
+  const goTo = (i) => {
+    sw.scrollTo({ left: slides[i].offsetLeft, behavior: "smooth" });
+  };
+  slides.forEach((slide, i) => {
+    const src = slide.querySelector("img").getAttribute("src");
+    const t = document.createElement("img");
+    t.src = src;
+    t.alt = "";
+    if (i === 0) t.className = "on";
+    t.addEventListener("click", () => {
+      holdUntil = Date.now() + 10000;
+      goTo(i);
+    });
+    thumbsBox.appendChild(t);
+  });
+  const thumbs = [...thumbsBox.children];
+
+  const sync = () => {
     const mid = sw.scrollLeft + sw.clientWidth / 2;
     let best = 0, bestDist = Infinity;
     slides.forEach((el, i) => {
@@ -703,9 +714,9 @@ const initAlbum = () => {
       if (dist < bestDist) { bestDist = dist; best = i; }
     });
     idx = best;
-    dots.forEach((d, i) => d.classList.toggle("on", i === idx));
+    thumbs.forEach((t, i) => t.classList.toggle("on", i === idx));
   };
-  sw.addEventListener("scroll", () => { syncDots(); }, { passive: true });
+  sw.addEventListener("scroll", sync, { passive: true });
   ["pointerdown", "wheel", "touchstart"].forEach((evt) =>
     sw.addEventListener(evt, () => { holdUntil = Date.now() + 8000; }, { passive: true })
   );
@@ -713,10 +724,8 @@ const initAlbum = () => {
   if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
     setInterval(() => {
       if (Date.now() < holdUntil || document.hidden) return;
-      const next = (idx + 1) % slides.length;
-      const el = slides[next];
-      sw.scrollTo({ left: el.offsetLeft - (sw.clientWidth - el.offsetWidth) / 2, behavior: "smooth" });
-    }, 4000);
+      goTo((idx + 1) % slides.length);
+    }, 4500);
   }
 };
 initAlbum();

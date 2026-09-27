@@ -969,62 +969,64 @@ a { color: var(--fizz); }
   .wall-cta-body h3 { font-size: 0.78rem; }
 }
 
-/* ---------- 現場相簿 swiper（scroll-snap，零依賴） ---------- */
-.album-section {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 4.5rem 1.5rem 3.5rem;
-  text-align: center;
-}
-.album-section .section-kicker, .album-section h2 { text-align: center; }
+/* ---------- 現場相簿（主舞台一次一張完整圖 + 縮圖切換，零依賴） ---------- */
 .album-swiper {
   display: flex;
-  gap: 1rem;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  border-radius: var(--radius);
 }
 .album-swiper::-webkit-scrollbar { display: none; }
 .album-slide {
-  flex: 0 0 min(86%, 780px);
+  flex: 0 0 100%;
   scroll-snap-align: center;
-  position: relative;
+  scroll-snap-stop: always;
   margin: 0;
-  border-radius: var(--radius);
-  overflow: hidden;
-  box-shadow: var(--shadow);
-  background: #1a110c;
+  min-width: 0;
 }
 .album-slide img {
   display: block;
   width: 100%;
-  height: clamp(320px, 52vh, 520px);
+  height: auto;
+  max-height: min(64vh, 560px);
   object-fit: contain;
-  background: #1a110c;
+  border-radius: var(--radius);
 }
 .album-slide figcaption {
-  position: absolute;
-  left: 0; right: 0; bottom: 0;
-  padding: 2rem 1rem 0.8rem;
-  background: linear-gradient(to top, rgba(26, 17, 12, 0.78), transparent);
-  color: var(--cream);
+  margin-top: 0.5rem;
+  text-align: center;
   font-family: var(--font-display);
-  font-size: clamp(1rem, 2.4vw, 1.2rem);
+  font-size: clamp(0.95rem, 2.2vw, 1.15rem);
+  color: var(--cola-soft);
   letter-spacing: 0.06em;
 }
 #about .album-swiper { margin-top: 0.5rem; }
-.album-dots { display: flex; justify-content: center; gap: 0.45rem; margin-top: 1rem; }
-.album-dots i {
-  width: 9px; height: 9px; border-radius: 50%;
-  background: var(--cream-deep);
-  border: 1.5px solid var(--caramel);
-  transition: background 0.2s, transform 0.2s;
+.album-thumbs {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.6rem;
+  margin-top: 0.9rem;
 }
-.album-dots i.on { background: var(--fizz); border-color: var(--fizz); transform: scale(1.25); }
+.album-thumbs img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 10px;
+  cursor: pointer;
+  opacity: 0.55;
+  border: 2.5px solid transparent;
+  transition: opacity 0.2s, border-color 0.2s;
+}
+.album-thumbs img:hover { opacity: 0.85; }
+.album-thumbs img.on { opacity: 1; border-color: var(--fizz); }
+@media (max-width: 640px) {
+  .album-thumbs { gap: 0.4rem; }
+  .album-thumbs img { border-radius: 8px; }
+}
 
-/* ---------- 活動流程表 ---------- */
+/* ---------- 活動流程表 ---------- *//* ---------- 活動流程表 ---------- */
 .event-agenda {
   list-style: none;
   margin: 0.6rem 0 0;
