@@ -679,6 +679,48 @@ const loadPulse = async () => {
   } catch (err) {}
 };
 
+/* ---------- 現場相簿：自動輪播 + 圓點（互動即暫停 8 秒） ---------- */
+const initAlbum = () => {
+  const sw = document.getElementById("album-swiper");
+  const dotsBox = document.getElementById("album-dots");
+  if (!sw || !dotsBox) return;
+  const slides = [...sw.children];
+  slides.forEach((_, i) => {
+    const d = document.createElement("i");
+    if (i === 0) d.className = "on";
+    dotsBox.appendChild(d);
+  });
+  const dots = [...dotsBox.children];
+  let idx = 0;
+  let holdUntil = 0;
+
+  const syncDots = () => {
+    const mid = sw.scrollLeft + sw.clientWidth / 2;
+    let best = 0, bestDist = Infinity;
+    slides.forEach((el, i) => {
+      const center = el.offsetLeft + el.offsetWidth / 2;
+      const dist = Math.abs(center - mid);
+      if (dist < bestDist) { bestDist = dist; best = i; }
+    });
+    idx = best;
+    dots.forEach((d, i) => d.classList.toggle("on", i === idx));
+  };
+  sw.addEventListener("scroll", () => { syncDots(); }, { passive: true });
+  ["pointerdown", "wheel", "touchstart"].forEach((evt) =>
+    sw.addEventListener(evt, () => { holdUntil = Date.now() + 8000; }, { passive: true })
+  );
+
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    setInterval(() => {
+      if (Date.now() < holdUntil || document.hidden) return;
+      const next = (idx + 1) % slides.length;
+      const el = slides[next];
+      sw.scrollTo({ left: el.offsetLeft - (sw.clientWidth - el.offsetWidth) / 2, behavior: "smooth" });
+    }, 4000);
+  }
+};
+initAlbum();
+
 loadEvents();
 loadWall();
 loadPulse();
