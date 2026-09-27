@@ -406,6 +406,7 @@ const handleSignup = (req, res) => {
         ? {
             title: e.title, date: e.date, time: e.time || "", location: e.location || "", mapUrl: e.mapUrl || "",
             ...(e.prepay && typeof e.prepay === "object" ? { prepay: e.prepay } : {}),
+            ...(e.doneNote ? { doneNote: e.doneNote } : {}),
           }
         : null;
 
@@ -438,6 +439,11 @@ const handleSignup = (req, res) => {
       // 報名前置任務（如：去 Threads 貼文留言）：必須勾確認
       if (event.preTask && body.preTaskDone !== true) {
         sendJson(res, 400, { error: "先完成任務再勾確認，報名才算數喔" });
+        return;
+      }
+      // 這場指定用 LINE 聯繫：LINE ID 必填（電話不能替代）
+      if (event.lineRequired && !contact) {
+        sendJson(res, 400, { error: "這場用 LINE 聯繫，LINE ID 要填喔" });
         return;
       }
       // 場次自訂問答（單題 ask 或多題 asks）

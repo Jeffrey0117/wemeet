@@ -419,6 +419,8 @@ const validate = (step) => {
   }
   if (step === 1) {
     if (!$("f-name").value.trim()) return "暱稱要填喔，不然不知道怎麼叫你";
+    const evL = currentEvent();
+    if (evL && evL.lineRequired && !$("f-contact").value.trim()) return "這場用 LINE 聯繫與確認，LINE ID 一定要填喔";
     if (!$("f-contact").value.trim() && !$("f-phone").value.trim()) return "LINE ID 或電話至少留一個，才通知得到你";
   }
   if (step === 2) {
@@ -528,6 +530,11 @@ const submit = async () => {
         note.style.fontSize = "0.9em";
         note.textContent = data.heatNote;
         sub.appendChild(note);
+      }
+      // 場次自訂完成文案（如：以 LINE 聯繫為準）
+      if (data.event && data.event.doneNote && !data.already) {
+        document.getElementById("done-sub").innerHTML = "";
+        document.getElementById("done-sub").textContent = data.event.doneNote;
       }
       // 先匯款場：揭露轉帳資訊（只有報名成功才看得到）
       if (data.event && data.event.prepay) {
