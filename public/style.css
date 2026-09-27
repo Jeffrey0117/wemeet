@@ -1014,20 +1014,118 @@ a { color: var(--fizz); }
   letter-spacing: 0.06em;
 }
 #about .album-swiper { margin-top: 0.5rem; }
-.history-in-album { margin-top: 2.4rem; text-align: left; }
-.history-in-album .event-history-title { text-align: center; margin-bottom: 0.9rem; }
+.history-in-album { margin-top: 2.6rem; }
+.history-in-album .event-history-title { text-align: center; margin-bottom: 1.2rem; }
+
+/* 橫向時間軸：一條線、一排節點、hover 浮出小卡 */
+.timeline {
+  position: relative;
+  display: flex;
+  gap: clamp(1.2rem, 3vw, 2.4rem);
+  overflow-x: auto;
+  padding: 3.2rem 1rem 1.2rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--cream-deep) transparent;
+}
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  top: calc(3.2rem + 7px);
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--caramel) 6%, var(--caramel) 94%, transparent);
+  opacity: 0.45;
+}
+.tl-node {
+  position: relative;
+  flex: 0 0 auto;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: center;
+  font-family: var(--font-body);
+  min-width: 74px;
+}
+.tl-dot {
+  display: block;
+  width: 17px; height: 17px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: var(--cream);
+  border: 4px solid var(--fizz);
+  transition: transform 0.15s;
+}
+.tl-node:hover .tl-dot, .tl-node:focus .tl-dot { transform: scale(1.3); background: var(--fizz); }
+.tl-date {
+  display: block;
+  margin-top: 0.5rem;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  color: var(--cola);
+  white-space: nowrap;
+}
+.tl-name {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.76rem;
+  color: var(--cola-soft);
+  white-space: nowrap;
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tl-tip {
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  width: max-content;
+  max-width: 260px;
+  background: var(--cola);
+  color: var(--cream);
+  text-align: left;
+  border-radius: 12px;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  box-shadow: 0 12px 30px rgba(26, 17, 12, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s, transform 0.15s;
+  z-index: 5;
+}
+.tl-tip::after {
+  content: "";
+  position: absolute;
+  top: 100%; left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--cola);
+}
+.tl-tip b { color: #ffb38a; display: block; margin-bottom: 0.15rem; }
+.tl-node:hover .tl-tip, .tl-node:focus .tl-tip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+/* 前兩個節點的小卡靠左對齊避免出血 */
+.tl-node:first-child .tl-tip { left: 0; transform: translateX(0) translateY(4px); }
+.tl-node:first-child:hover .tl-tip, .tl-node:first-child:focus .tl-tip { transform: translateX(0) translateY(0); }
+.tl-node:first-child .tl-tip::after { left: 24px; }
 .album-thumbs {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 0.6rem;
-  margin-top: 0.9rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.55rem;
+  margin: 0.9rem auto 0;
+  max-width: 620px;
+  flex-wrap: wrap;
 }
 .album-thumbs img {
   display: block;
-  width: 100%;
+  width: clamp(76px, 16vw, 108px);
   aspect-ratio: 4 / 3;
   object-fit: cover;
-  border-radius: 10px;
+  border-radius: 8px;
   cursor: pointer;
   opacity: 0.55;
   border: 2.5px solid transparent;

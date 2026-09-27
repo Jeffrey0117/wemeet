@@ -159,10 +159,31 @@ const renderEvents = (events) => {
   const historyList = document.getElementById("history-list");
   if (historyWrap && historyList && past.length) {
     historyList.textContent = "";
-    const wrap = el("div", "history-list");
-    past.forEach((ev) => wrap.appendChild(buildHistoryRow(ev)));
-    historyList.appendChild(wrap);
+    // 橫向時間軸：時間由舊到新，hover/點擊浮出當場回顧小卡
+    const tl = el("div", "timeline");
+    past.slice().reverse().forEach((ev) => {
+      const { md, w } = fmtDate(ev.date);
+      const node = document.createElement("button");
+      node.type = "button";
+      node.className = "tl-node";
+      node.appendChild(el("i", "tl-dot"));
+      node.appendChild(el("span", "tl-date", md));
+      node.appendChild(el("span", "tl-name", ev.title));
+      const tip = el("span", "tl-tip");
+      const b = el("b", null, `${md}（${w}）${ev.title}`);
+      tip.appendChild(b);
+      if (ev.location) tip.appendChild(document.createTextNode(ev.location));
+      if (ev.note) {
+        tip.appendChild(document.createElement("br"));
+        tip.appendChild(document.createTextNode(ev.note));
+      }
+      node.appendChild(tip);
+      tl.appendChild(node);
+    });
+    historyList.appendChild(tl);
     historyWrap.hidden = false;
+    // 預設捲到最新（最右）
+    requestAnimationFrame(() => { tl.scrollLeft = tl.scrollWidth; });
   }
 };
 
