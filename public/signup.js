@@ -266,7 +266,9 @@ const loadEvents = async () => {
         : ev.buyoutMode
         ? (ev.buyoutMode.reached ? "　包場達成！剩最後幾位" : `　已揪 ${ev.buyoutMode.signed} 人・再 ${ev.buyoutMode.goal - ev.buyoutMode.signed} 人包場`)
         : left !== null ? `　剩 ${left} 名額` : "";
-      sub.textContent = `${ev.time || ""}｜${ev.location || "地點確認中"}` + slotTxt;
+      sub.textContent = `${ev.time || ""}｜${ev.location || "地點確認中"}` + slotTxt + (ev.note ? `
+${ev.note}` : "");
+      sub.style.whiteSpace = "pre-line";
       text.appendChild(title);
       text.appendChild(document.createElement("br"));
       text.appendChild(sub);
@@ -298,6 +300,13 @@ const loadEvents = async () => {
       } else {
         poster.hidden = true;
         $("event-hero").classList.remove("has-poster");
+      }
+      // 活動簡介＋費用說明（分享連結進來的人才看得到賣點）
+      const noteEl = $("eh-note");
+      if (noteEl) {
+        const parts = [preselected.note || "", preselected.feeNote || ""].filter(Boolean);
+        noteEl.hidden = !parts.length;
+        noteEl.textContent = parts.join("　");
       }
       // 活動流程表
       const ag = $("eh-agenda");
