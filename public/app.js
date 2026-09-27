@@ -691,6 +691,16 @@ const initAlbum = () => {
   const goTo = (i) => {
     sw.scrollTo({ left: slides[i].offsetLeft, behavior: "smooth" });
   };
+  // 每張主圖包進白色相框
+  slides.forEach((slide) => {
+    const img = slide.querySelector("img");
+    if (img && !img.closest(".album-frame")) {
+      const frame = document.createElement("span");
+      frame.className = "album-frame";
+      img.parentNode.insertBefore(frame, img);
+      frame.appendChild(img);
+    }
+  });
   slides.forEach((slide, i) => {
     const src = slide.querySelector("img").getAttribute("src");
     const t = document.createElement("img");
