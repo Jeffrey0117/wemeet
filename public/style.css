@@ -1000,9 +1000,9 @@ a { color: var(--fizz); }
 .album-slide img {
   display: block;
   width: 100%;
-  height: clamp(300px, 48vh, 480px);
-  object-fit: cover;
-  object-position: center 30%;
+  height: clamp(320px, 52vh, 520px);
+  object-fit: contain;
+  background: #1a110c;
 }
 .album-slide figcaption {
   position: absolute;
@@ -1014,6 +1014,7 @@ a { color: var(--fizz); }
   font-size: clamp(1rem, 2.4vw, 1.2rem);
   letter-spacing: 0.06em;
 }
+#about .album-swiper { margin-top: 0.5rem; }
 .album-dots { display: flex; justify-content: center; gap: 0.45rem; margin-top: 1rem; }
 .album-dots i {
   width: 9px; height: 9px; border-radius: 50%;
