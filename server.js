@@ -315,13 +315,22 @@ const isDeadlinePassed = (e) => {
   return !Number.isNaN(t.getTime()) && t < new Date();
 };
 
+// closeAtCap：正取數到 hardCap 就真的關門（對外顯示額滿、擋報名），不走默默候補
+const isCapReached = (e, signups) =>
+  !!(e.closeAtCap && e.hardCap && signups.filter((x) => x.eventId === e.id && !x.waitlisted).length >= e.hardCap);
+
 const publicEvents = () => {
   const events = readJsonFile(EVENTS_PATH, []);
-  const counts = countByEvent(readJsonFile(SIGNUPS_PATH, []));
+  const allSignups = readJsonFile(SIGNUPS_PATH, []);
+  const counts = countByEvent(allSignups);
   return events
     .filter((e) => e.status !== "hidden")
     .map((raw) => {
-      const e = isDeadlinePassed(raw) ? { ...raw, status: "closed", fullText: "已截止報名" } : raw;
+      const e = isDeadlinePassed(raw)
+        ? { ...raw, status: "closed", fullText: "已截止報名" }
+        : isCapReached(raw, allSignups)
+          ? { ...raw, status: "closed", fullText: raw.fullText || "已額滿" }
+          : raw;
       // 地點一律不對外（場地會重複用，過往地址=洩漏未來場地；報名後才解鎖）
       // ended:true = 手動提前收進歷史（當天活動結束、不想等午夜自動下架）
       const past = isPast(e) || e.ended === true;
@@ -429,6 +438,11 @@ const handleSignup = (req, res) => {
       );
       if (dup) {
         sendJson(res, 200, { success: true, already: true, event: eventPublicInfo(event) });
+        return;
+      }
+      // 額滿檢查放在去重之後：已報名的人重送仍拿得到場地資訊
+      if (isCapReached(event, readJsonFile(SIGNUPS_PATH, []))) {
+        sendJson(res, 409, { error: "這場已經額滿囉！下一場優先通知你" });
         return;
       }
       // 時段投票場：至少勾一個（只收活動定義過的選項）
