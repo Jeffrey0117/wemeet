@@ -1769,3 +1769,6 @@ body.ev-themed .ev-block-title { letter-spacing: 0.14em; }
   mask-image: radial-gradient(ellipse 92% 80% at 50% 50%, #000 52%, transparent 97%);
 }
 @media (max-width: 760px) { .sketch-band { margin-top: 1.2rem; } }
+/* hero 版：開門定調帶 — 緊貼 nav、下接大合照，同屏看得到兩者 */
+.sketch-band-hero { max-width: 980px; margin: 0.6rem auto 0.2rem; }
+@media (max-width: 760px) { .sketch-band-hero { margin: 0.5rem auto 0.1rem; padding: 0 0.8rem; } }
