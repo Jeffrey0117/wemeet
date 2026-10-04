@@ -66,10 +66,12 @@ const PAGE_SVG =
 const THEMES = {
   reading: {
     cls: "ev-theme-reading",
+    poster: "/media/theme-reading.jpg",
+    posterKicker: "揪可樂・線下讀書會",
     particles: [
-      { svg: LEAF_SVG, color: "#d98a3d" },
+      { svg: LEAF_SVG, color: "#6b4a38" },
       { svg: LEAF_SVG, color: "#c1622f" },
-      { svg: PAGE_SVG, color: "#f3e7d3" },
+      { svg: PAGE_SVG, color: "#8a6a50" },
     ],
   },
 };
@@ -78,7 +80,7 @@ const TYPE_THEME = { book: "reading" };
 const applyTheme = (ev) => {
   const key = ev.theme === "none" ? "" : ev.theme || TYPE_THEME[ev.type] || "";
   const theme = THEMES[key];
-  if (!theme) return;
+  if (!theme) return null;
   document.body.classList.add("ev-themed", theme.cls);
   $("ev-theme-bg").hidden = false;
   // 自備主題圖（themeBg）就鋪圖暗化；沒有就用純 CSS 漸層底
@@ -103,10 +105,11 @@ const applyTheme = (ev) => {
     p.style.animationDelay = (-Math.random() * 22).toFixed(1) + "s";
     box.appendChild(p);
   }
+  return theme;
 };
 
 const render = (ev) => {
-  applyTheme(ev);
+  const theme = applyTheme(ev);
   const signupUrl = "/signup?event=" + encodeURIComponent(ev.id);
   document.title = `${ev.title}｜Chill Club 揪可樂`;
   $("ev-title").textContent = ev.title;
@@ -144,6 +147,15 @@ const render = (ev) => {
     img.src = ev.poster;
     img.alt = ev.title;
     poster.appendChild(img);
+  } else if (theme && theme.poster) {
+    // 主題預設海報：主題插畫 + CSS 蓋文字（上 kicker、下場次標題）
+    poster.classList.add("ev-poster-sketch");
+    const img = el("img", "ev-poster-img");
+    img.src = theme.poster;
+    img.alt = ev.title;
+    poster.appendChild(img);
+    poster.appendChild(el("p", "ev-ps-top", theme.posterKicker || "揪可樂小聚"));
+    poster.appendChild(el("p", "ev-ps-title", ev.title));
   } else {
     const t = typeInfo(ev.type);
     poster.classList.add("ev-poster-fallback");

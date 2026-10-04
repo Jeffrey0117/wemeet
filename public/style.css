@@ -1688,26 +1688,26 @@ a { color: var(--fizz); }
   cursor: pointer;
 }
 
-/* ==================== 活動頁主題皮膚（Luma 式沉浸背景） ==================== */
-/* 背景層：固定全版，粒子飄落；themeBg 有圖就鋪圖暗化 */
+/* ==================== 活動頁主題皮膚（調性跟主頁一致的淺色沉浸版） ==================== */
+/* 背景層：固定全版，素描粒子飄落 */
 .ev-theme-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; }
 .ev-theme-img.has-img {
   position: absolute;
   inset: 0;
   background-size: cover;
   background-position: center;
-  filter: brightness(0.55) saturate(0.9);
+  opacity: 0.18;
 }
 .ev-particles { position: absolute; inset: 0; }
 .ev-particle {
   position: absolute;
   top: 0;
-  opacity: 0.75;
+  opacity: 0.3;
   animation: ev-fall linear infinite;
   will-change: transform;
 }
-.ev-particle svg { width: 100%; height: auto; display: block; filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25)); }
-.ev-particle-far { opacity: 0.3; filter: blur(4px); }
+.ev-particle svg { width: 100%; height: auto; display: block; }
+.ev-particle-far { opacity: 0.14; filter: blur(4px); }
 @keyframes ev-fall {
   0%   { transform: translate(0, -12vh) rotate(0deg); }
   25%  { transform: translate(3vw, 18vh) rotate(95deg); }
@@ -1716,85 +1716,41 @@ a { color: var(--fizz); }
   100% { transform: translate(-1vw, 112vh) rotate(360deg); }
 }
 
-/* 閱讀主題：深棕暖調（讀書會 type:book 自動套用） */
+/* 閱讀主題：米色紙感（跟主頁同底色），質感靠襯線標題＋素描海報＋粒子 */
 body.ev-theme-reading {
   background:
-    radial-gradient(1200px 600px at 80% -10%, rgba(217, 138, 61, 0.22), transparent 60%),
-    radial-gradient(900px 500px at 10% 110%, rgba(193, 98, 47, 0.18), transparent 60%),
-    linear-gradient(170deg, #35221a 0%, #4a2e1d 55%, #3a2318 100%);
-  color: #f5ead9;
+    radial-gradient(1000px 500px at 85% -5%, rgba(193, 98, 47, 0.07), transparent 60%),
+    radial-gradient(800px 450px at 5% 105%, rgba(107, 74, 56, 0.06), transparent 60%),
+    var(--cream);
 }
-
-/* 導覽列與頁尾融入深色 */
-body.ev-themed .nav { background: rgba(42, 26, 17, 0.6); border-bottom-color: rgba(255, 255, 255, 0.08); }
-body.ev-themed .nav-logo { color: #f5ead9; }
-body.ev-themed .nav-sub, body.ev-themed .nav-links a { color: rgba(245, 234, 217, 0.75); }
-body.ev-themed .nav-links a:hover { color: #fff; }
-body.ev-themed .footer { background: transparent; color: rgba(245, 234, 217, 0.6); }
-body.ev-themed .footer-logo { color: #f5ead9; }
-body.ev-themed .footer a { color: rgba(245, 234, 217, 0.8); }
-
-/* 大標題：淺色 + 襯線（Luma 的置頂大字感） */
 body.ev-themed .ev-title {
-  color: #fff;
   font-family: "Noto Serif TC", var(--font-display), serif;
   font-weight: 700;
   font-size: 2.3rem;
-  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.35);
 }
-body.ev-themed .ev-past-badge { background: rgba(255, 255, 255, 0.14); color: #f5ead9; }
+body.ev-themed .ev-block-title { letter-spacing: 0.14em; }
 
-/* 卡片玻璃化 */
-body.ev-themed .ev-card,
-body.ev-themed .ev-date-chip,
-body.ev-themed .ev-meta-icon {
-  background: rgba(30, 18, 12, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+/* 素描海報：主題圖 + CSS 蓋文字（上 kicker、下標題，米色漸層墊底） */
+.ev-poster-sketch { position: relative; background: #f5efe3; }
+.ev-ps-top {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  padding: 0.75rem 1rem 2.4rem;
+  text-align: center;
+  font-size: 0.78rem;
+  letter-spacing: 0.22em;
+  color: var(--cola);
+  background: linear-gradient(rgba(245, 239, 227, 0.95) 30%, rgba(245, 239, 227, 0));
 }
-body.ev-themed .ev-date-chip .d { color: #fff; }
-body.ev-themed .ev-meta-icon { color: #e8a05e; }
-body.ev-themed .ev-meta-text b { color: #fff; }
-body.ev-themed .ev-meta-text span, body.ev-themed .ev-unlock-sub { color: rgba(245, 234, 217, 0.72); }
-body.ev-themed .ev-map-link { color: #e8a05e; }
-body.ev-themed .ev-block-title,
-body.ev-themed .ev-signup-head { color: rgba(245, 234, 217, 0.72); border-bottom-color: rgba(255, 255, 255, 0.12); }
-body.ev-themed .ev-about .ev-block-title,
-body.ev-themed .ev-photos-wrap .ev-block-title,
-body.ev-themed .ev-agenda-wrap .ev-block-title { border-bottom-color: rgba(255, 255, 255, 0.12); }
-body.ev-themed .ev-host-text b { color: #fff; }
-body.ev-themed .ev-host-text span { color: rgba(245, 234, 217, 0.7); }
-body.ev-themed .ev-host-ig { color: #e8a05e; }
-body.ev-themed .ev-att { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.12); color: #f5ead9; }
-body.ev-themed .ev-att-count { color: #e8a05e; }
-body.ev-themed .ev-att-more { color: rgba(245, 234, 217, 0.65); }
-
-/* 報名卡：深玻璃 + 白色 CTA（Luma 的「申請加入」） */
-body.ev-themed .ev-signup-card { background: rgba(30, 18, 12, 0.55); }
-body.ev-themed .ev-signup-card .event-slots { color: #e8a05e; }
-body.ev-themed .ev-cta.btn-primary {
-  background: #fff;
-  color: #3a2318;
-  border-color: #fff;
+.ev-ps-title {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 2.6rem 1rem 0.95rem;
+  text-align: center;
+  font-family: "Noto Serif TC", var(--font-display), serif;
+  font-weight: 700;
+  font-size: 1.18rem;
+  line-height: 1.5;
+  color: var(--cola);
+  background: linear-gradient(rgba(245, 239, 227, 0), rgba(245, 239, 227, 0.96) 60%);
 }
-body.ev-themed .ev-cta.btn-primary:hover { background: var(--cream); }
-body.ev-themed .ev-fee-line, body.ev-themed .ev-feenote { color: rgba(245, 234, 217, 0.7); }
-
-/* 內文、流程、照片牆 */
-body.ev-themed .ev-desc { color: #f0e3cf; }
-body.ev-themed .ev-desc h3 { color: #fff; }
-body.ev-themed .ev-agenda { border-left-color: rgba(255, 255, 255, 0.18); }
-body.ev-themed .ev-agenda b { color: #e8a05e; }
-body.ev-themed .ev-photo { background: rgba(255, 255, 255, 0.06); }
-
-/* 海報 fallback 與 sticky 列 */
-body.ev-themed .ev-poster { box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4); }
-body.ev-themed .ev-sticky {
-  background: rgba(30, 18, 12, 0.92);
-  border-top-color: rgba(255, 255, 255, 0.12);
-}
-body.ev-themed .ev-sticky-info b { color: #fff; }
-body.ev-themed .ev-sticky-info span { color: rgba(245, 234, 217, 0.7); }
-body.ev-themed .ev-sticky .btn-primary { background: #fff; color: #3a2318; border-color: #fff; }
