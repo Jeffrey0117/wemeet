@@ -90,9 +90,10 @@ const applyTheme = (ev) => {
     img.classList.add("has-img");
   }
   // 飄落粒子：負的 delay 讓畫面一載入就是滿天飄的狀態
+  // 減少動態效果的使用者只跳過粒子動畫，主題（海報/配色）照常回傳
   const box = $("ev-particles");
   const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (reduced) return;
+  if (reduced) return theme;
   for (let i = 0; i < 18; i++) {
     const spec = theme.particles[i % theme.particles.length];
     const far = i % 4 === 0; // 每四顆一顆遠景：更大、模糊，做出景深
