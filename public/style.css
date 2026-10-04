@@ -1779,11 +1779,11 @@ body.ev-themed .ev-block-title { letter-spacing: 0.14em; }
   white-space: nowrap;
   border: 0;
 }
-.bh-masthead { max-width: 1120px; margin: 0 auto; padding: 0.6rem 1rem 1.1rem; }
+.bh-masthead { margin: 0 auto; padding: 0.5rem 0 0.9rem; }
 .bh-masthead-img {
   width: 100%;
   display: block;
   /* 去背版：multiply 讓殘餘白邊融進紙色即可，不需遮罩 */
   mix-blend-mode: multiply;
 }
-@media (max-width: 760px) { .bh-masthead { padding: 0.4rem 0.6rem 0.7rem; } }
+@media (max-width: 760px) { .bh-masthead { padding: 0.3rem 0 0.5rem; } }
