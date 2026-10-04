@@ -1443,3 +1443,205 @@ a { color: var(--fizz); }
 @media (max-width: 760px) {
   #about, #wall { display: none; }
 }
+
+/* ==================== 活動獨立頁 /e/{id}（Luma 結構 × 揪可樂皮膚） ==================== */
+.ev-page { background: var(--cream); }
+.ev-main { max-width: 980px; margin: 0 auto; padding: 2.2rem 1.2rem 4rem; }
+.ev-grid { display: grid; grid-template-columns: 340px 1fr; gap: 2.2rem; align-items: start; }
+
+.ev-card {
+  background: var(--card);
+  border: 1px solid var(--cream-deep);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.1rem 1.2rem;
+}
+.ev-block-title {
+  font-size: 0.82rem;
+  color: var(--cola-soft);
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--cream-deep);
+  padding-bottom: 0.45rem;
+  margin-bottom: 0.7rem;
+}
+
+/* 左欄：海報 */
+.ev-left { display: flex; flex-direction: column; gap: 1.1rem; position: sticky; top: 76px; }
+.ev-poster {
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  aspect-ratio: 1 / 1;
+  background: var(--cream-deep);
+}
+.ev-poster-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ev-poster-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-align: center;
+  padding: 1.4rem;
+  color: #fff;
+}
+.ev-poster-logo { width: 64px; height: 64px; border-radius: 50%; border: 3px solid rgba(255, 255, 255, 0.85); }
+.ev-poster-type { font-size: 0.85rem; letter-spacing: 0.14em; opacity: 0.9; }
+.ev-poster-title { font-family: var(--font-display); font-size: 1.35rem; line-height: 1.45; }
+
+/* 主辦卡 */
+.ev-host-row { display: flex; gap: 0.7rem; align-items: center; }
+.ev-host-logo { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
+.ev-host-text { display: flex; flex-direction: column; line-height: 1.5; }
+.ev-host-text b { font-family: var(--font-display); font-size: 1.02rem; }
+.ev-host-text span { font-size: 0.8rem; color: var(--cola-soft); }
+.ev-host-ig { display: inline-block; margin-top: 0.6rem; font-size: 0.85rem; text-decoration: none; }
+.ev-host-ig:hover { text-decoration: underline; }
+
+/* 誰要來 */
+.ev-att-count { color: var(--fizz); letter-spacing: 0.02em; }
+.ev-att-wall { display: flex; flex-wrap: wrap; gap: 0.45rem 0.6rem; }
+.ev-att {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--cream);
+  border: 1px solid var(--cream-deep);
+  border-radius: 999px;
+  padding: 0.22rem 0.75rem 0.22rem 0.25rem;
+  font-size: 0.85rem;
+}
+.ev-ava {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  flex: none;
+}
+.ev-att-more { margin-top: 0.6rem; font-size: 0.82rem; color: var(--cola-soft); }
+
+/* 右欄 */
+.ev-right { min-width: 0; }
+.ev-past-badge {
+  display: inline-block;
+  background: var(--cream-deep);
+  color: var(--cola-soft);
+  border-radius: 999px;
+  padding: 0.25rem 0.9rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.7rem;
+}
+.ev-title { font-size: 2rem; line-height: 1.4; margin-bottom: 1.1rem; }
+
+.ev-meta-rows { display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 1.3rem; }
+.ev-meta-row { display: flex; gap: 0.8rem; align-items: center; }
+.ev-date-chip {
+  width: 50px;
+  border: 1px solid var(--cream-deep);
+  border-radius: 12px;
+  overflow: hidden;
+  text-align: center;
+  background: var(--card);
+  flex: none;
+  box-shadow: var(--shadow);
+}
+.ev-date-chip .m { display: block; background: var(--fizz); color: #fff; font-size: 0.68rem; padding: 0.12rem 0; }
+.ev-date-chip .d { display: block; font-size: 1.25rem; font-family: var(--font-display); padding: 0.1rem 0 0.18rem; }
+.ev-meta-icon {
+  width: 50px;
+  height: 50px;
+  border: 1px solid var(--cream-deep);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--fizz);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  box-shadow: var(--shadow);
+}
+.ev-meta-text { display: flex; flex-direction: column; line-height: 1.5; min-width: 0; }
+.ev-meta-text b { font-size: 1.02rem; }
+.ev-meta-text span { font-size: 0.88rem; color: var(--cola-soft); }
+.ev-map-link { font-size: 0.85rem; }
+.ev-unlock + .ev-unlock-sub, .ev-unlock-sub { font-size: 0.82rem; color: var(--cola-soft); }
+
+/* 報名卡（Luma 的 sticky registration card） */
+.ev-signup-card { margin-bottom: 1.6rem; padding: 1.2rem 1.3rem; }
+.ev-signup-head {
+  font-size: 0.82rem;
+  color: var(--cola-soft);
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--cream-deep);
+  padding-bottom: 0.45rem;
+  margin-bottom: 0.8rem;
+}
+.ev-slots-line { margin-bottom: 0.8rem; }
+.ev-signup-card .buyout-box { margin-bottom: 0.9rem; }
+.ev-cta { display: block; text-align: center; font-size: 1.05rem; padding: 0.8rem 1rem; }
+.ev-fee-line { margin-top: 0.7rem; font-size: 0.88rem; color: var(--cola-soft); text-align: center; }
+.ev-feenote { margin-top: 0.4rem; font-size: 0.82rem; color: var(--cola-soft); text-align: center; }
+
+/* 關於這場 */
+.ev-about { margin-bottom: 1.6rem; }
+.ev-desc { line-height: 1.9; }
+.ev-desc p { margin-bottom: 0.9rem; }
+.ev-desc h3 { font-size: 1.15rem; margin: 1.2rem 0 0.5rem; }
+.ev-desc ul { padding-left: 1.3rem; margin-bottom: 0.9rem; }
+.ev-desc li { margin-bottom: 0.3rem; }
+
+/* 流程表 */
+.ev-agenda { list-style: none; border-left: 2px solid var(--cream-deep); padding-left: 1.1rem; }
+.ev-agenda li { position: relative; padding-bottom: 0.7rem; font-size: 0.95rem; }
+.ev-agenda li::before {
+  content: "";
+  position: absolute;
+  left: -1.42rem;
+  top: 0.55em;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--fizz);
+}
+.ev-agenda b { color: var(--caramel); font-family: var(--font-body); margin-right: 0.3rem; }
+
+/* 手機 sticky 報名列 */
+.ev-sticky {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.7rem 1rem calc(0.7rem + env(safe-area-inset-bottom));
+  background: rgba(255, 253, 248, 0.96);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--cream-deep);
+  box-shadow: 0 -6px 24px rgba(58, 35, 24, 0.1);
+}
+.ev-sticky-info { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.4; }
+.ev-sticky-info b { font-size: 0.92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ev-sticky-info span { font-size: 0.78rem; color: var(--cola-soft); }
+.ev-sticky .btn { flex: none; }
+
+@media (max-width: 820px) {
+  .ev-grid { grid-template-columns: 1fr; gap: 1.4rem; }
+  .ev-left { position: static; order: 2; }
+  .ev-right { order: 1; }
+  .ev-poster { max-width: 420px; margin: 0 auto; width: 100%; }
+  .ev-title { font-size: 1.55rem; }
+  .ev-main { padding-bottom: 7rem; }
+}
+
+/* 活動卡標題連去活動頁 */
+.event-title-link { color: inherit; text-decoration: none; }
+.event-title-link:hover { color: var(--fizz); }
+
+/* hidden 屬性一律贏過元件自己的 display 規則（flex/grid 蓋掉 UA hidden 的坑） */
+.ev-page [hidden] { display: none !important; }

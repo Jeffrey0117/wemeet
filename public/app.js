@@ -67,7 +67,16 @@ const buildEventCard = (ev, full) => {
   card.appendChild(dateBox);
 
   const info = el("div", "event-info");
-  info.appendChild(el("h3", null, ev.title));
+  // 標題連去活動獨立頁（/e/{id}，Luma 式：先看完整介紹再報名）
+  const h3 = el("h3");
+  if (ev.past) {
+    h3.textContent = ev.title;
+  } else {
+    const tLink = el("a", "event-title-link", ev.title);
+    tLink.href = "/e/" + encodeURIComponent(ev.id);
+    h3.appendChild(tLink);
+  }
+  info.appendChild(h3);
   const meta = el("p", "event-meta");
   meta.appendChild(iconEl("clock", 14));
   meta.appendChild(document.createTextNode(" " + (ev.time || "") + (ev.past ? "" : ev.fee === 0 ? "　免報名費" : `　報名費 $${ev.fee != null ? ev.fee : 50}`)));
@@ -129,7 +138,7 @@ const buildEventCard = (ev, full) => {
     }
     if (!isFull) {
       const btn = el("a", "btn btn-primary", "報名這場");
-      btn.href = "/signup?event=" + encodeURIComponent(ev.id);
+      btn.href = "/e/" + encodeURIComponent(ev.id);
       btn.setAttribute("data-track-cta", "signup-" + ev.id);
       side.appendChild(btn);
     }

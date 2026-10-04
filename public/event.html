@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>活動｜Chill Club 揪可樂</title>
+  <meta name="description" content="揪可樂小聚，看對頻直接報名，下一場見。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://wemeet.pipee.tw/">
+  <meta property="og:title" content="Chill Club 揪可樂｜台中第一小聚品牌">
+  <meta property="og:description" content="揪可樂小聚，看對頻直接報名，下一場見。">
+  <meta property="og:image" content="https://wemeet.pipee.tw/og.png">
+  <meta property="og:site_name" content="Chill Club 揪可樂">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/png" href="/logo-icon.png?v=__BUILD__">
+  <link rel="preconnect" href="https://letmeuse.isnowfriend.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Iansui&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css?v=__BUILD__">
+  <script defer src="https://letmeuse.isnowfriend.com/letmeuse.js"
+    data-app-id="app_pkd334f_"
+    data-theme="light"
+    data-accent="#e2572b"
+    data-locale="zh"
+    data-mode="modal">
+  </script>
+  <script defer src="https://adman.isnowfriend.com/embed/track.js" data-site="site_vWNeBS43zP"></script>
+</head>
+<body class="ev-page">
+
+<nav class="nav">
+  <a class="nav-logo" href="/"><img class="nav-logo-img" src="/logo-icon.png?v=__BUILD__" alt=""> 揪可樂<span class="nav-sub">｜台中第一小聚品牌</span></a>
+  <div class="nav-links">
+    <a href="/#events">所有活動</a>
+    <a href="/#about">關於我們</a>
+    <span id="nav-auth"></span>
+  </div>
+</nav>
+
+<main class="ev-main">
+  <div class="ev-grid">
+    <aside class="ev-left">
+      <div class="ev-poster" id="ev-poster"></div>
+      <div class="ev-card ev-host">
+        <p class="ev-block-title">主辦</p>
+        <div class="ev-host-row">
+          <img class="ev-host-logo" src="/logo-sm.png?v=__BUILD__" alt="Chill Club 揪可樂">
+          <div class="ev-host-text">
+            <b>Chill Club 揪可樂</b>
+            <span>台中第一小聚品牌・就算是 i 人，也能揪在一起快樂</span>
+          </div>
+        </div>
+        <a class="ev-host-ig" href="https://www.instagram.com/we_i_meet" target="_blank" rel="noopener">IG @we_i_meet →</a>
+      </div>
+      <div class="ev-card ev-attendees" id="ev-attendees" hidden>
+        <p class="ev-block-title">誰要來 <span class="ev-att-count" id="ev-att-count"></span></p>
+        <div class="ev-att-wall" id="ev-att-wall"></div>
+        <p class="ev-att-more" id="ev-att-more" hidden></p>
+      </div>
+    </aside>
+
+    <section class="ev-right">
+      <p class="ev-past-badge" id="ev-past" hidden>這場已圓滿結束 🎉</p>
+      <h1 class="ev-title" id="ev-title"></h1>
+
+      <div class="ev-meta-rows">
+        <div class="ev-meta-row">
+          <div class="ev-date-chip" id="ev-date-chip"><span class="m" id="ev-chip-m"></span><span class="d" id="ev-chip-d"></span></div>
+          <div class="ev-meta-text"><b id="ev-when"></b><span id="ev-time"></span></div>
+        </div>
+        <div class="ev-meta-row" id="ev-where-row">
+          <div class="ev-meta-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>
+          <div class="ev-meta-text" id="ev-where"></div>
+        </div>
+      </div>
+
+      <div class="ev-card ev-signup-card" id="ev-signup-card">
+        <p class="ev-signup-head" id="ev-signup-head">報名</p>
+        <div class="ev-slots-line" id="ev-slots"></div>
+        <div class="buyout-box" id="ev-buyout" hidden>
+          <span class="buyout-text" id="ev-buyout-text"></span>
+          <div class="buyout-bar"><i class="buyout-fill" id="ev-buyout-fill"></i></div>
+        </div>
+        <a class="btn btn-primary ev-cta" id="ev-cta" href="#">報名這場 →</a>
+        <p class="ev-fee-line" id="ev-fee"></p>
+        <p class="ev-feenote" id="ev-feenote" hidden></p>
+      </div>
+
+      <div class="ev-about" id="ev-about" hidden>
+        <p class="ev-block-title">關於這場</p>
+        <div class="ev-desc" id="ev-desc"></div>
+      </div>
+
+      <div class="ev-agenda-wrap" id="ev-agenda-wrap" hidden>
+        <p class="ev-block-title">當天流程</p>
+        <ul class="ev-agenda" id="ev-agenda"></ul>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div class="ev-sticky" id="ev-sticky" hidden>
+  <div class="ev-sticky-info">
+    <b id="ev-sticky-title"></b>
+    <span id="ev-sticky-meta"></span>
+  </div>
+  <a class="btn btn-primary" id="ev-sticky-btn" href="#">報名這場 →</a>
+</div>
+
+<footer class="footer">
+  <p class="footer-logo"><img class="nav-logo-img" src="/logo-icon.png?v=__BUILD__" alt=""> Chill Club 揪可樂</p>
+  <p>台中｜做自己的輕鬆小聚</p>
+  <p><a href="https://www.instagram.com/we_i_meet" target="_blank" rel="noopener">Instagram @we_i_meet</a></p>
+  <p class="footer-tiny">© 2026 Chill Club 揪可樂</p>
+</footer>
+
+<script>window.__EVENT__ = null</script>
+<script src="/lmu.js?v=__BUILD__"></script>
+<script src="/event.js?v=__BUILD__"></script>
+</body>
+</html>

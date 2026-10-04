@@ -1144,6 +1144,57 @@ const sendSignupHtml = (req, res) => {
   res.end(html);
 };
 
+// /e/{id}：Luma 式活動獨立頁 — 注入該場專屬 OG + 公開資料（分享連結有專屬預覽卡）
+const sendEventHtml = (req, res, evId) => {
+  const ev = publicEvents().find((e) => e.id === evId);
+  const file = path.join(PUBLIC_DIR, "event.html");
+  if (!ev || !fs.existsSync(file)) {
+    res.writeHead(302, { Location: "/#events" });
+    res.end();
+    return;
+  }
+  let html = fs.readFileSync(file, "utf8").replace(/__BUILD__/g, BUILD_ID);
+  const d = new Date(String(ev.date) + "T00:00:00");
+  const md = Number.isNaN(d.getTime()) ? ev.date : `${d.getMonth() + 1}/${d.getDate()}（週${OG_WEEKDAYS[d.getDay()]}）`;
+  const title = `${ev.title}｜${md} ${ev.time || ""}`.trim();
+  const parts = [];
+  if (ev.desc || ev.note) parts.push(String(ev.desc || ev.note).replace(/\s+/g, " ").slice(0, 100));
+  const tail = [ev.location || "", ev.fee != null ? `報名費 $${ev.fee}` : ""].filter(Boolean).join("・");
+  if (tail) parts.push(tail);
+  const desc = parts.join(" ") || "揪可樂小聚，看對頻直接報名，下一場見。";
+  const img = ev.og ? "https://wemeet.pipee.tw" + ev.og : "https://wemeet.pipee.tw/og.png";
+  const pageUrl = "https://wemeet.pipee.tw/e/" + encodeURIComponent(ev.id);
+  // 一律用 replacer function，避免內容裡的 $ 被當群組參照；JSON 內 < 轉義防 </script> 斷標
+  html = html
+    .replace(/<title>[^<]*<\/title>/, () => `<title>${escHtml(title)}｜Chill Club 揪可樂</title>`)
+    .replace(/<meta name="description" content="[^"]*"/, () => `<meta name="description" content="${escHtml(desc)}"`)
+    .replace(/<meta property="og:title" content="[^"]*"/, () => `<meta property="og:title" content="${escHtml(title)}"`)
+    .replace(/<meta property="og:description" content="[^"]*"/, () => `<meta property="og:description" content="${escHtml(desc)}"`)
+    .replace(/<meta property="og:image" content="[^"]*"/, () => `<meta property="og:image" content="${escHtml(img)}"`)
+    .replace(/<meta property="og:url" content="[^"]*"/, () => `<meta property="og:url" content="${escHtml(pageUrl)}"`)
+    .replace("window.__EVENT__ = null", () => "window.__EVENT__ = " + JSON.stringify(ev).replace(/</g, "\\u003c"));
+  res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-cache" });
+  res.end(html);
+};
+
+// 公開報名牆：只回該場非候補報名者的稱呼（社交證明）；ratio 場次不洩漏人數
+const handleAttendees = (res, evId) => {
+  const ev = readJsonFile(EVENTS_PATH, []).find((e) => e.id === evId && e.status !== "hidden");
+  if (!ev) {
+    sendJson(res, 404, { error: "event not found" });
+    return;
+  }
+  if (ev.ratio) {
+    sendJson(res, 200, { names: [], more: 0 });
+    return;
+  }
+  const names = readJsonFile(SIGNUPS_PATH, [])
+    .filter((s) => s.eventId === evId && !s.waitlisted)
+    .map((s) => cleanStr(s.name, 12))
+    .filter(Boolean);
+  sendJson(res, 200, { names: names.slice(0, 20), more: Math.max(0, names.length - 20) });
+};
+
 // 影音串流：支援 Range（iOS/Safari 播 mp4/mp3 與 seek 必要）
 const sendVideo = (req, res, filePath) => {
   if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
@@ -1199,6 +1250,11 @@ const handleRequest = (req, res) => {
 
   if (req.method === "GET" && pathname === "/api/events") {
     sendJson(res, 200, { events: publicEvents() });
+    return;
+  }
+  const mAtt = pathname.match(/^\/api\/events\/([\w.-]+)\/attendees$/);
+  if (req.method === "GET" && mAtt) {
+    handleAttendees(res, mAtt[1]);
     return;
   }
   if (req.method === "GET" && pathname === "/api/icebreaker") {
@@ -1371,6 +1427,11 @@ const handleRequest = (req, res) => {
   }
   if (pathname === "/signup") {
     sendSignupHtml(req, res);
+    return;
+  }
+  const mEv = pathname.match(/^\/e\/([\w.-]+)$/);
+  if (mEv) {
+    sendEventHtml(req, res, mEv[1]);
     return;
   }
   if (pathname === "/me") {
