@@ -58,7 +58,55 @@ const fmtWhen = (ev) => {
   };
 };
 
+/* ---------- 主題皮膚（Luma 式沉浸背景）：theme 欄位指定，type 自動對應 ---------- */
+const LEAF_SVG =
+  '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/></svg>';
+const PAGE_SVG =
+  '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 3h10l4 4v14H5z" opacity="0.92"/><path d="M15 3v4h4" opacity="0.5"/></svg>';
+const THEMES = {
+  reading: {
+    cls: "ev-theme-reading",
+    particles: [
+      { svg: LEAF_SVG, color: "#d98a3d" },
+      { svg: LEAF_SVG, color: "#c1622f" },
+      { svg: PAGE_SVG, color: "#f3e7d3" },
+    ],
+  },
+};
+const TYPE_THEME = { book: "reading" };
+
+const applyTheme = (ev) => {
+  const key = ev.theme === "none" ? "" : ev.theme || TYPE_THEME[ev.type] || "";
+  const theme = THEMES[key];
+  if (!theme) return;
+  document.body.classList.add("ev-themed", theme.cls);
+  $("ev-theme-bg").hidden = false;
+  // 自備主題圖（themeBg）就鋪圖暗化；沒有就用純 CSS 漸層底
+  if (ev.themeBg) {
+    const img = $("ev-theme-img");
+    img.style.backgroundImage = `url("${encodeURI(ev.themeBg)}")`;
+    img.classList.add("has-img");
+  }
+  // 飄落粒子：負的 delay 讓畫面一載入就是滿天飄的狀態
+  const box = $("ev-particles");
+  const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduced) return;
+  for (let i = 0; i < 18; i++) {
+    const spec = theme.particles[i % theme.particles.length];
+    const far = i % 4 === 0; // 每四顆一顆遠景：更大、模糊，做出景深
+    const p = el("span", "ev-particle" + (far ? " ev-particle-far" : ""));
+    p.innerHTML = spec.svg;
+    p.style.color = spec.color;
+    p.style.left = Math.random() * 100 + "%";
+    p.style.width = Math.round((far ? 54 : 26) + Math.random() * (far ? 46 : 30)) + "px";
+    p.style.animationDuration = (10 + Math.random() * 12).toFixed(1) + "s";
+    p.style.animationDelay = (-Math.random() * 22).toFixed(1) + "s";
+    box.appendChild(p);
+  }
+};
+
 const render = (ev) => {
+  applyTheme(ev);
   const signupUrl = "/signup?event=" + encodeURIComponent(ev.id);
   document.title = `${ev.title}｜Chill Club 揪可樂`;
   $("ev-title").textContent = ev.title;
