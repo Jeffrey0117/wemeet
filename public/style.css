@@ -1783,9 +1783,7 @@ body.ev-themed .ev-block-title { letter-spacing: 0.14em; }
 .bh-masthead-img {
   width: 100%;
   display: block;
+  /* 去背版：multiply 讓殘餘白邊融進紙色即可，不需遮罩 */
   mix-blend-mode: multiply;
-  filter: brightness(1.04);
-  -webkit-mask-image: radial-gradient(ellipse 96% 88% at 50% 50%, #000 58%, transparent 99%);
-  mask-image: radial-gradient(ellipse 96% 88% at 50% 50%, #000 58%, transparent 99%);
 }
 @media (max-width: 760px) { .bh-masthead { padding: 0.4rem 0.6rem 0.7rem; } }
