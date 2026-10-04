@@ -1769,6 +1769,22 @@ body.ev-themed .ev-block-title { letter-spacing: 0.14em; }
   mask-image: radial-gradient(ellipse 92% 80% at 50% 50%, #000 52%, transparent 97%);
 }
 @media (max-width: 760px) { .sketch-band { margin-top: 1.2rem; } }
-/* hero 版：開門定調帶 — 緊貼 nav、下接大合照，同屏看得到兩者 */
-.sketch-band-hero { max-width: 980px; margin: 0.6rem auto 0.2rem; }
-@media (max-width: 760px) { .sketch-band-hero { margin: 0.5rem auto 0.1rem; padding: 0 0.8rem; } }
+/* hero 開場列：左雙手素描、右品牌識別，下接大合照 */
+.bh-top {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  align-items: center;
+  gap: 1.2rem;
+  max-width: 1150px;
+  margin: 0 auto;
+  padding: 0.6rem 1.2rem 1rem;
+}
+.bh-top .sketch-band-hero { margin: 0; padding: 0; max-width: none; }
+.bh-top .bh-head { padding: 0.4rem 0; }
+@media (max-width: 820px) {
+  .bh-top { grid-template-columns: 1fr; gap: 0.2rem; padding: 0.4rem 0.9rem 0.8rem; }
+  .bh-top .bh-head { padding: 0; }
+  .bh-top .bh-head .hero-tag { margin-bottom: 0.6rem; }
+  .bh-top .bh-head .hero-logo-sm { width: 64px; }
+  .bh-top .bh-head .hero-title { gap: 0.4rem; }
+}
