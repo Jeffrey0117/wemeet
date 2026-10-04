@@ -154,11 +154,38 @@ const render = (ev) => {
     }
   }
 
-  /* 關於這場：desc（markdown-lite）→ fallback note */
+  /* 關於這場：desc（markdown-lite）→ fallback note；過往場標題改成回顧語氣 */
   const about = ev.desc || ev.note;
   if (about) {
     $("ev-about").hidden = false;
+    if (ev.past) $("ev-about-title").textContent = "那天發生了什麼";
     $("ev-desc").innerHTML = ev.desc ? mdLite(ev.desc) : "<p>" + inline(escText(ev.note)) + "</p>";
+  }
+
+  /* 現場回顧照片牆（photos: ["/media/xxx.jpg", ...]）＋極簡 lightbox */
+  if (Array.isArray(ev.photos) && ev.photos.length) {
+    $("ev-photos-wrap").hidden = false;
+    const grid = $("ev-photos");
+    const lb = $("ev-lightbox");
+    const lbImg = $("ev-lb-img");
+    ev.photos.forEach((src) => {
+      const btn = el("button", "ev-photo");
+      btn.type = "button";
+      const img = el("img");
+      img.src = src;
+      img.alt = ev.title + " 現場照片";
+      img.loading = "lazy";
+      btn.appendChild(img);
+      btn.addEventListener("click", () => {
+        lbImg.src = src;
+        lb.hidden = false;
+      });
+      grid.appendChild(btn);
+    });
+    const closeLb = () => { lb.hidden = true; lbImg.src = ""; };
+    lb.addEventListener("click", closeLb);
+    $("ev-lb-close").addEventListener("click", closeLb);
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeLb(); });
   }
 
   /* 流程表 */
@@ -204,6 +231,7 @@ const loadAttendees = async (ev) => {
     const { names = [], more = 0 } = await res.json();
     if (!names.length) return;
     $("ev-attendees").hidden = false;
+    if (ev.past) $("ev-att-label").textContent = "誰來過";
     $("ev-att-count").textContent = `・${names.length + more} 人`;
     const wall = $("ev-att-wall");
     names.forEach((name, i) => {

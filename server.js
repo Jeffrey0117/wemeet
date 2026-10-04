@@ -1162,7 +1162,13 @@ const sendEventHtml = (req, res, evId) => {
   const tail = [ev.location || "", ev.fee != null ? `報名費 $${ev.fee}` : ""].filter(Boolean).join("・");
   if (tail) parts.push(tail);
   const desc = parts.join(" ") || "揪可樂小聚，看對頻直接報名，下一場見。";
-  const img = ev.og ? "https://wemeet.pipee.tw" + ev.og : "https://wemeet.pipee.tw/og.png";
+  // OG 圖優先序：場次橫版 og 圖 → 第一張現場回顧照（過往場分享有真實畫面）→ 站的通用圖
+  const firstPhoto = Array.isArray(ev.photos) && ev.photos[0] ? ev.photos[0] : "";
+  const img = ev.og
+    ? "https://wemeet.pipee.tw" + ev.og
+    : firstPhoto
+      ? "https://wemeet.pipee.tw" + firstPhoto
+      : "https://wemeet.pipee.tw/og.png";
   const pageUrl = "https://wemeet.pipee.tw/e/" + encodeURIComponent(ev.id);
   // 一律用 replacer function，避免內容裡的 $ 被當群組參照；JSON 內 < 轉義防 </script> 斷標
   html = html

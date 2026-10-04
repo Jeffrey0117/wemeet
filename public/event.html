@@ -54,7 +54,7 @@
         <a class="ev-host-ig" href="https://www.instagram.com/we_i_meet" target="_blank" rel="noopener">IG @we_i_meet →</a>
       </div>
       <div class="ev-card ev-attendees" id="ev-attendees" hidden>
-        <p class="ev-block-title">誰要來 <span class="ev-att-count" id="ev-att-count"></span></p>
+        <p class="ev-block-title"><span id="ev-att-label">誰要來</span> <span class="ev-att-count" id="ev-att-count"></span></p>
         <div class="ev-att-wall" id="ev-att-wall"></div>
         <p class="ev-att-more" id="ev-att-more" hidden></p>
       </div>
@@ -88,8 +88,13 @@
       </div>
 
       <div class="ev-about" id="ev-about" hidden>
-        <p class="ev-block-title">關於這場</p>
+        <p class="ev-block-title" id="ev-about-title">關於這場</p>
         <div class="ev-desc" id="ev-desc"></div>
+      </div>
+
+      <div class="ev-photos-wrap" id="ev-photos-wrap" hidden>
+        <p class="ev-block-title">現場回顧</p>
+        <div class="ev-photos" id="ev-photos"></div>
       </div>
 
       <div class="ev-agenda-wrap" id="ev-agenda-wrap" hidden>
@@ -114,6 +119,11 @@
   <p><a href="https://www.instagram.com/we_i_meet" target="_blank" rel="noopener">Instagram @we_i_meet</a></p>
   <p class="footer-tiny">© 2026 Chill Club 揪可樂</p>
 </footer>
+
+<div class="ev-lightbox" id="ev-lightbox" hidden>
+  <button type="button" class="ev-lb-close" id="ev-lb-close" aria-label="關閉">✕</button>
+  <img id="ev-lb-img" alt="">
+</div>
 
 <script>window.__EVENT__ = null</script>
 <script src="/lmu.js?v=__BUILD__"></script>
