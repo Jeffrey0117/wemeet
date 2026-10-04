@@ -1754,3 +1754,18 @@ body.ev-themed .ev-block-title { letter-spacing: 0.14em; }
   color: var(--cola);
   background: linear-gradient(rgba(245, 239, 227, 0), rgba(245, 239, 227, 0.96) 60%);
 }
+
+/* 創世紀之手過場帶：multiply 讓紙色融進米色底，像直接畫在頁面上 */
+.sketch-band { max-width: 1060px; margin: 2.5rem auto -1rem; padding: 0 1.2rem; }
+.sketch-band img {
+  width: 100%;
+  display: block;
+  mix-blend-mode: multiply;
+  opacity: 0.92;
+  /* 把紙色推近頁面米色（multiply 下接近白 = 近乎透明），只留筆觸 */
+  filter: brightness(1.05);
+  /* 四邊漸隱：消掉圖片矩形邊界，讓筆觸像直接畫在頁面上 */
+  -webkit-mask-image: radial-gradient(ellipse 92% 80% at 50% 50%, #000 52%, transparent 97%);
+  mask-image: radial-gradient(ellipse 92% 80% at 50% 50%, #000 52%, transparent 97%);
+}
+@media (max-width: 760px) { .sketch-band { margin-top: 1.2rem; } }
