@@ -389,6 +389,20 @@ wireJoin();
 
 /* ---------- 會員秒報名 ---------- */
 
+// 非會員：步驟一給「登入帶入」入口；登入成功立刻重跑帶入
+const wireMemberCue = async () => {
+  const sdk = await waitForLetMeUse();
+  if (!sdk) return;
+  const cue = $("member-cue");
+  if (!sdk.user) cue.hidden = false;
+  $("cue-login").addEventListener("click", () => sdk.login());
+  sdk.onAuthChange((user) => {
+    cue.hidden = !!user;
+    if (user) prefillFromMember();
+  });
+};
+wireMemberCue();
+
 const prefillFromMember = async () => {
   const sdk = await waitForLetMeUse();
   if (!sdk || !sdk.user) return;
@@ -565,6 +579,11 @@ const submit = async () => {
       if (loggedIn && window.__wemeetBellRefresh) setTimeout(window.__wemeetBellRefresh, 600);
       $("done-track-member").hidden = !loggedIn;
       $("done-track-guest").hidden = loggedIn;
+      // 會員沒頭貼 → 完成頁推一把（Chill 友牆/Quickky 名片都靠它）
+      if (loggedIn && !window.letmeuse.user.avatar) {
+        $("done-avatar").hidden = false;
+        $("btn-avatar").onclick = () => window.letmeuse.openProfile();
+      }
       if (!loggedIn) {
         // 一鍵入會用：留住剛送出的資料，入會後直接寫進會員檔案
         submittedProfile = {

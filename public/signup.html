@@ -234,6 +234,22 @@
     }
     .lu-item a { color: var(--fizz); }
     .lu-none { text-align: center; font-size: 0.88rem; color: var(--cola-soft); margin-top: 0.7rem; }
+    .member-cue {
+      margin-top: 1.1rem; padding-top: 0.9rem;
+      border-top: 1px dashed var(--cream-deep);
+      font-size: 0.9rem; color: var(--cola-soft); text-align: center;
+    }
+    .cue-login {
+      background: none; border: none; padding: 0;
+      color: var(--fizz); font-family: var(--font-body); font-size: 0.9rem;
+      font-weight: 700; cursor: pointer; text-decoration: underline;
+    }
+    .done-avatar {
+      background: #fff7f2; border: 1.5px solid var(--fizz); border-radius: 14px;
+      padding: 1.2rem 1rem 1.3rem; margin-bottom: 1.4rem;
+    }
+    .done-avatar .done-next-kicker { color: var(--fizz); }
+    .done-avatar p { margin-bottom: 0.8rem; }
     .ig-box {
       text-align: center; border: 1.5px dashed var(--caramel);
       border-radius: 14px; padding: 1.4rem 1rem; margin-bottom: 1.2rem;
@@ -375,6 +391,7 @@
       <label class="field"><span>電話（選填，沒有 LINE 才必填）</span>
         <input type="tel" id="f-phone" maxlength="40" placeholder="例：0912345678" autocomplete="tel">
       </label>
+      <p class="member-cue" id="member-cue" hidden>已經是會員？<button type="button" class="cue-login" id="cue-login">登入，資料自動帶入</button></p>
     </section>
 
     <section class="step" data-step="2">
@@ -500,6 +517,11 @@
           <p class="pay-acct"><span id="pay-account"></span><button type="button" class="btn-copy" id="pay-copy">複製帳號</button></p>
           <p class="pay-name" id="pay-name"></p>
           <p class="pay-hint">轉完私訊 IG 附<strong>你帳號的後五碼</strong>，核對後鈴鐺會通知你「名額鎖定」。<br>真的不方便匯款，當天現場繳也 OK。</p>
+        </div>
+        <div class="done-avatar" id="done-avatar" hidden>
+          <p class="done-next-kicker">放上你的頭貼</p>
+          <p>現場 Chill 友牆、Quickky 名片卡都用它，<strong>大家先認得你的臉</strong>，見面不用從零開始。</p>
+          <button class="btn btn-primary" id="btn-avatar" type="button">放頭貼 →</button>
         </div>
         <div class="done-next">
           <p class="done-next-kicker">保持聯絡</p>
