@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://letmeuse.isnowfriend.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Iansui&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Iansui&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css?v=__BUILD__">
   <script defer src="https://letmeuse.isnowfriend.com/letmeuse.js"
     data-app-id="app_pkd334f_"
@@ -40,20 +40,25 @@
       width: 100%;
       max-width: 520px;
       background: var(--card);
+      border: 1px solid var(--cream-deep);
       border-radius: var(--radius);
-      box-shadow: var(--shadow);
+      box-shadow: 0 10px 36px rgba(58, 35, 24, 0.1);
       padding: 2rem 1.8rem 1.8rem;
     }
-    .quiz-progress { display: flex; gap: 0.4rem; margin-bottom: 1.6rem; }
+    .quiz-progress { display: flex; gap: 0.35rem; margin-bottom: 1.6rem; }
     .quiz-progress span {
-      flex: 1; height: 6px; border-radius: 999px;
-      background: var(--cream-deep); transition: background 0.25s;
+      flex: 1; height: 4px; border-radius: 999px;
+      background: var(--cream-deep); transition: background 0.3s;
     }
     .quiz-progress span.on { background: var(--fizz); }
     .step { display: none; }
     .step.on { display: block; animation: fadein 0.25s ease; }
     @keyframes fadein { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-    .step h2 { font-size: 1.4rem; margin-bottom: 0.4rem; text-align: left; }
+    .step h2 {
+      font-family: "Noto Serif TC", var(--font-display), serif;
+      font-weight: 700;
+      font-size: 1.35rem; margin-bottom: 0.4rem; text-align: left;
+    }
     .step .hint { color: var(--cola-soft); font-size: 0.92rem; margin-bottom: 1.2rem; }
     .choice { display: grid; gap: 0.7rem; }
     .choice label {
@@ -81,27 +86,17 @@
     }
     .gchip:has(input:checked) { border-color: var(--fizz); background: #fff7f2; }
     .gchip input { accent-color: var(--fizz); }
+    /* 場次看板：跟活動頁同一套淺色紙感（米色底＋暖色光暈＋襯線標題） */
     .event-hero {
       position: relative;
       overflow: hidden;
-      background: var(--cola);
-      color: var(--cream);
+      background:
+        radial-gradient(900px 420px at 85% -5%, rgba(193, 98, 47, 0.09), transparent 60%),
+        radial-gradient(700px 380px at 5% 105%, rgba(107, 74, 56, 0.07), transparent 60%),
+        var(--cream);
+      color: var(--cola);
       text-align: center;
       padding: 2.6rem 1.2rem 4.2rem;
-    }
-    .event-hero::before, .event-hero::after {
-      content: "";
-      position: absolute;
-      border-radius: 50%;
-      pointer-events: none;
-    }
-    .event-hero::before {
-      width: 340px; height: 340px; left: -120px; top: -140px;
-      background: radial-gradient(circle, rgba(226, 87, 43, 0.35), transparent 70%);
-    }
-    .event-hero::after {
-      width: 420px; height: 420px; right: -160px; bottom: -220px;
-      background: radial-gradient(circle, rgba(193, 98, 47, 0.4), transparent 70%);
     }
     .eh-inner {
       position: relative; z-index: 1;
@@ -112,9 +107,10 @@
     .eh-poster {
       width: min(420px, 68vw);
       border-radius: 14px;
-      border: 5px solid rgba(250, 243, 231, 0.14);
-      box-shadow: 0 20px 44px rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--cream-deep);
+      box-shadow: 0 14px 38px rgba(58, 35, 24, 0.16);
       flex-shrink: 0;
+      background: #fff;
     }
     .event-hero.has-poster .eh-text { text-align: left; }
     .event-hero.has-poster .eh-title { margin-left: 0; }
@@ -124,62 +120,64 @@
       .eh-poster { width: min(320px, 85vw); }
     }
     .eh-kicker {
-      font-family: var(--font-display);
       letter-spacing: 0.22em;
-      font-size: 0.95rem;
-      color: rgba(250, 243, 231, 0.75);
-      margin-bottom: 0.5rem;
+      font-size: 0.82rem;
+      color: var(--cola-soft);
+      margin-bottom: 0.6rem;
     }
     .eh-title {
       position: relative; z-index: 1;
-      font-family: var(--font-display);
-      font-weight: 400;
-      font-size: clamp(2rem, 6.5vw, 3.4rem);
-      line-height: 1.25;
+      font-family: "Noto Serif TC", var(--font-display), serif;
+      font-weight: 700;
+      font-size: clamp(1.8rem, 5.5vw, 2.9rem);
+      line-height: 1.3;
       margin: 0 auto 0.7rem;
       max-width: 820px;
+      color: var(--cola);
     }
-    .eh-title .squiggle { background-image: linear-gradient(transparent 70%, rgba(226, 87, 43, 0.65) 70%); }
+    .eh-title .squiggle { background-image: linear-gradient(transparent 72%, rgba(226, 87, 43, 0.45) 72%); }
     .eh-meta {
       position: relative; z-index: 1;
-      font-size: clamp(0.95rem, 2.4vw, 1.1rem);
-      color: rgba(250, 243, 231, 0.85);
+      font-size: clamp(0.95rem, 2.4vw, 1.05rem);
+      color: var(--cola-soft);
       margin-bottom: 1rem;
     }
     .eh-note {
       position: relative; z-index: 1;
       max-width: 640px;
       margin: 0 auto 1rem;
-      font-size: clamp(0.95rem, 2.2vw, 1.05rem);
+      font-size: clamp(0.92rem, 2.2vw, 1rem);
       line-height: 1.8;
-      color: rgba(250, 243, 231, 0.92);
+      color: var(--cola-soft);
     }
     .eh-agenda {
       list-style: none;
       position: relative; z-index: 1;
       display: inline-grid;
-      gap: 0.25rem;
+      gap: 0.3rem;
       margin: 0 auto 1rem;
-      padding: 0.7rem 1.2rem;
-      background: rgba(250, 243, 231, 0.12);
+      padding: 0.8rem 1.2rem;
+      background: var(--card);
+      border: 1px solid var(--cream-deep);
       border-radius: 12px;
+      box-shadow: var(--shadow);
       font-size: 0.92rem;
-      color: rgba(250, 243, 231, 0.92);
+      color: var(--cola);
       text-align: left;
     }
-    .eh-agenda b { color: #ffb38a; font-weight: 700; margin-right: 0.35rem; font-variant-numeric: tabular-nums; }
+    .eh-agenda b { color: var(--caramel); font-weight: 700; margin-right: 0.35rem; font-variant-numeric: tabular-nums; }
     .eh-change {
       position: relative; z-index: 1;
       background: none;
-      border: 1.5px solid rgba(250, 243, 231, 0.45);
-      color: rgba(250, 243, 231, 0.9);
+      border: 1.5px solid var(--cream-deep);
+      color: var(--cola-soft);
       border-radius: 999px;
       padding: 0.35rem 1.1rem;
       font-family: var(--font-body);
       font-size: 0.85rem;
       cursor: pointer;
     }
-    .eh-change:hover { border-color: var(--fizz); color: #fff; background: rgba(226, 87, 43, 0.35); }
+    .eh-change:hover { border-color: var(--fizz); color: var(--fizz); background: #fff7f2; }
     /* 破格：卡片往上疊進看板 */
     body.has-event-hero .quiz-wrap { margin-top: -2.6rem; padding-top: 0; }
     body.has-event-hero .quiz-card { position: relative; z-index: 2; }
