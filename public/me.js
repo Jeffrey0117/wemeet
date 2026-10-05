@@ -18,6 +18,37 @@ const renderQuickky = (url) => {
   $("quickky-none").hidden = has;
   $("quickky-has").hidden = !has;
   if (has) $("quickky-view").href = url;
+  renderQuickkyPreview(url);
+};
+
+// 左欄名片預覽：從 Quickky 公開 API 撈頭貼/名字/自介
+const renderQuickkyPreview = async (url) => {
+  const box = $("qk-preview");
+  if (!url) {
+    box.hidden = true;
+    return;
+  }
+  $("qkp-view").href = url;
+  box.hidden = false;
+  try {
+    const u = new URL(url);
+    const slug = u.pathname.split("/").filter(Boolean)[0];
+    if (slug && slug !== "c") {
+      const res = await fetch(u.origin + "/api/public/profiles/" + encodeURIComponent(slug));
+      if (res.ok) {
+        const d = (await res.json()).data || {};
+        if (d.avatarUrl) $("qkp-avatar").src = d.avatarUrl;
+        $("qkp-name").textContent = d.displayName || slug;
+        $("qkp-bio").textContent = d.bio || "還沒寫自介，點「編輯名片」補上";
+        return;
+      }
+    }
+    $("qkp-name").textContent = "我的名片";
+    $("qkp-bio").textContent = "點「編輯名片」補頭貼和自介";
+  } catch (err) {
+    $("qkp-name").textContent = "我的名片";
+    $("qkp-bio").textContent = "";
+  }
 };
 
 const fillForm = (member) => {
@@ -327,6 +358,68 @@ const init = async () => {
       }
     } catch (err) {}
     window.open(fallback, "_blank", "noopener");
+  });
+
+  /* ---- 站內編輯名片：SSO 拿 Quickky token → 讀/寫 profile ---- */
+  const qkeMsg = (text, ok) => {
+    const node = $("qke-msg");
+    node.textContent = text;
+    node.className = "me-msg " + (ok ? "ok" : "err");
+  };
+  let qkToken = "";
+  $("qkp-edit").addEventListener("click", async () => {
+    const boxE = $("qk-editbox");
+    if (!boxE.hidden) {
+      boxE.hidden = true;
+      return;
+    }
+    try {
+      qkeMsg("連接 Quickky⋯", true);
+      qkToken = qkToken || (await qkGetToken());
+      const pf = (await (await fetch(QK_API + "/api/profile", { headers: { Authorization: "Bearer " + qkToken } })).json()).data || {};
+      $("qke-name").value = pf.displayName || "";
+      $("qke-bio").value = pf.bio || "";
+      boxE.hidden = false;
+      qkeMsg("", true);
+    } catch (err) {
+      qkeMsg("連不上 Quickky，再試一次", false);
+    }
+  });
+  $("qke-save").addEventListener("click", async () => {
+    const btn = $("qke-save");
+    btn.disabled = true;
+    try {
+      qkToken = qkToken || (await qkGetToken());
+      const auth = { Authorization: "Bearer " + qkToken };
+      let avatarUrl;
+      const file = $("qke-avatar").files[0];
+      if (file) {
+        qkeMsg("上傳頭貼中⋯", true);
+        const fd = new FormData();
+        fd.append("file", file);
+        const up = await (await fetch(QK_API + "/api/upload", { method: "POST", headers: auth, body: fd })).json();
+        if (up.data && up.data.url) avatarUrl = up.data.url;
+      }
+      qkeMsg("儲存中⋯", true);
+      const res = await fetch(QK_API + "/api/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", ...auth },
+        body: JSON.stringify({
+          displayName: $("qke-name").value.trim(),
+          bio: $("qke-bio").value.trim(),
+          ...(avatarUrl ? { avatarUrl } : {}),
+        }),
+      });
+      if (!res.ok) throw new Error("save failed");
+      qkeMsg("名片更新了 ✓", true);
+      $("qk-editbox").hidden = true;
+      renderQuickkyPreview($("m-quickky").value.trim());
+      saveMember(); // 順手同步 wemeet 側的頭貼快取
+    } catch (err) {
+      qkeMsg("沒存成，再試一次", false);
+    } finally {
+      btn.disabled = false;
+    }
   });
 };
 

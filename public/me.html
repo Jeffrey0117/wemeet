@@ -40,6 +40,26 @@
     }
     .guest h1 { font-size: 1.5rem; }
     .me-sub { color: var(--cola-soft); font-size: 0.92rem; margin-bottom: 1.4rem; }
+    /* 左右布局：左名片、右資料（手機單欄，名片在上） */
+    .me-card:has(#state-member:not([hidden])) { max-width: 960px; }
+    .me-grid { display: grid; grid-template-columns: 300px 1fr; gap: 1.8rem; align-items: start; }
+    @media (max-width: 880px) { .me-grid { grid-template-columns: 1fr; gap: 1.2rem; } }
+    .me-side { display: grid; gap: 1.2rem; }
+    .me-side .quickky-box { margin: 0; }
+    .qk-preview {
+      border: 1px solid var(--cream-deep); background: var(--cream);
+      border-radius: 14px; padding: 1.4rem 1rem 1.2rem; text-align: center;
+    }
+    .qk-ava {
+      width: 96px; height: 96px; border-radius: 50%; object-fit: cover;
+      border: 3px solid #fff; box-shadow: var(--shadow); margin-bottom: 0.6rem;
+      background: var(--cream-deep);
+    }
+    .qk-name { font-family: "Noto Serif TC", var(--font-display), serif; font-weight: 700; font-size: 1.2rem; }
+    .qk-bio { font-size: 0.88rem; color: var(--cola-soft); margin: 0.3rem 0 0.9rem; line-height: 1.6; }
+    .qk-actions { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; }
+    .qk-actions .btn { font-size: 0.88rem; padding: 0.45rem 1rem; }
+    .qk-editbox { text-align: left; margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--cream-deep); display: grid; gap: 0.2rem; }
     /* 區塊標題統一成活動頁語言：小字、字距、底線 */
     .my-signups h3, .avail-box h3, .quickky-box h3 {
       font-family: var(--font-body) !important;
@@ -138,39 +158,30 @@
 
     <!-- 已登入 -->
     <div id="state-member" hidden>
-      <h1>會員中心</h1>
-      <p class="me-sub" id="member-hello">嗨！</p>
-
-      <label class="field">暱稱
-        <input type="text" id="m-nickname" maxlength="40" placeholder="小聚的時候怎麼叫你">
-      </label>
-      <label class="field">LINE ID 或電話
-        <input type="text" id="m-contact" maxlength="120" placeholder="活動通知用">
-      </label>
-      <label class="field">IG 帳號
-        <input type="text" id="m-ig" maxlength="60" placeholder="選填，讓我們回追你">
-      </label>
-      <label class="field">自我介紹
-        <textarea id="m-bio" maxlength="300" rows="3" placeholder="選填，讓大家先認識你一點點"></textarea>
-      </label>
-
-      <div class="my-signups" id="my-signups" hidden>
-        <h3>我的報名</h3>
-        <div id="signup-list"></div>
-      </div>
-
-      <div class="avail-box">
-        <h3>我的空檔</h3>
-        <p class="avail-hint">點日期切換：一下＝白天有空、兩下＝晚上、三下＝整天。我們照大家的空檔排下一場。</p>
-        <div class="avail-head">
-          <button type="button" class="avail-nav" id="av-prev">←</button>
-          <span id="av-title"></span>
-          <button type="button" class="avail-nav" id="av-next">→</button>
+      <div class="me-grid">
+      <aside class="me-side">
+      <div class="qk-preview" id="qk-preview" hidden>
+        <img class="qk-ava" id="qkp-avatar" alt="" src="/logo-icon.png?v=__BUILD__">
+        <p class="qk-name" id="qkp-name"></p>
+        <p class="qk-bio" id="qkp-bio"></p>
+        <div class="qk-actions">
+          <a class="btn btn-ghost" id="qkp-view" href="#" target="_blank" rel="noopener">看卡片</a>
+          <button class="btn btn-primary" id="qkp-edit" type="button">編輯名片</button>
         </div>
-        <div class="avail-grid" id="av-grid"></div>
-        <p class="avail-legend"><i class="lg-day"></i>白天　<i class="lg-night"></i>晚上　<i class="lg-both"></i>整天</p>
+        <div class="qk-editbox" id="qk-editbox" hidden>
+          <label class="field">顯示名稱
+            <input type="text" id="qke-name" maxlength="40">
+          </label>
+          <label class="field">名片上的自介
+            <textarea id="qke-bio" maxlength="200" rows="3" placeholder="一兩句話讓大家認識你"></textarea>
+          </label>
+          <label class="field">換頭貼
+            <input type="file" id="qke-avatar" accept="image/*">
+          </label>
+          <button class="btn btn-primary" id="qke-save" type="button">儲存名片</button>
+          <p class="me-msg" id="qke-msg" role="status" style="text-align:left;margin:0.3rem 0 0"></p>
+        </div>
       </div>
-
       <div class="quickky-box">
         <h3><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="18" height="18"><path d="M16 10h2"/><path d="M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/></svg> 頭貼與名片卡</h3>
         <div id="quickky-none">
@@ -202,6 +213,42 @@
           <input type="checkbox" id="m-wall">
           把我的卡片放上首頁「Chill 友牆」讓大家認識我
         </label>
+      </div>
+
+      </aside>
+
+      <div class="me-main">
+      <h1>會員中心</h1>
+      <p class="me-sub" id="member-hello">嗨！</p>
+
+      <label class="field">暱稱
+        <input type="text" id="m-nickname" maxlength="40" placeholder="小聚的時候怎麼叫你">
+      </label>
+      <label class="field">LINE ID 或電話
+        <input type="text" id="m-contact" maxlength="120" placeholder="活動通知用">
+      </label>
+      <label class="field">IG 帳號
+        <input type="text" id="m-ig" maxlength="60" placeholder="選填，讓我們回追你">
+      </label>
+      <label class="field">自我介紹
+        <textarea id="m-bio" maxlength="300" rows="3" placeholder="選填，讓大家先認識你一點點"></textarea>
+      </label>
+
+      <div class="my-signups" id="my-signups" hidden>
+        <h3>我的報名</h3>
+        <div id="signup-list"></div>
+      </div>
+
+      <div class="avail-box">
+        <h3>我的空檔</h3>
+        <p class="avail-hint">點日期切換：一下＝白天有空、兩下＝晚上、三下＝整天。我們照大家的空檔排下一場。</p>
+        <div class="avail-head">
+          <button type="button" class="avail-nav" id="av-prev">←</button>
+          <span id="av-title"></span>
+          <button type="button" class="avail-nav" id="av-next">→</button>
+        </div>
+        <div class="avail-grid" id="av-grid"></div>
+        <p class="avail-legend"><i class="lg-day"></i>白天　<i class="lg-night"></i>晚上　<i class="lg-both"></i>整天</p>
       </div>
 
       <button class="btn btn-primary btn-block" id="btn-save">儲存資料</button>
