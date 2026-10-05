@@ -151,18 +151,24 @@ const wireMemberLogin = async () => {
   $("ev-login").addEventListener("click", () => sdk.login());
   sdk.onAuthChange((user) => {
     cue.hidden = !!user;
-    // 從表單 cue 發起的登入：成功後重載 iframe，回來就是秒報名狀態
+    // 從表單發起的登入：成功後重載表單並自動把報名視窗開回來（已登入秒報名狀態）
     if (user && reloadFrameAfterLogin) {
       reloadFrameAfterLogin = false;
       const frame = $("ev-modal-frame");
-      if (!$("ev-modal").hidden && frame.getAttribute("src")) frame.src = frame.getAttribute("src");
+      const src = frame.getAttribute("src");
+      if (src) {
+        frame.src = src;
+        $("ev-modal").hidden = false;
+        document.body.style.overflow = "hidden";
+      }
     }
   });
 };
-// 表單（iframe）請求登入 → 在本頁開
+// 表單（iframe）請求登入 → 先收起報名視窗，登入視窗單獨開（不做雙層疊疊樂）
 window.addEventListener("message", (e) => {
   if (e.origin !== location.origin) return;
   if (e.data && e.data.type === "wemeet-login" && window.letmeuse) {
+    closeSignupModal();
     reloadFrameAfterLogin = true;
     window.letmeuse.login();
   }
