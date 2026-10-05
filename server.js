@@ -1460,7 +1460,8 @@ const handleRequest = (req, res) => {
 const server = http.createServer((req, res) => {
   // 全域安全標頭
   res.setHeader("X-Content-Type-Options", "nosniff");
-  res.setHeader("X-Frame-Options", "DENY");
+  // SAMEORIGIN：活動頁用 iframe 內嵌自家報名表單（外站仍不可嵌）
+  res.setHeader("X-Frame-Options", "SAMEORIGIN");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
   res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
   try {

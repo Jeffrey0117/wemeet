@@ -26,8 +26,18 @@
     data-locale="zh"
     data-mode="modal">
   </script>
+  <script>
+    // 嵌入模式（活動頁 modal 內）：只留表單卡
+    if (new URLSearchParams(location.search).get("embed") === "1") {
+      document.documentElement.classList.add("embed");
+    }
+  </script>
   <style>
     body { min-height: 100vh; display: flex; flex-direction: column; }
+    html.embed .nav, html.embed .footer, html.embed .lookup-wrap, html.embed #event-hero { display: none !important; }
+    html.embed body { background: var(--cream); }
+    html.embed .quiz-wrap { margin-top: 0 !important; padding: 1.1rem 0.8rem 2rem; }
+    html.embed .quiz-card { box-shadow: none; border: none; max-width: none; padding: 1.2rem 1.1rem 1.4rem; background: transparent; }
     [hidden] { display: none !important; }
     .quiz-wrap {
       flex: 1;

@@ -109,8 +109,40 @@ const applyTheme = (ev) => {
   return theme;
 };
 
+/* 報名 modal：同頁彈出表單（iframe 載 /signup，流程邏輯全複用） */
+const openSignupModal = (url) => {
+  const modal = $("ev-modal");
+  const frame = $("ev-modal-frame");
+  const embedUrl = url + (url.includes("?") ? "&" : "?") + "embed=1";
+  if (frame.getAttribute("src") !== embedUrl) frame.src = embedUrl;
+  modal.hidden = false;
+  document.body.style.overflow = "hidden";
+};
+const closeSignupModal = () => {
+  $("ev-modal").hidden = true;
+  document.body.style.overflow = "";
+};
+const bindModal = () => {
+  $("ev-modal").addEventListener("click", (e) => {
+    if (e.target === $("ev-modal")) closeSignupModal();
+  });
+  $("ev-modal-close").addEventListener("click", closeSignupModal);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !$("ev-modal").hidden) closeSignupModal();
+  });
+};
+// 點報名 → 開 modal（新分頁/中鍵維持原連結行為）
+const hookSignup = (el, url) => {
+  el.addEventListener("click", (e) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+    e.preventDefault();
+    openSignupModal(url);
+  });
+};
+
 const render = (ev) => {
   const theme = applyTheme(ev);
+  bindModal();
   const signupUrl = "/signup?event=" + encodeURIComponent(ev.id);
   document.title = `${ev.title}｜Chill Club 揪可樂`;
   $("ev-title").textContent = ev.title;
@@ -201,9 +233,11 @@ const render = (ev) => {
       cta.href = "/signup";
       cta.classList.add("btn-ghost");
       cta.classList.remove("btn-primary");
+      hookSignup(cta, "/signup");
     } else {
       cta.href = signupUrl;
       cta.setAttribute("data-track-cta", "evpage-signup-" + ev.id);
+      hookSignup(cta, signupUrl);
     }
     $("ev-fee").textContent =
       ev.fee === 0
@@ -269,6 +303,7 @@ const render = (ev) => {
     const btn = $("ev-sticky-btn");
     btn.href = signupUrl;
     btn.setAttribute("data-track-cta", "evpage-sticky-" + ev.id);
+    hookSignup(btn, signupUrl);
     if ("IntersectionObserver" in window) {
       new IntersectionObserver(
         ([entry]) => { sticky.hidden = entry.isIntersecting; },

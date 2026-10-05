@@ -1787,3 +1787,46 @@ body.ev-themed .ev-block-title { letter-spacing: 0.14em; }
   mix-blend-mode: multiply;
 }
 @media (max-width: 760px) { .bh-masthead { padding: 0.3rem 0 0.5rem; } }
+
+/* 活動頁報名 modal：同頁彈出表單 */
+.ev-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  background: rgba(58, 35, 24, 0.55);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.2rem;
+}
+.ev-modal-box {
+  position: relative;
+  width: min(560px, 100%);
+  height: min(780px, 94vh);
+  background: var(--cream);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+}
+.ev-modal-box iframe { width: 100%; height: 100%; border: 0; display: block; }
+.ev-modal-close {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.7rem;
+  z-index: 2;
+  border: none;
+  background: var(--cream-deep);
+  color: var(--cola-soft);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+.ev-modal-close:hover { background: var(--fizz); color: #fff; }
+@media (max-width: 560px) {
+  .ev-modal { padding: 0; }
+  .ev-modal-box { width: 100%; height: 100%; border-radius: 0; }
+}
