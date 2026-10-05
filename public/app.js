@@ -34,6 +34,34 @@ const el = (tag, className, text) => {
   return node;
 };
 
+/* ---------- 首頁落花（素描紙屑，低調版：張數少、透明度低） ---------- */
+(() => {
+  const box = document.getElementById("home-particles");
+  if (!box) return;
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const LEAF =
+    '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/></svg>';
+  const PAGE =
+    '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 3h10l4 4v14H5z" opacity="0.92"/><path d="M15 3v4h4" opacity="0.5"/></svg>';
+  const SPECS = [
+    { svg: LEAF, color: "#6b4a38" },
+    { svg: LEAF, color: "#c1622f" },
+    { svg: PAGE, color: "#8a6a50" },
+  ];
+  for (let i = 0; i < 10; i += 1) {
+    const spec = SPECS[i % SPECS.length];
+    const far = i % 4 === 0;
+    const p = el("span", "ev-particle petal-soft" + (far ? " ev-particle-far" : ""));
+    p.innerHTML = spec.svg;
+    p.style.color = spec.color;
+    p.style.left = Math.random() * 100 + "%";
+    p.style.width = Math.round((far ? 44 : 20) + Math.random() * (far ? 36 : 22)) + "px";
+    p.style.animationDuration = (12 + Math.random() * 14).toFixed(1) + "s";
+    p.style.animationDelay = (-Math.random() * 26).toFixed(1) + "s";
+    box.appendChild(p);
+  }
+})();
+
 /* ---------- 活動清單 ---------- */
 
 let allEvents = [];

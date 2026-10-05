@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://letmeuse.isnowfriend.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Iansui&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Iansui&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css?v=__BUILD__">
   <script defer src="https://letmeuse.isnowfriend.com/letmeuse.js"
     data-app-id="app_pkd334f_"
@@ -19,15 +19,38 @@
     data-mode="modal">
   </script>
   <style>
-    body { min-height: 100vh; display: flex; flex-direction: column; }
+    body {
+      min-height: 100vh; display: flex; flex-direction: column;
+      background:
+        radial-gradient(900px 420px at 85% -5%, rgba(193, 98, 47, 0.08), transparent 60%),
+        radial-gradient(700px 380px at 5% 105%, rgba(107, 74, 56, 0.06), transparent 60%),
+        var(--cream);
+    }
     .me-wrap { flex: 1; display: flex; justify-content: center; padding: 2.5rem 1.2rem 4rem; }
     .me-card {
-      width: 100%; max-width: 520px; background: var(--card);
-      border-radius: var(--radius); box-shadow: var(--shadow);
+      width: 100%; max-width: 540px; background: var(--card);
+      border: 1px solid var(--cream-deep);
+      border-radius: var(--radius);
+      box-shadow: 0 10px 36px rgba(58, 35, 24, 0.1);
       padding: 2rem 1.8rem; height: fit-content;
     }
-    .me-card h1 { font-size: 1.5rem; margin-bottom: 0.3rem; }
+    .me-card h1 {
+      font-family: "Noto Serif TC", var(--font-display), serif;
+      font-weight: 700; font-size: 1.6rem; margin-bottom: 0.3rem;
+    }
+    .guest h1 { font-size: 1.5rem; }
     .me-sub { color: var(--cola-soft); font-size: 0.92rem; margin-bottom: 1.4rem; }
+    /* 區塊標題統一成活動頁語言：小字、字距、底線 */
+    .my-signups h3, .avail-box h3, .quickky-box h3 {
+      font-family: var(--font-body) !important;
+      font-size: 0.82rem !important;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      color: var(--cola-soft);
+      border-bottom: 1px solid var(--cream-deep);
+      padding-bottom: 0.45rem;
+      margin-bottom: 0.8rem !important;
+    }
     .field { display: grid; gap: 0.35rem; margin-bottom: 1rem; font-size: 0.95rem; font-weight: 500; }
     .field input, .field textarea {
       font-family: var(--font-body); font-size: 1rem;
@@ -38,10 +61,10 @@
     .guest { text-align: center; padding: 2rem 0 1rem; }
     .guest .big { color: var(--caramel); margin-bottom: 0.6rem; }
     .quickky-box {
-      border: 1.5px dashed var(--caramel); border-radius: 14px;
+      border: 1px solid var(--cream-deep); background: var(--cream);
+      border-radius: 14px;
       padding: 1.2rem 1rem; margin: 1.4rem 0; text-align: center;
     }
-    .quickky-box h3 { font-size: 1.1rem; margin-bottom: 0.4rem; }
     .quickky-box p { font-size: 0.88rem; color: var(--cola-soft); margin-bottom: 0.8rem; }
     .wall-toggle {
       display: flex; gap: 0.5rem; align-items: center; justify-content: center;
@@ -71,7 +94,7 @@
     .my-signups { margin: 1.4rem 0; }
     .my-signups h3 { font-size: 1.1rem; margin-bottom: 0.6rem; }
     .signup-row {
-      background: var(--cream-deep); border-radius: 12px;
+      background: var(--cream); border: 1px solid var(--cream-deep); border-radius: 12px;
       padding: 0.8rem 1rem; margin-bottom: 0.6rem; font-size: 0.92rem;
     }
     .signup-row.past { opacity: 0.65; }

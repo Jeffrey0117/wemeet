@@ -1838,3 +1838,7 @@ body.ev-themed .ev-block-title { letter-spacing: 0.14em; }
   color: var(--fizz); font-family: var(--font-body); font-size: 0.85rem;
   font-weight: 700; cursor: pointer; text-decoration: underline;
 }
+
+/* 首頁落花：比活動頁更低調 */
+.petal-layer .ev-particle.petal-soft { opacity: 0.18; }
+.petal-layer .ev-particle-far.petal-soft { opacity: 0.1; }
