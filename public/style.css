@@ -1830,3 +1830,11 @@ body.ev-themed .ev-block-title { letter-spacing: 0.14em; }
   .ev-modal { padding: 0; }
   .ev-modal-box { width: 100%; height: 100%; border-radius: 0; }
 }
+
+/* 報名卡：會員登入入口 */
+.ev-member-cue { margin-top: 0.6rem; font-size: 0.85rem; color: var(--cola-soft); text-align: center; }
+.ev-member-cue button {
+  background: none; border: none; padding: 0;
+  color: var(--fizz); font-family: var(--font-body); font-size: 0.85rem;
+  font-weight: 700; cursor: pointer; text-decoration: underline;
+}

@@ -395,7 +395,12 @@ const wireMemberCue = async () => {
   if (!sdk) return;
   const cue = $("member-cue");
   if (!sdk.user) cue.hidden = false;
-  $("cue-login").addEventListener("click", () => sdk.login());
+  const embedded = document.documentElement.classList.contains("embed") && window.parent !== window;
+  $("cue-login").addEventListener("click", () => {
+    // 嵌在活動頁 modal 裡：登入視窗請外層開（iframe 內開會被框住），登入後外層會重載表單
+    if (embedded) window.parent.postMessage({ type: "wemeet-login" }, location.origin);
+    else sdk.login();
+  });
   sdk.onAuthChange((user) => {
     cue.hidden = !!user;
     if (user) prefillFromMember();

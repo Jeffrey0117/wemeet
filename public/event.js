@@ -140,9 +140,38 @@ const hookSignup = (el, url) => {
   });
 };
 
+/* 會員登入一律在本頁（外層）開 LetMeUse 視窗 — iframe 裡開會被框住很醜 */
+let reloadFrameAfterLogin = false;
+const wireMemberLogin = async () => {
+  if (typeof waitForLetMeUse !== "function") return;
+  const sdk = await waitForLetMeUse();
+  if (!sdk) return;
+  const cue = $("ev-member-cue");
+  if (!sdk.user) cue.hidden = false;
+  $("ev-login").addEventListener("click", () => sdk.login());
+  sdk.onAuthChange((user) => {
+    cue.hidden = !!user;
+    // 從表單 cue 發起的登入：成功後重載 iframe，回來就是秒報名狀態
+    if (user && reloadFrameAfterLogin) {
+      reloadFrameAfterLogin = false;
+      const frame = $("ev-modal-frame");
+      if (!$("ev-modal").hidden && frame.getAttribute("src")) frame.src = frame.getAttribute("src");
+    }
+  });
+};
+// 表單（iframe）請求登入 → 在本頁開
+window.addEventListener("message", (e) => {
+  if (e.origin !== location.origin) return;
+  if (e.data && e.data.type === "wemeet-login" && window.letmeuse) {
+    reloadFrameAfterLogin = true;
+    window.letmeuse.login();
+  }
+});
+
 const render = (ev) => {
   const theme = applyTheme(ev);
   bindModal();
+  if (!ev.past) wireMemberLogin();
   const signupUrl = "/signup?event=" + encodeURIComponent(ev.id);
   document.title = `${ev.title}｜Chill Club 揪可樂`;
   $("ev-title").textContent = ev.title;
