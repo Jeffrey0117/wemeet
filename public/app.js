@@ -513,6 +513,22 @@ const bindVideoSound = (video, btn) => {
 const bindHeroSound = () => {
   bindVideoSound(document.querySelector(".hero-video"), document.getElementById("video-sound"));
   bindVideoSound(document.querySelector(".pb-video"), document.getElementById("pb-sound"));
+  // 底部實況影片：捲到附近才開始載入播放（省掉首屏 0.5MB）
+  const pbVideo = document.querySelector(".pb-video");
+  if (pbVideo && "IntersectionObserver" in window) {
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          pbVideo.play().catch(() => {});
+          io.disconnect();
+        }
+      },
+      { rootMargin: "300px" }
+    );
+    io.observe(pbVideo);
+  } else if (pbVideo) {
+    pbVideo.play().catch(() => {});
+  }
 };
 
 /* ---------- 會員心得語音條（真實波形 + 點擊跳轉） ---------- */
