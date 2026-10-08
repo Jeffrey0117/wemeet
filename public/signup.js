@@ -80,6 +80,44 @@ const renderPoll = () => {
 let uploadedPhotoId = "";
 let photoUploading = false;
 
+/* 許願牆：這場大家許願想讀的書，塞在許願題上方（快取避免重複抓） */
+const wishCache = {};
+const renderWishWall = async (ev, asksBox) => {
+  if (!ev || typeof ev.wishAsk !== "number") return;
+  const anchor = asksBox.children[ev.wishAsk];
+  if (!anchor) return;
+  const wall = document.createElement("div");
+  wall.className = "wish-wall";
+  wall.innerHTML = '<p class="wish-wall-title">大家許願想讀的書</p>';
+  asksBox.insertBefore(wall, anchor);
+  let wishes = wishCache[ev.id];
+  if (!wishes) {
+    try {
+      const res = await fetch("/api/events/" + encodeURIComponent(ev.id) + "/wishes");
+      wishes = res.ok ? (await res.json()).wishes || [] : [];
+      wishCache[ev.id] = wishes;
+    } catch (err) {
+      wishes = [];
+    }
+  }
+  if (!wishes.length) {
+    wall.appendChild(Object.assign(document.createElement("p"), { className: "wish-item wish-empty", textContent: "還沒有人許願，第一個寫下來的就是你" }));
+    return;
+  }
+  wishes.forEach(({ wish, name }) => {
+    const row = document.createElement("p");
+    row.className = "wish-item";
+    row.textContent = `《${wish}》`;
+    if (name) {
+      const who = document.createElement("span");
+      who.className = "wish-who";
+      who.textContent = `　${name} 許願`;
+      row.appendChild(who);
+    }
+    wall.appendChild(row);
+  });
+};
+
 const renderExtras = () => {
   const ev = currentEvent();
   const askBox = $("ask-box");
@@ -105,6 +143,7 @@ const renderExtras = () => {
         label.appendChild(inp);
         asksBox.appendChild(label);
       });
+      renderWishWall(ev, asksBox);
     } else {
       asksBox.hidden = true;
       asksBox.innerHTML = "";
@@ -597,6 +636,15 @@ const submit = async () => {
           age: parseInt($("f-age").value, 10) || 0,
           igHandle: $("f-ig").value.trim(),
         };
+      }
+      // 場次自帶的完成頁推薦卡（例：讀書場推 HappyBook）
+      const promoEv = currentEvent();
+      if (promoEv && promoEv.donePromo && promoEv.donePromo.url) {
+        $("promo-kicker").textContent = promoEv.donePromo.kicker || "推薦給你";
+        $("promo-text").textContent = promoEv.donePromo.text || "";
+        $("promo-btn").textContent = promoEv.donePromo.btn || "看看 →";
+        $("promo-btn").href = promoEv.donePromo.url;
+        $("done-promo").hidden = false;
       }
       showDone();
     } else {

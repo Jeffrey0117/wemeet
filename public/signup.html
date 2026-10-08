@@ -234,6 +234,20 @@
     }
     .lu-item a { color: var(--fizz); }
     .lu-none { text-align: center; font-size: 0.88rem; color: var(--cola-soft); margin-top: 0.7rem; }
+    .wish-wall {
+      background: var(--cream); border: 1px dashed var(--caramel);
+      border-radius: 12px; padding: 0.8rem 1rem; margin-bottom: 1rem;
+    }
+    .wish-wall-title {
+      font-size: 0.8rem; letter-spacing: 0.12em; color: var(--caramel);
+      font-weight: 700; margin-bottom: 0.4rem;
+    }
+    .wish-item { font-size: 0.92rem; margin-bottom: 0.2rem; }
+    .wish-item.wish-empty { color: var(--cola-soft); font-size: 0.88rem; }
+    .wish-who { font-size: 0.78rem; color: var(--cola-soft); }
+    .done-promo { border-style: solid; border-color: var(--mint); background: #f4f8f4; }
+    .done-promo .done-next-kicker { color: #4d7d61; }
+    .done-promo p { margin-bottom: 0.8rem; }
     .member-cue {
       margin-top: 1.1rem; padding-top: 0.9rem;
       border-top: 1px dashed var(--cream-deep);
@@ -522,6 +536,11 @@
           <p class="done-next-kicker">放上你的頭貼</p>
           <p>現場 Chill 友牆、Quickky 名片卡都用它，<strong>大家先認得你的臉</strong>，見面不用從零開始。</p>
           <button class="btn btn-primary" id="btn-avatar" type="button">放頭貼 →</button>
+        </div>
+        <div class="done-next done-promo" id="done-promo" hidden>
+          <p class="done-next-kicker" id="promo-kicker"></p>
+          <p id="promo-text"></p>
+          <a class="btn btn-primary" id="promo-btn" href="#" target="_blank" rel="noopener"></a>
         </div>
         <div class="done-next">
           <p class="done-next-kicker">保持聯絡</p>

@@ -1265,6 +1265,22 @@ const handleRequest = (req, res) => {
     handleAttendees(res, mAtt[1]);
     return;
   }
+  // 許願牆：報名者許願想讀的書（answers[wishAsk]），下一位填表的人看得到
+  const mWish = pathname.match(/^\/api\/events\/([\w.-]+)\/wishes$/);
+  if (req.method === "GET" && mWish) {
+    const ev = readJsonFile(EVENTS_PATH, []).find((e) => e.id === mWish[1] && e.status !== "hidden");
+    if (!ev || typeof ev.wishAsk !== "number") {
+      sendJson(res, 200, { wishes: [] });
+      return;
+    }
+    const wishes = readJsonFile(SIGNUPS_PATH, [])
+      .filter((s) => s.eventId === ev.id && Array.isArray(s.answers) && s.answers[ev.wishAsk])
+      .map((s) => ({ wish: cleanStr(s.answers[ev.wishAsk], 100), name: cleanStr(s.name, 12) }))
+      .filter((x) => x.wish)
+      .slice(-20);
+    sendJson(res, 200, { wishes });
+    return;
+  }
   if (req.method === "GET" && pathname === "/api/icebreaker") {
     handleIcebreaker(res);
     return;
