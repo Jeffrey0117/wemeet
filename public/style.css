@@ -1786,7 +1786,8 @@ body.ev-themed .ev-block-title { letter-spacing: 0.14em; }
   /* 去背版：multiply 讓殘餘白邊融進紙色即可，不需遮罩 */
   mix-blend-mode: multiply;
 }
-@media (max-width: 760px) { .bh-masthead { padding: 0.3rem 0 0.5rem; } }
+/* 手機：3:1 橫幅的刻字縮到看不清，直接收掉，第一屏讓給合照 */
+@media (max-width: 760px) { .bh-masthead { display: none; } }
 
 /* 活動頁報名 modal：同頁彈出表單 */
 .ev-modal {
