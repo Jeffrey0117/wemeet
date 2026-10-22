@@ -1843,3 +1843,85 @@ body.ev-themed .ev-block-title { letter-spacing: 0.14em; }
 /* 首頁落花：比活動頁更低調 */
 .petal-layer .ev-particle.petal-soft { opacity: 0.18; }
 .petal-layer .ev-particle-far.petal-soft { opacity: 0.1; }
+
+/* ==================== 揪可樂誌（部落格） ==================== */
+.bl-page {
+  background:
+    radial-gradient(900px 420px at 85% -5%, rgba(193, 98, 47, 0.07), transparent 60%),
+    radial-gradient(700px 380px at 5% 105%, rgba(107, 74, 56, 0.06), transparent 60%),
+    var(--cream);
+}
+.bl-wrap { max-width: 760px; margin: 0 auto; padding: 2.8rem 1.2rem 4rem; }
+.bl-head { text-align: center; margin-bottom: 2.4rem; }
+.bl-title { font-family: "Noto Serif TC", var(--font-display), serif; font-weight: 700; font-size: 2.2rem; }
+.bl-sub { color: var(--cola-soft); font-size: 0.92rem; letter-spacing: 0.14em; margin-top: 0.3rem; }
+.bl-empty { text-align: center; color: var(--cola-soft); padding: 2rem 0; }
+.bl-list { display: grid; gap: 1.4rem; }
+.bl-card {
+  display: block; text-decoration: none; color: inherit;
+  background: var(--card); border: 1px solid var(--cream-deep);
+  border-radius: var(--radius); overflow: hidden;
+  box-shadow: var(--shadow); transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.bl-card:hover { transform: translateY(-3px); box-shadow: 0 14px 38px rgba(58, 35, 24, 0.14); }
+.bl-cover { width: 100%; aspect-ratio: 1200 / 630; object-fit: cover; display: block; }
+.bl-card-body { padding: 1.3rem 1.5rem 1.4rem; }
+.bl-kicker { font-size: 0.8rem; letter-spacing: 0.14em; color: var(--caramel); margin-bottom: 0.4rem; }
+.bl-card-title { font-family: "Noto Serif TC", var(--font-display), serif; font-weight: 700; font-size: 1.35rem; line-height: 1.45; }
+.bl-excerpt { margin-top: 0.5rem; color: var(--cola-soft); font-size: 0.95rem; line-height: 1.75; }
+
+/* 文章頁 */
+.po-wrap { max-width: 720px; margin: 0 auto; padding: 2.8rem 1.2rem 4rem; }
+.po-head { text-align: center; margin-bottom: 1.8rem; }
+.po-kicker { font-size: 0.82rem; letter-spacing: 0.16em; color: var(--caramel); margin-bottom: 0.7rem; }
+.po-title {
+  font-family: "Noto Serif TC", var(--font-display), serif;
+  font-weight: 700; font-size: clamp(1.7rem, 4.5vw, 2.4rem); line-height: 1.45;
+  margin-bottom: 0.8rem;
+}
+.po-byline { font-size: 0.88rem; color: var(--cola-soft); }
+.po-cover { margin: 0 0 2rem; }
+.po-cover img { width: 100%; border-radius: var(--radius); box-shadow: var(--shadow); display: block; }
+.po-body { font-size: 1.05rem; line-height: 2; color: var(--cola); }
+.po-body p { margin-bottom: 1.5rem; }
+.po-body h2 {
+  font-family: "Noto Serif TC", var(--font-display), serif; font-weight: 700;
+  font-size: 1.45rem; margin: 2.4rem 0 1rem; line-height: 1.5;
+}
+.po-body h3 { font-size: 1.15rem; font-weight: 700; margin: 1.8rem 0 0.8rem; }
+.po-body ul { padding-left: 1.4rem; margin-bottom: 1.5rem; }
+.po-body li { margin-bottom: 0.4rem; }
+.po-body blockquote {
+  border-left: 3px solid var(--fizz); background: #fff7f2;
+  padding: 0.9rem 1.2rem; border-radius: 0 12px 12px 0;
+  margin: 0 0 1.5rem; color: var(--cola-soft); font-size: 0.98rem;
+}
+.po-body hr { border: none; border-top: 1px dashed var(--cream-deep); margin: 2rem auto; width: 60%; }
+.po-body a { color: var(--fizz); }
+.po-img { margin: 0 0 1.5rem; }
+.po-img img { width: 100%; border-radius: 14px; box-shadow: var(--shadow); display: block; }
+.po-img figcaption { text-align: center; font-size: 0.82rem; color: var(--cola-soft); margin-top: 0.5rem; }
+
+/* 文末：下一場小聚＋更多文章 */
+.po-next, .po-more { margin-top: 2.6rem; }
+.po-next-kicker {
+  font-size: 0.8rem; letter-spacing: 0.14em; color: var(--cola-soft);
+  border-bottom: 1px solid var(--cream-deep); padding-bottom: 0.45rem; margin-bottom: 0.9rem;
+}
+.po-next-card {
+  display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+  background: var(--card); border: 1px solid var(--cream-deep);
+  border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.1rem 1.3rem;
+}
+.po-next-link { flex: 1; min-width: 200px; text-decoration: none; color: inherit; display: grid; gap: 0.15rem; }
+.po-next-link b { font-size: 1.05rem; }
+.po-next-link span { font-size: 0.88rem; color: var(--cola-soft); }
+.po-more-list { display: grid; gap: 0.6rem; }
+.po-more-item {
+  display: flex; justify-content: space-between; gap: 1rem; align-items: baseline;
+  text-decoration: none; color: inherit;
+  background: var(--card); border: 1px solid var(--cream-deep);
+  border-radius: 12px; padding: 0.8rem 1.1rem;
+}
+.po-more-item:hover b { color: var(--fizz); }
+.po-more-item span { font-size: 0.82rem; color: var(--cola-soft); white-space: nowrap; }

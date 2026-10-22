@@ -32,6 +32,7 @@ const ADMIN_TOKEN = ENV.ADMIN_TOKEN || "";
 const LMU_APP_ID = ENV.LETMEUSE_APP_ID || "";
 const LMU_SECRET = ENV.LETMEUSE_APP_SECRET || "";
 const MEMBERS_PATH = path.join(DATA_DIR, "members.json");
+const POSTS_PATH = path.join(DATA_DIR, "posts.json");
 const NOTICES_PATH = path.join(DATA_DIR, "notices.json");
 const UPLOADS_DIR = path.join(DATA_DIR, "uploads");
 
@@ -891,8 +892,106 @@ const requireAdmin = (req, res) => {
   return true;
 };
 
+/* ---------- 部落格 ---------- */
+
+const publicPosts = () =>
+  readJsonFile(POSTS_PATH, [])
+    .filter((p) => p.published)
+    .map(({ md, ...meta }) => meta)
+    .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+
+// /blog/{slug}：文章頁 — 注入專屬 OG 與文章資料
+const sendPostHtml = (req, res, slug) => {
+  const post = readJsonFile(POSTS_PATH, []).find((p) => p.slug === slug && p.published);
+  const file = path.join(PUBLIC_DIR, "post.html");
+  if (!post || !fs.existsSync(file)) {
+    res.writeHead(302, { Location: "/blog" });
+    res.end();
+    return;
+  }
+  let html = fs.readFileSync(file, "utf8").replace(/__BUILD__/g, BUILD_ID);
+  const desc = String(post.excerpt || post.md || "").replace(/\s+/g, " ").slice(0, 150);
+  const img = post.cover
+    ? (post.cover.startsWith("http") ? post.cover : "https://wemeet.pipee.tw" + post.cover)
+    : "https://wemeet.pipee.tw/og.png";
+  const pageUrl = "https://wemeet.pipee.tw/blog/" + encodeURIComponent(post.slug);
+  html = html
+    .replace(/<title>[^<]*<\/title>/, () => `<title>${escHtml(post.title)}｜Chill Club 揪可樂</title>`)
+    .replace(/<meta name="description" content="[^"]*"/, () => `<meta name="description" content="${escHtml(desc)}"`)
+    .replace(/<meta property="og:title" content="[^"]*"/, () => `<meta property="og:title" content="${escHtml(post.title)}"`)
+    .replace(/<meta property="og:description" content="[^"]*"/, () => `<meta property="og:description" content="${escHtml(desc)}"`)
+    .replace(/<meta property="og:image" content="[^"]*"/, () => `<meta property="og:image" content="${escHtml(img)}"`)
+    .replace(/<meta property="og:url" content="[^"]*"/, () => `<meta property="og:url" content="${escHtml(pageUrl)}"`)
+    .replace("window.__POST__ = null", () => "window.__POST__ = " + JSON.stringify(post).replace(/</g, "\\u003c"));
+  res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-cache" });
+  res.end(html);
+};
+
 const handleAdmin = (req, res, pathname) => {
   if (!requireAdmin(req, res)) return;
+
+  // 文章管理
+  if (req.method === "GET" && pathname === "/api/admin/posts") {
+    sendJson(res, 200, { posts: readJsonFile(POSTS_PATH, []) });
+    return true;
+  }
+  if (req.method === "PUT" && pathname === "/api/admin/posts") {
+    readJsonBody(req, res, (body) => {
+      const p = body.post;
+      if (!p || typeof p !== "object") {
+        sendJson(res, 400, { error: "缺 post" });
+        return;
+      }
+      const title = cleanStr(p.title, 120);
+      const slug = cleanStr(p.slug, 80).toLowerCase();
+      if (!title) {
+        sendJson(res, 400, { error: "標題不可為空" });
+        return;
+      }
+      if (!/^[a-z0-9-]{1,80}$/.test(slug)) {
+        sendJson(res, 400, { error: "slug 只能用小寫英文、數字、連字號" });
+        return;
+      }
+      const posts = readJsonFile(POSTS_PATH, []);
+      const id = cleanStr(p.id, 40) || "post_" + crypto.randomBytes(6).toString("hex");
+      if (posts.some((x) => x.slug === slug && x.id !== id)) {
+        sendJson(res, 400, { error: "slug 已被別篇使用" });
+        return;
+      }
+      const existing = posts.find((x) => x.id === id);
+      const next = {
+        id,
+        slug,
+        title,
+        category: cleanStr(p.category, 30),
+        cover: cleanStr(p.cover, 300),
+        excerpt: cleanStr(p.excerpt, 300),
+        md: String(p.md == null ? "" : p.md).slice(0, 60000),
+        published: p.published === true,
+        createdAt: (existing && existing.createdAt) || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      const merged = existing ? posts.map((x) => (x.id === id ? next : x)) : [...posts, next];
+      writeJsonAtomic(POSTS_PATH, merged, (err) => {
+        if (err) sendJson(res, 500, { error: "寫入失敗" });
+        else sendJson(res, 200, { success: true, post: next });
+      });
+    });
+    return true;
+  }
+  const mPost = pathname.match(/^\/api\/admin\/posts\/(post_[a-f0-9]{12})$/);
+  if (req.method === "DELETE" && mPost) {
+    const posts = readJsonFile(POSTS_PATH, []);
+    if (!posts.some((x) => x.id === mPost[1])) {
+      sendJson(res, 404, { error: "找不到這篇" });
+      return true;
+    }
+    writeJsonAtomic(POSTS_PATH, posts.filter((x) => x.id !== mPost[1]), (err) => {
+      if (err) sendJson(res, 500, { error: "寫入失敗" });
+      else sendJson(res, 200, { success: true });
+    });
+    return true;
+  }
 
   if (req.method === "GET" && pathname === "/api/admin/overview") {
     sendJson(res, 200, {
@@ -1265,6 +1364,10 @@ const handleRequest = (req, res) => {
     handleAttendees(res, mAtt[1]);
     return;
   }
+  if (req.method === "GET" && pathname === "/api/posts") {
+    sendJson(res, 200, { posts: publicPosts() });
+    return;
+  }
   // 許願牆：報名者許願想讀的書（answers[wishAsk]），下一位填表的人看得到
   const mWish = pathname.match(/^\/api\/events\/([\w.-]+)\/wishes$/);
   if (req.method === "GET" && mWish) {
@@ -1456,6 +1559,15 @@ const handleRequest = (req, res) => {
   const mEv = pathname.match(/^\/e\/([\w.-]+)$/);
   if (mEv) {
     sendEventHtml(req, res, mEv[1]);
+    return;
+  }
+  if (pathname === "/blog" || pathname === "/blog/") {
+    sendFile(res, path.join(PUBLIC_DIR, "blog.html"));
+    return;
+  }
+  const mBlog = pathname.match(/^\/blog\/([a-z0-9-]{1,80})$/);
+  if (mBlog) {
+    sendPostHtml(req, res, mBlog[1]);
     return;
   }
   if (pathname === "/me") {

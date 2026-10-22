@@ -117,6 +117,7 @@
     <button class="nav-btn" data-panel="p-signups"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> 報名名單</button>
     <button class="nav-btn" data-panel="p-traffic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg> 流量分析</button>
     <button class="nav-btn" data-panel="p-events"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg> 場次管理</button>
+    <button class="nav-btn" data-panel="p-blog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M12 20h9"/><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/></svg> 文章</button>
     <button class="nav-btn" data-panel="p-notify"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg> 發通知</button>
     <button class="nav-btn" data-panel="p-avail"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 會員空檔</button>
     <div class="side-foot">Chill Club 揪可樂</div>
@@ -218,6 +219,35 @@
     </div>
   </div>
     </section>
+    <section class="panel" id="p-blog">
+      <h1>文章</h1>
+      <div class="card">
+        <h2 id="po-editor-title">寫新文章</h2>
+        <div style="display:grid; gap:0.7rem; margin-top:0.8rem">
+          <div style="display:flex; gap:0.7rem; flex-wrap:wrap">
+            <input type="text" id="po-title" placeholder="標題" style="flex:2; min-width:240px; padding:0.5rem 0.7rem; border:1.5px solid #f3e7d3; border-radius:10px">
+            <input type="text" id="po-slug" placeholder="slug（網址用，小寫英文-數字，留空自動生）" style="flex:1; min-width:200px; padding:0.5rem 0.7rem; border:1.5px solid #f3e7d3; border-radius:10px">
+          </div>
+          <div style="display:flex; gap:0.7rem; flex-wrap:wrap">
+            <input type="text" id="po-category" placeholder="分類（例：小聚記錄、閱讀筆記）" style="flex:1; min-width:180px; padding:0.5rem 0.7rem; border:1.5px solid #f3e7d3; border-radius:10px">
+            <input type="url" id="po-cover" placeholder="封面圖連結（選填，建議橫圖）" style="flex:2; min-width:240px; padding:0.5rem 0.7rem; border:1.5px solid #f3e7d3; border-radius:10px">
+          </div>
+          <input type="text" id="po-excerpt" maxlength="300" placeholder="摘要（列表與分享卡用，一兩句）" style="padding:0.5rem 0.7rem; border:1.5px solid #f3e7d3; border-radius:10px">
+          <textarea id="po-md" spellcheck="false" placeholder="內文 markdown：## 標題、### 小標、**粗體**、- 列表、> 引用、![圖說](圖片網址)、[文字](連結)、--- 分隔線"></textarea>
+          <div style="display:flex; gap:0.7rem; align-items:center; flex-wrap:wrap">
+            <button class="btn" id="po-save-draft" type="button">存草稿</button>
+            <button class="btn primary" id="po-publish" type="button">發佈</button>
+            <button class="btn" id="po-new" type="button">清空，寫新的</button>
+            <span class="msg" id="po-msg"></span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>所有文章</h2>
+        <div id="post-list" style="display:grid; gap:0.5rem; margin-top:0.8rem"></div>
+      </div>
+    </section>
+
     <section class="panel" id="p-notify">
       <h1>發通知</h1>
       <div class="card" id="notify-card">
@@ -810,6 +840,131 @@ $("copy-csv").addEventListener("click", async () => {
   });
   await navigator.clipboard.writeText(rows.map((r) => r.join(",")).join("\n"));
   setMsg("copy-msg", "已複製 ✓", true);
+});
+
+/* ---------- 文章管理 ---------- */
+let postsCache = [];
+let postsLoaded = false;
+let editingPostId = "";
+
+const postSlugify = (s) =>
+  String(s).toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60);
+
+const renderPostList = () => {
+  const box = $("post-list");
+  box.innerHTML = "";
+  if (!postsCache.length) {
+    box.innerHTML = '<p class="muted">還沒有文章，上面寫第一篇。</p>';
+    return;
+  }
+  const sorted = [...postsCache].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+  sorted.forEach((p) => {
+    const row = document.createElement("div");
+    row.style.cssText = "display:flex; gap:0.6rem; align-items:center; flex-wrap:wrap; background:#fffdf8; border:1px solid #f3e7d3; border-radius:10px; padding:0.6rem 0.9rem";
+    const info = document.createElement("div");
+    info.style.cssText = "flex:1; min-width:200px";
+    const t = document.createElement("b");
+    t.textContent = p.title;
+    const meta = document.createElement("div");
+    meta.style.cssText = "font-size:0.78rem; color:#6b4a38";
+    meta.textContent = `/blog/${p.slug}　${(p.createdAt || "").slice(0, 10)}　${p.published ? "✅ 已發佈" : "📝 草稿"}`;
+    info.appendChild(t);
+    info.appendChild(meta);
+    row.appendChild(info);
+    const mk = (label, fn, ghost) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = label;
+      b.style.cssText = "font-size:0.8rem; padding:0.3rem 0.8rem" + (ghost ? "; background:#faf3e7; color:#3a2318; border:1.5px solid #f3e7d3" : "");
+      b.addEventListener("click", fn);
+      return b;
+    };
+    row.appendChild(mk("編輯", () => fillPostEditor(p), true));
+    row.appendChild(mk(p.published ? "下架" : "發佈", () => togglePublish(p)));
+    if (p.published) {
+      const a = document.createElement("a");
+      a.href = "/blog/" + p.slug;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.textContent = "開啟";
+      a.style.cssText = "font-size:0.8rem; color:#e2572b";
+      row.appendChild(a);
+    }
+    row.appendChild(mk("刪除", async () => {
+      if (!confirm(`刪除「${p.title}」？不可復原。`)) return;
+      await api("/api/admin/posts/" + p.id, { method: "DELETE" });
+      await loadPosts();
+    }, true));
+    box.appendChild(row);
+  });
+};
+
+const loadPosts = async () => {
+  const data = await api("/api/admin/posts");
+  postsCache = data.posts || [];
+  postsLoaded = true;
+  renderPostList();
+};
+
+const fillPostEditor = (p) => {
+  editingPostId = p.id;
+  $("po-editor-title").textContent = "編輯：" + p.title;
+  $("po-title").value = p.title;
+  $("po-slug").value = p.slug;
+  $("po-category").value = p.category || "";
+  $("po-cover").value = p.cover || "";
+  $("po-excerpt").value = p.excerpt || "";
+  $("po-md").value = p.md || "";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+const resetPostEditor = () => {
+  editingPostId = "";
+  $("po-editor-title").textContent = "寫新文章";
+  ["po-title", "po-slug", "po-category", "po-cover", "po-excerpt", "po-md"].forEach((id) => { $(id).value = ""; });
+};
+
+const savePost = async (published) => {
+  const title = $("po-title").value.trim();
+  if (!title) { setMsg("po-msg", "標題要填", false); return; }
+  const slug = $("po-slug").value.trim() || postSlugify(title) || "post-" + Date.now().toString(36);
+  const existing = postsCache.find((x) => x.id === editingPostId);
+  const post = {
+    id: editingPostId,
+    title,
+    slug,
+    category: $("po-category").value.trim(),
+    cover: $("po-cover").value.trim(),
+    excerpt: $("po-excerpt").value.trim(),
+    md: $("po-md").value,
+    published: published == null ? !!(existing && existing.published) : published,
+  };
+  try {
+    const data = await api("/api/admin/posts", { method: "PUT", body: JSON.stringify({ post }) });
+    editingPostId = data.post.id;
+    $("po-slug").value = data.post.slug;
+    $("po-editor-title").textContent = "編輯：" + data.post.title;
+    setMsg("po-msg", post.published ? "已發佈 ✓　/blog/" + data.post.slug : "草稿已存 ✓", true);
+    await loadPosts();
+  } catch (err) {
+    setMsg("po-msg", err.message, false);
+  }
+};
+
+const togglePublish = async (p) => {
+  try {
+    await api("/api/admin/posts", { method: "PUT", body: JSON.stringify({ post: { ...p, published: !p.published } }) });
+    await loadPosts();
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
+$("po-save-draft").addEventListener("click", () => savePost(false));
+$("po-publish").addEventListener("click", () => savePost(true));
+$("po-new").addEventListener("click", resetPostEditor);
+document.querySelector('[data-panel="p-blog"]').addEventListener("click", () => {
+  if (!postsLoaded) loadPosts().catch((e) => setMsg("po-msg", e.message, false));
 });
 
 const saved = localStorage.getItem("wemeet_admin_token");
