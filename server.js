@@ -145,7 +145,9 @@ const ensureData = () => {
   if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 };
 
-/* ---------- LetMeUse JWT 驗簽（ES256 via JWKS，HS256 過渡期相容） ---------- */
+/* ---------- LetMeUse JWT 驗簽（只收 ES256 via JWKS） ---------- */
+// ⚠️ 2026-10-28 資安:廢除 HS256（pokkit 事件：app secret 一洩就能自簽任意 sub 偽造任何用戶）。
+// LetMeUse 早已全面 ES256，真實 token 走 JWKS 公鑰（除非 LetMeUse 私鑰外洩，否則偽造不了）。
 
 // JWKS 公鑰快取：背景抓、同步讀（照 quickky jwks-cache 模式）
 const LMU_BASE_URL = (ENV.LETMEUSE_BASE_URL || "").replace(/\/$/, "");
@@ -201,13 +203,8 @@ const verifyLmuToken = (token) => {
         Buffer.from(s, "base64url")
       );
       if (!ok) return null;
-    } else if (header.alg === "HS256") {
-      if (!LMU_SECRET) return null;
-      const expected = crypto.createHmac("sha256", LMU_SECRET).update(h + "." + p).digest();
-      const actual = Buffer.from(s, "base64url");
-      if (actual.length !== expected.length || !crypto.timingSafeEqual(actual, expected)) return null;
     } else {
-      return null;
+      return null; // HS256 / none / 其他 → 一律擋
     }
 
     const payload = JSON.parse(Buffer.from(p, "base64url").toString("utf8"));
