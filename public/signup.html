@@ -312,8 +312,18 @@
     .done-join p { margin-bottom: 0.8rem; }
     .done-join .done-next-alt { margin: 0.6rem 0 0 !important; color: #4d7d61; font-weight: 700; }
     .poll-chips, .why-chips { flex-wrap: wrap; }
-    /* chip 不被 flex 壓縮（CJK 會逐字直排破版）；過長就在容器寬度內正常換行 */
-    .poll-chips .gchip, .why-chips .gchip { flex: 0 0 auto; max-width: 100%; }
+    .why-chips .gchip { flex: 0 0 auto; max-width: 100%; }
+    /* poll 選項：一列一項的選卡（窄 chip 會讓 CJK 逐字直排，直接給滿寬最乾淨） */
+    .poll-chips { flex-direction: column; align-items: stretch; gap: 0.55rem; }
+    .poll-chips .gchip {
+      width: 100%; justify-content: flex-start; gap: 0.6rem;
+      border-radius: 12px; padding: 0.65rem 0.95rem; background: #fff;
+    }
+    .poll-chips .gchip input[type="text"] {
+      flex: 1; min-width: 0; border: none; border-bottom: 1.5px solid var(--cream-deep);
+      background: transparent; padding: 0.1rem 0.2rem; font: inherit; color: var(--cola);
+    }
+    .poll-chips .gchip input[type="text"]:focus { outline: none; border-bottom-color: var(--caramel); }
     .task-box {
       border: 1.5px dashed var(--fizz); border-radius: 14px;
       padding: 1rem 1.1rem; margin-bottom: 1rem;

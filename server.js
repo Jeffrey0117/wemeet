@@ -358,6 +358,10 @@ const publicEvents = () => {
 
 const cleanStr = (v, max) => String(v == null ? "" : v).trim().slice(0, max);
 
+// poll 勾選是否有效：在選項清單內，或（allowOther 場）「其他：xxx」自填
+const pollPickOk = (poll, p) =>
+  (poll.options || []).includes(p) || !!(poll.allowOther && typeof p === "string" && p.startsWith("其他") && p.length > 3);
+
 const handleSignup = (req, res) => {
   const ip = clientIp(req);
   const ua = cleanStr(req.headers["user-agent"], 200);
@@ -443,8 +447,8 @@ const handleSignup = (req, res) => {
         sendJson(res, 409, { error: "這場已經額滿囉！下一場優先通知你" });
         return;
       }
-      // 單選題場（時段投票、身分選擇…）：至少勾一個（只收活動定義過的選項）
-      if (event.poll && !rawPicks.some((p) => (event.poll.options || []).includes(p))) {
+      // 單選題場（時段投票、身分選擇…）：至少勾一個（只收活動定義過的選項；allowOther 加收「其他：自填」）
+      if (event.poll && !rawPicks.some((p) => pollPickOk(event.poll, p))) {
         sendJson(res, 400, { error: "「" + (event.poll.question || "單選題") + "」勾一下才能報名喔" });
         return;
       }
@@ -534,7 +538,7 @@ const handleSignup = (req, res) => {
       gender,
       age,
       waitlisted,
-      picks: joinedEvent && joinedEvent.poll ? rawPicks.filter((p) => (joinedEvent.poll.options || []).includes(p)) : [],
+      picks: joinedEvent && joinedEvent.poll ? rawPicks.filter((p) => pollPickOk(joinedEvent.poll, p)) : [],
       preTaskDone: joinedEvent && joinedEvent.preTask ? body.preTaskDone === true : undefined,
       answer: answer || undefined,
       answers: joinedEvent && Array.isArray(joinedEvent.asks) && answers.some(Boolean) ? answers : undefined,

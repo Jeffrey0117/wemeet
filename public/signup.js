@@ -60,7 +60,8 @@ const renderPoll = () => {
   box.hidden = false;
   $("poll-q").innerHTML = (ev.poll.question || "哪些時段你可以？") + '<span class="req-star" aria-hidden="true">*</span>（可複選）';
   const wrap = $("poll-chips");
-  const kept = new Set([...wrap.querySelectorAll("input:checked")].map((c) => c.value));
+  const kept = new Set([...wrap.querySelectorAll('input[type="checkbox"]:checked')].map((c) => c.value));
+  const prevOther = (wrap.querySelector("#poll-other-text") || {}).value || "";
   wrap.textContent = "";
   (ev.poll.options || []).forEach((opt) => {
     const label = document.createElement("label");
@@ -74,6 +75,31 @@ const renderPoll = () => {
     label.appendChild(document.createTextNode(opt));
     wrap.appendChild(label);
   });
+  if (ev.poll.allowOther) {
+    const label = document.createElement("label");
+    label.className = "gchip";
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.name = "poll-pick";
+    cb.value = "__other__";
+    cb.checked = kept.has("__other__");
+    const txt = document.createElement("input");
+    txt.type = "text";
+    txt.id = "poll-other-text";
+    txt.maxLength = 30;
+    txt.placeholder = "自己填";
+    txt.value = prevOther;
+    txt.hidden = !cb.checked;
+    cb.addEventListener("change", () => {
+      txt.hidden = !cb.checked;
+      if (cb.checked) txt.focus();
+    });
+    txt.addEventListener("click", (e) => e.preventDefault());
+    label.appendChild(cb);
+    label.appendChild(document.createTextNode("其他"));
+    label.appendChild(txt);
+    wrap.appendChild(label);
+  }
 };
 
 /* 場次自訂問答 + 照片（event.ask / event.photoAsk） */
@@ -502,8 +528,12 @@ const validate = (step) => {
   }
   if (step === 3) {
     const pickedEv = currentEvent();
-    if (pickedEv && pickedEv.poll && !document.querySelector('input[name="poll-pick"]:checked')) {
-      return "「" + (pickedEv.poll.question || "單選題") + "」勾一下就能繼續";
+    if (pickedEv && pickedEv.poll) {
+      const picked = [...document.querySelectorAll('input[name="poll-pick"]:checked')];
+      if (!picked.length) return "「" + (pickedEv.poll.question || "單選題") + "」勾一下就能繼續";
+      if (picked.some((c) => c.value === "__other__") && !((($("poll-other-text") || {}).value || "").trim())) {
+        return "勾了「其他」就順手寫一下是什麼";
+      }
     }
     if (pickedEv && pickedEv.preTask && !$("f-task").checked) {
       return "完成小任務再勾「" + (pickedEv.preTask.confirmLabel || "我完成了") + "」就能繼續";
@@ -555,7 +585,9 @@ const submit = async () => {
         igHandle: $("f-ig").value.trim(),
         igFollowed: $("f-followed").checked,
         gender: (document.querySelector('input[name="gender"]:checked') || {}).value || "",
-        picks: [...document.querySelectorAll('input[name="poll-pick"]:checked')].map((c) => c.value),
+        picks: [...document.querySelectorAll('input[name="poll-pick"]:checked')].map((c) =>
+          c.value === "__other__" ? "其他：" + ((($("poll-other-text") || {}).value || "").trim()) : c.value
+        ),
         preTaskDone: $("f-task") ? $("f-task").checked : false,
         answer: $("f-answer") ? $("f-answer").value.trim() : "",
         answers: [...document.querySelectorAll(".f-ask-input")].map((i) => i.value.trim()),
