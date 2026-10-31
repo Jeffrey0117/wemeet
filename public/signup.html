@@ -312,6 +312,8 @@
     .done-join p { margin-bottom: 0.8rem; }
     .done-join .done-next-alt { margin: 0.6rem 0 0 !important; color: #4d7d61; font-weight: 700; }
     .poll-chips, .why-chips { flex-wrap: wrap; }
+    /* chip 不被 flex 壓縮（CJK 會逐字直排破版）；過長就在容器寬度內正常換行 */
+    .poll-chips .gchip, .why-chips .gchip { flex: 0 0 auto; max-width: 100%; }
     .task-box {
       border: 1.5px dashed var(--fizz); border-radius: 14px;
       padding: 1rem 1.1rem; margin-bottom: 1rem;
