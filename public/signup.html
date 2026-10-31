@@ -319,6 +319,12 @@
       width: 100%; justify-content: flex-start; gap: 0.6rem;
       border-radius: 12px; padding: 0.65rem 0.95rem; background: #fff;
     }
+    /* 根因：#poll-box 有 .field class，.field input 的 width:100%/padding/邊框會把 checkbox 撐成滿寬大白框，
+       文字被擠到右邊細縫逐字直排。這裡把 checkbox 還原成正常大小。 */
+    .poll-chips .gchip input[type="checkbox"], .why-chips .gchip input[type="checkbox"] {
+      width: 1.05rem; height: 1.05rem; flex: 0 0 auto;
+      padding: 0; margin: 0; border: none; background: transparent;
+    }
     .poll-chips .gchip input[type="text"] {
       flex: 1; min-width: 0; border: none; border-bottom: 1.5px solid var(--cream-deep);
       background: transparent; padding: 0.1rem 0.2rem; font: inherit; color: var(--cola);
