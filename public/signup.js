@@ -503,7 +503,7 @@ const validate = (step) => {
   if (step === 3) {
     const pickedEv = currentEvent();
     if (pickedEv && pickedEv.poll && !document.querySelector('input[name="poll-pick"]:checked')) {
-      return "勾一下你可以的時段，我們才排得進去";
+      return "「" + (pickedEv.poll.question || "單選題") + "」勾一下就能繼續";
     }
     if (pickedEv && pickedEv.preTask && !$("f-task").checked) {
       return "完成小任務再勾「" + (pickedEv.preTask.confirmLabel || "我完成了") + "」就能繼續";

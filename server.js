@@ -443,9 +443,9 @@ const handleSignup = (req, res) => {
         sendJson(res, 409, { error: "這場已經額滿囉！下一場優先通知你" });
         return;
       }
-      // 時段投票場：至少勾一個（只收活動定義過的選項）
+      // 單選題場（時段投票、身分選擇…）：至少勾一個（只收活動定義過的選項）
       if (event.poll && !rawPicks.some((p) => (event.poll.options || []).includes(p))) {
-        sendJson(res, 400, { error: "勾一下你可以的時段，我們才排得進去" });
+        sendJson(res, 400, { error: "「" + (event.poll.question || "單選題") + "」勾一下才能報名喔" });
         return;
       }
       // 報名前置任務（如：去 Threads 貼文留言）：必須勾確認
