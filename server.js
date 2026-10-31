@@ -465,8 +465,16 @@ const handleSignup = (req, res) => {
       }
       if (Array.isArray(event.asks)) {
         for (let qi = 0; qi < event.asks.length; qi++) {
-          if (event.asks[qi] && event.asks[qi].required && !(answers[qi] || "").trim()) {
-            sendJson(res, 400, { error: (event.asks[qi].label || "問題") + "要填一下喔" });
+          const q = event.asks[qi];
+          if (!q) continue;
+          const a = (answers[qi] || "").trim();
+          if (q.required && !a) {
+            sendJson(res, 400, { error: (q.label || "問題") + "要填一下喔" });
+            return;
+          }
+          // minLen：防敷衍，字數不到不收
+          if (q.minLen && a && a.length < q.minLen) {
+            sendJson(res, 400, { error: (q.label || "問題") + `至少要 ${q.minLen} 個字，認真填喔` });
             return;
           }
         }

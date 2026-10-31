@@ -515,6 +515,8 @@ const validate = (step) => {
       const vals = [...document.querySelectorAll(".f-ask-input")].map((i) => i.value.trim());
       for (let qi = 0; qi < pickedEv.asks.length; qi++) {
         if (pickedEv.asks[qi].required && !vals[qi]) return (pickedEv.asks[qi].label || "問題") + "填一下就能繼續";
+        const need = pickedEv.asks[qi].minLen;
+        if (need && vals[qi] && vals[qi].length < need) return (pickedEv.asks[qi].label || "問題") + "至少寫 " + need + " 個字，認真填喔";
       }
     }
     if (pickedEv && pickedEv.photoAsk && pickedEv.photoAsk.required) {
