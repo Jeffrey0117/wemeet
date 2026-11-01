@@ -96,6 +96,33 @@
     .msg.ok { color: #4d7d61; } .msg.err { color: #c74a22; }
     .muted { color: #6b4a38; font-size: 0.85rem; }
     .table-scroll { overflow-x: auto; }
+    /* 報名名單手機卡片視圖（桌機維持表格；≤820px 換卡片，審核不用橫捲） */
+    .signup-cards { display: none; }
+    .sg-card {
+      background: #fffdf8; border: 1px solid #f3e7d3; border-radius: 14px;
+      padding: 0.9rem 1rem; display: grid; gap: 0.5rem;
+      box-shadow: 0 4px 14px rgba(58,35,24,0.06);
+    }
+    .sg-head { display: flex; align-items: baseline; gap: 0.5rem; flex-wrap: wrap; }
+    .sg-head strong { font-size: 1.08rem; }
+    .sg-sub { color: #6b4a38; font-size: 0.85rem; }
+    .sg-badge { font-size: 0.72rem; background: #e2572b; color: #fff; border-radius: 999px; padding: 0.12rem 0.55rem; }
+    .sg-meta { font-size: 0.86rem; color: #6b4a38; overflow-wrap: anywhere; }
+    .sg-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .sg-chip { font-size: 0.78rem; border: 1px solid #e2572b; color: #c74a22; border-radius: 999px; padding: 0.1rem 0.6rem; background: #fff7f2; }
+    .sg-qa { display: grid; gap: 0.15rem; background: #faf3e7; border-radius: 10px; padding: 0.6rem 0.75rem; }
+    .sg-q { font-size: 0.74rem; color: #6b4a38; margin-top: 0.3rem; }
+    .sg-q:first-child { margin-top: 0; }
+    .sg-a { font-size: 0.93rem; overflow-wrap: anywhere; white-space: pre-wrap; }
+    .sg-actions { display: flex; gap: 0.6rem; justify-content: flex-end; }
+    .sg-actions button { padding: 0.45rem 1.2rem; }
+    /* 桌機表格的表單內容格：分行呈現，不再用｜黏成一坨 */
+    .td-qa div { margin-bottom: 0.15rem; }
+    .td-qa .q { color: #9a7a63; font-size: 0.78rem; }
+    @media (max-width: 820px) {
+      #signups-card .table-scroll { display: none; }
+      .signup-cards { display: grid; gap: 0.8rem; }
+    }
   </style>
 </head>
 <body>
@@ -157,10 +184,11 @@
     </div>
     <div class="table-scroll">
       <table>
-        <thead><tr><th>時間</th><th>活動</th><th>暱稱</th><th>年紀</th><th>職業</th><th>居住地</th><th>性別</th><th>時段</th><th>LINE/電話</th><th>IG</th><th>想說的話</th><th></th></tr></thead>
+        <thead><tr><th>時間</th><th>活動</th><th>暱稱</th><th>年紀</th><th>職業</th><th>居住地</th><th>性別</th><th>勾選</th><th>LINE/電話</th><th>IG</th><th>表單內容</th><th></th></tr></thead>
         <tbody id="signup-rows"></tbody>
       </table>
     </div>
+    <div class="signup-cards" id="signup-cards"></div>
   </div>
     </section>
     <section class="panel" id="p-traffic">
@@ -376,23 +404,76 @@ const renderSignups = () => {
   Object.entries(pollTally).forEach(([eid, t]) => {
     const p = document.createElement("p");
     p.className = "muted";
-    p.textContent = `${eventTitle(eid)} 時段票：` + Object.entries(t).map(([k, v]) => `${k} ${v} 票`).join("・");
+    p.textContent = `${eventTitle(eid)} 勾選統計：` + Object.entries(t).map(([k, v]) => `${k} ${v} 票`).join("・");
     tallyBox.appendChild(p);
   });
   const tbody = $("signup-rows");
   tbody.textContent = "";
+  const cardsBox = $("signup-cards");
+  cardsBox.textContent = "";
+
+  // 表單問答攤平：答案配上該場 asks 的題目文字
+  const qaEntries = (s) => {
+    const ev = eventsCache.find((e) => e.id === s.eventId);
+    const asks = ev && Array.isArray(ev.asks) ? ev.asks : [];
+    const out = [];
+    if (s.answer) out.push(["帶書", s.answer]);
+    (s.answers || []).forEach((a, i) => {
+      if (a) out.push([(asks[i] && asks[i].label) || "問題 " + (i + 1), a]);
+    });
+    if ((s.whyPicks || []).length) out.push(["為什麼來", s.whyPicks.join("、")]);
+    if (s.note) out.push(["想說的話", s.note]);
+    return out;
+  };
+
+  const removeSignup = async (s) => {
+    if (!confirm(`確定刪除「${s.name}」這筆報名？`)) return;
+    try {
+      await api("/api/admin/signups/" + s.id, { method: "DELETE" });
+      signupsCache = signupsCache.filter((x) => x.id !== s.id);
+      renderSignups();
+    } catch (err) {
+      alert("刪除失敗：" + err.message);
+    }
+  };
+
+  const openPhoto = async (s) => {
+    try {
+      const r = await fetch("/api/admin/photo/" + s.photoId, { headers: { Authorization: "Bearer " + token() } });
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      const blob = await r.blob();
+      window.open(URL.createObjectURL(blob), "_blank");
+    } catch (err) {
+      alert("照片載入失敗：" + err.message);
+    }
+  };
+
   signups.forEach((s) => {
+    const ig = (s.igHandle || "") + (s.igFollowed ? "（已追蹤 ✓）" : "");
+    const genderTxt = s.gender === "male" ? "男" : s.gender === "female" ? "女" : "";
+    const contactTxt = s.contact + (s.phone && s.phone !== s.contact ? "／" + s.phone : "");
+    const qa = qaEntries(s);
+
+    // 桌機表格列（表單內容分行呈現）
     const tr = document.createElement("tr");
     if (s.ip || s.ua) tr.title = (s.ip ? "IP: " + s.ip : "") + (s.ua ? "\n" + s.ua : "");
-
-    // 繳費欄已移除（統一現場收，不追蹤）
-
-    const ig = (s.igHandle || "") + (s.igFollowed ? "（已追蹤 ✓）" : "");
-    [new Date(s.createdAt).toLocaleString("zh-TW"), eventTitle(s.eventId), s.name, s.age || "", s.job || "", s.city || "", (s.gender === "male" ? "男" : s.gender === "female" ? "女" : "") + (s.waitlisted ? "（候補）" : ""), (s.picks || []).join("、"), s.contact + (s.phone && s.phone !== s.contact ? "／" + s.phone : ""), ig, [s.answer ? "帶書：" + s.answer : "", (s.answers || []).filter(Boolean).join("；"), (s.whyPicks || []).join("、"), s.note || ""].filter(Boolean).join("｜")].forEach((v) => {
+    [new Date(s.createdAt).toLocaleString("zh-TW"), eventTitle(s.eventId), s.name, s.age || "", s.job || "", s.city || "", genderTxt + (s.waitlisted ? "（候補）" : ""), (s.picks || []).join("、"), contactTxt, ig].forEach((v) => {
       const td = document.createElement("td");
       td.textContent = v;
       tr.appendChild(td);
     });
+    const qaTd = document.createElement("td");
+    qaTd.className = "td-qa";
+    qa.forEach(([q, a]) => {
+      const d = document.createElement("div");
+      const qs = document.createElement("span");
+      qs.className = "q";
+      qs.textContent = q + "：";
+      d.appendChild(qs);
+      d.appendChild(document.createTextNode(a));
+      qaTd.appendChild(d);
+    });
+    tr.appendChild(qaTd);
 
     const delTd = document.createElement("td");
     if (s.photoId) {
@@ -400,34 +481,87 @@ const renderSignups = () => {
       pBtn.className = "ghost";
       pBtn.textContent = "書櫃照";
       pBtn.style.cssText = "padding:0.15rem 0.5rem;margin-right:0.3rem";
-      pBtn.addEventListener("click", async () => {
-        try {
-          const r = await fetch("/api/admin/photo/" + s.photoId, { headers: { Authorization: "Bearer " + token() } });
-          if (!r.ok) throw new Error("HTTP " + r.status);
-          const blob = await r.blob();
-          window.open(URL.createObjectURL(blob), "_blank");
-        } catch (err) {
-          alert("照片載入失敗：" + err.message);
-        }
-      });
+      pBtn.addEventListener("click", () => openPhoto(s));
       delTd.appendChild(pBtn);
     }
     const delBtn = document.createElement("button");
     delBtn.className = "ghost";
     delBtn.textContent = "刪";
     delBtn.style.padding = "0.15rem 0.6rem";
-    delBtn.addEventListener("click", async () => {
-      if (!confirm(`確定刪除「${s.name}」這筆報名？`)) return;
-      try {
-        await api("/api/admin/signups/" + s.id, { method: "DELETE" });
-        tr.remove();
-      } catch (err) {
-        alert("刪除失敗：" + err.message);
-      }
-    });
+    delBtn.addEventListener("click", () => removeSignup(s));
     delTd.appendChild(delBtn);
     tr.appendChild(delTd);
     tbody.appendChild(tr);
+
+    // 手機卡片
+    const card = document.createElement("article");
+    card.className = "sg-card";
+    const head = document.createElement("div");
+    head.className = "sg-head";
+    const nm = document.createElement("strong");
+    nm.textContent = s.name;
+    head.appendChild(nm);
+    const sub = document.createElement("span");
+    sub.className = "sg-sub";
+    sub.textContent = [s.age, genderTxt, s.job, s.city].filter(Boolean).join("・");
+    head.appendChild(sub);
+    if (s.waitlisted) {
+      const b = document.createElement("span");
+      b.className = "sg-badge";
+      b.textContent = "候補";
+      head.appendChild(b);
+    }
+    card.appendChild(head);
+    const meta = document.createElement("div");
+    meta.className = "sg-meta";
+    meta.textContent = eventTitle(s.eventId) + "・" + new Date(s.createdAt).toLocaleString("zh-TW");
+    card.appendChild(meta);
+    if ((s.picks || []).length) {
+      const chips = document.createElement("div");
+      chips.className = "sg-chips";
+      s.picks.forEach((p) => {
+        const c = document.createElement("span");
+        c.className = "sg-chip";
+        c.textContent = p;
+        chips.appendChild(c);
+      });
+      card.appendChild(chips);
+    }
+    const contact = document.createElement("div");
+    contact.className = "sg-meta";
+    contact.textContent = "聯絡：" + contactTxt + (ig ? "・IG " + ig : "");
+    card.appendChild(contact);
+    if (qa.length) {
+      const box = document.createElement("div");
+      box.className = "sg-qa";
+      qa.forEach(([q, a]) => {
+        const qd = document.createElement("div");
+        qd.className = "sg-q";
+        qd.textContent = q;
+        const ad = document.createElement("div");
+        ad.className = "sg-a";
+        ad.textContent = a;
+        box.appendChild(qd);
+        box.appendChild(ad);
+      });
+      card.appendChild(box);
+    }
+    const actions = document.createElement("div");
+    actions.className = "sg-actions";
+    if (s.photoId) {
+      const pBtn = document.createElement("button");
+      pBtn.className = "ghost";
+      pBtn.textContent = "書櫃照";
+      pBtn.addEventListener("click", () => openPhoto(s));
+      actions.appendChild(pBtn);
+    }
+    const dBtn = document.createElement("button");
+    dBtn.className = "ghost";
+    dBtn.textContent = "刪除";
+    dBtn.addEventListener("click", () => removeSignup(s));
+    actions.appendChild(dBtn);
+    card.appendChild(actions);
+    cardsBox.appendChild(card);
   });
 
 };
