@@ -680,20 +680,54 @@ const initVoicePlayer = () => {
 
 /* ---------- 成長數據（真實資料：AdMan 人氣 + 報名人次 + 場次數） ---------- */
 
-const renderPulse = (d) => {
-  const tiles = document.getElementById("pulse-tiles");
-  if (!tiles) return;
-  tiles.textContent = "";
-  const tile = (num, label) => {
-    const t = el("div", "pulse-tile");
-    t.appendChild(el("div", "pulse-num", String(num)));
-    t.appendChild(el("div", "pulse-label", label));
-    tiles.appendChild(t);
+// 蘋果風大字數據帶：巨大數字 + 進場計數動畫（數字鎖 tabular 防跳動，跑完換回比例字）
+const renderBigStats = (d) => {
+  const row = document.getElementById("big-stats-row");
+  if (!row) return;
+  row.textContent = "";
+  const items = [];
+  items.push({ v: d.eventsHeld || 0, unit: "場", lbl: "小聚圓滿結束", accent: true });
+  items.push({ v: d.attendees || 0, unit: "人次", lbl: "報名參加" });
+  if (d.threadsViews) items.push({ v: Number(d.threadsViews), unit: "次", lbl: "Threads 檢視" });
+  else if (d.views) items.push({ v: Number(d.views), unit: "次", lbl: "網站瀏覽" });
+  const counters = [];
+  items.forEach((it) => {
+    const t = el("div", "big-stat" + (it.accent ? " accent" : ""));
+    const numWrap = el("div", "num counting");
+    const numSpan = el("span", "", "0");
+    numWrap.appendChild(numSpan);
+    numWrap.appendChild(el("span", "unit", it.unit));
+    t.appendChild(numWrap);
+    t.appendChild(el("div", "lbl", it.lbl));
+    row.appendChild(t);
+    counters.push({ numWrap, numSpan, target: it.v });
+  });
+  const fmt = (n) => Math.round(n).toLocaleString("en-US");
+  let played = false;
+  const play = () => {
+    if (played) return;
+    played = true;
+    const t0 = performance.now();
+    const DUR = 1400;
+    const tick = (now) => {
+      const p = Math.min(1, (now - t0) / DUR);
+      const ease = 1 - Math.pow(1 - p, 3);
+      counters.forEach((c) => { c.numSpan.textContent = fmt(c.target * ease); });
+      if (p < 1) requestAnimationFrame(tick);
+      else counters.forEach((c) => c.numWrap.classList.remove("counting"));
+    };
+    requestAnimationFrame(tick);
   };
-  if (d.threadsViews) tile(Number(d.threadsViews).toLocaleString("en-US"), "Threads 檢視次數");
-  else if (d.views) tile(d.views, "次網站瀏覽");
-  tile(d.attendees || 0, "人次報名參加");
-  tile(d.eventsHeld || 0, "場小聚圓滿結束");
+  if ("IntersectionObserver" in window) {
+    const io = new IntersectionObserver((es) => {
+      if (es.some((e) => e.isIntersecting)) { play(); io.disconnect(); }
+    }, { threshold: 0.4 });
+    io.observe(row);
+  } else play();
+};
+
+const renderPulse = (d) => {
+  renderBigStats(d);
   const heroStat = document.getElementById("hero-stat");
   if (heroStat && d.eventsHeld) heroStat.textContent = `已辦 ${d.eventsHeld} 場・${d.attendees || 0} 人次參加`;
 
