@@ -240,11 +240,15 @@
       <h1>場次管理</h1>
       <div class="card" id="quick-card">
     <h2>快速開場</h2>
-    <p class="muted">選類型＋日期＋時間就開場（編號自動接續、名額 8、費用 50、地點先隱藏之後在下面活動清單補）。開場會自動發會員鈴鐺通知。</p>
+    <p class="muted">選模板＋日期就開場（標題編號自動接續、名額 8、時段與費用隨模板帶入可改、地點先隱藏之後在下面活動清單補）。開場會自動發會員鈴鐺通知。</p>
     <div class="row" style="margin-top:0.4rem">
       <select id="q-type" style="padding:0.5rem 0.7rem;border:1.5px solid #f3e7d3;border-radius:10px">
-        <option value="english">英文口說小聚</option>
-        <option value="book">閱讀 Chill 聊</option>
+        <option value="work">工作派對（生產力派對）</option>
+        <option value="dinner">共進晚餐</option>
+        <option value="detox">數位排毒</option>
+        <option value="english">英文 Chill 聊</option>
+        <option value="bookclub">讀書小聚</option>
+        <option value="ai">AI 小聚</option>
         <option value="vibe">聊天小聚</option>
       </select>
       <input type="date" id="q-date" style="padding:0.45rem 0.7rem;border:1.5px solid #f3e7d3;border-radius:10px">
@@ -1056,12 +1060,45 @@ const renderQuickEdit = () => {
   });
 };
 
-/* ---- 快速開場 ---- */
+/* ---- 快速開場：固定模板（時段/費用/文案帶入，開場前都可改） ---- */
 const QUICK_TEMPLATES = {
-  english: { type: "english", base: "英文口說小聚", note: "不用很會講，敢開口就好。輕鬆話題、小組練習，全程零壓力。" },
-  book:    { type: "book",    base: "閱讀 Chill 聊", note: "帶一本你正在讀（或想讀）的書來，聊聊書、也聊聊天。什麼書都行，漫畫也可以。" },
-  vibe:    { type: "vibe",    base: "聊天小聚",     note: "下班後找個地方坐下來，聊工作、聊生活、聊最近在追什麼。" },
+  work: {
+    type: "vibe", base: "工作派對", idPrefix: "work", fee: 100, start: "14:00", end: "17:00",
+    note: "帶你的工作、side project 或任何想完成的事來，一起坐下來各自努力，中途休息聊聊彼此在做什麼。不想努力的時候，旁邊都是正在努力的人。帶筆電或平板來。",
+  },
+  dinner: {
+    type: "vibe", base: "共進晚餐", idPrefix: "dinner", fee: 0, start: "18:30", end: "20:30",
+    feeNote: "不收活動費，大家自己點自己的、各自結帳",
+    note: "一起吃頓晚餐，聊聊天認識新朋友。各自點自己的、各自結帳，人來就好。",
+  },
+  detox: {
+    type: "vibe", base: "數位排毒", idPrefix: "detox", fee: 50, start: "19:00", end: "21:00",
+    note: "手機收起來，兩個小時不滑。看書、寫字、畫畫、發呆都好，跟人面對面聊天——離線的感覺，久違了。",
+  },
+  english: {
+    type: "english", base: "英文 Chill 聊", idPrefix: "eng", fee: 200, start: "19:00", end: "21:00",
+    note: "不用很會講，敢開口就好。輕鬆話題＋小組聊，講錯沒人笑你，卡住換中文也完全 OK。",
+  },
+  bookclub: {
+    type: "book", base: "讀書小聚", idPrefix: "read", fee: 50, start: "19:00", end: "21:00",
+    note: "帶一本你正在讀（或想讀）的書來，聊聊書、也聊聊天。什麼書都行，漫畫也可以。",
+  },
+  ai: {
+    type: "vibe", base: "AI 小聚", idPrefix: "ai", fee: 200, start: "19:00", end: "21:00",
+    note: "聊 AI 工具、聊 agent、聊你拿 AI 做了什麼。有 demo 直接帶來開給大家看，沒做過、純好奇也歡迎。",
+  },
+  vibe: {
+    type: "vibe", base: "聊天小聚", idPrefix: "vibe", fee: 50, start: "19:00", end: "21:00",
+    note: "下班後找個地方坐下來，聊工作、聊生活、聊最近在追什麼。",
+  },
 };
+
+// 換模板時帶入該模板的預設時段（可再手動改）
+$("q-type").addEventListener("change", () => {
+  const tpl = QUICK_TEMPLATES[$("q-type").value];
+  if (tpl && tpl.start) $("q-start").value = tpl.start;
+  if (tpl && tpl.end) $("q-end").value = tpl.end;
+});
 
 $("q-create").addEventListener("click", async () => {
   const tpl = QUICK_TEMPLATES[$("q-type").value];
@@ -1071,16 +1108,17 @@ $("q-create").addEventListener("click", async () => {
   if (!date || !start) { setMsg("q-msg", "日期和開始時間要選", false); return; }
   // 編號自動接續：同 base 名稱的場次數 +1
   const n = eventsCache.filter((e) => (e.title || "").startsWith(tpl.base)).length + 1;
-  let id = tpl.type + "-" + date;
+  let id = (tpl.idPrefix || tpl.type) + "-" + date;
   while (eventsCache.some((e) => e.id === id)) id += "x";
   const ev = {
     id, type: tpl.type,
     title: tpl.base + " #" + n,
     date, time: end ? start + "–" + end : start,
     location: "台中（詳細店家報名後通知）", mapUrl: "",
-    capacity: 8, fee: 50, fomo: 8,
+    capacity: 8, fee: tpl.fee != null ? tpl.fee : 50, fomo: 8,
     note: tpl.note, status: "open",
   };
+  if (tpl.feeNote) ev.feeNote = tpl.feeNote;
   if (!confirm(`開場：${ev.date} ${ev.time}｜${ev.title}？`)) return;
   $("q-create").disabled = true;
   try {
