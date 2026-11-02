@@ -116,6 +116,19 @@
     .sg-a { font-size: 0.93rem; overflow-wrap: anywhere; white-space: pre-wrap; }
     .sg-actions { display: flex; gap: 0.6rem; justify-content: flex-end; }
     .sg-actions button { padding: 0.45rem 1.2rem; }
+    /* 人脈網 */
+    .people-tools { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.9rem; }
+    #pp-search { flex: 1; min-width: 200px; padding: 0.55rem 0.8rem; border: 1.5px solid #f3e7d3; border-radius: 10px; }
+    .people-list { display: grid; gap: 0.9rem; grid-template-columns: repeat(auto-fill, minmax(min(360px, 100%), 1fr)); align-items: start; }
+    .pp-events { font-size: 0.82rem; color: #6b4a38; }
+    .pp-note {
+      width: 100%; min-height: 60px; margin-top: 0.2rem;
+      border: 1.5px dashed #e2c9a8; border-radius: 10px; padding: 0.5rem 0.65rem;
+      font-family: inherit; font-size: 0.88rem; background: #fffaf0;
+    }
+    .pp-save-row { display: flex; align-items: center; gap: 0.6rem; justify-content: flex-end; }
+    .sg-badge.member { background: #4d7d61; }
+    .sg-badge.times { background: #6b4a38; }
     /* 桌機表格的表單內容格：分行呈現，不再用｜黏成一坨 */
     .td-qa div { margin-bottom: 0.15rem; }
     .td-qa .q { color: #9a7a63; font-size: 0.78rem; }
@@ -142,6 +155,7 @@
     <div class="side-brand"><img src="/logo-icon.png" alt=""> 揪可樂後台</div>
     <button class="nav-btn on" data-panel="p-dash"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/></svg> 數據總覽</button>
     <button class="nav-btn" data-panel="p-signups"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> 報名名單</button>
+    <button class="nav-btn" data-panel="p-people"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg> 人脈網</button>
     <button class="nav-btn" data-panel="p-traffic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg> 流量分析</button>
     <button class="nav-btn" data-panel="p-events"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg> 場次管理</button>
     <button class="nav-btn" data-panel="p-blog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M12 20h9"/><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/></svg> 文章</button>
@@ -190,6 +204,15 @@
     </div>
     <div class="signup-cards" id="signup-cards"></div>
   </div>
+    </section>
+    <section class="panel" id="p-people">
+      <h1>人脈網</h1>
+      <div class="card">
+        <h2>人脈資源網（<span id="pp-count">0</span> 人）</h2>
+        <p class="muted">所有場次報名自動歸戶成「人」（用會員 ID／電話／IG／聯絡方式比對）。註記只有你看得到，寫了就存在後台。</p>
+        <div class="people-tools"><input type="text" id="pp-search" placeholder="搜尋：名字、職業、主題、答案、註記…"></div>
+        <div class="people-list" id="people-list"></div>
+      </div>
     </section>
     <section class="panel" id="p-traffic">
       <h1>流量分析</h1>
@@ -372,6 +395,20 @@ const filteredSignups = () => {
   });
 };
 
+// 表單問答攤平：答案配上該場 asks 的題目文字（報名名單、人脈網共用）
+const qaEntries = (s) => {
+  const ev = eventsCache.find((e) => e.id === s.eventId);
+  const asks = ev && Array.isArray(ev.asks) ? ev.asks : [];
+  const out = [];
+  if (s.answer) out.push(["帶書", s.answer]);
+  (s.answers || []).forEach((a, i) => {
+    if (a) out.push([(asks[i] && asks[i].label) || "問題 " + (i + 1), a]);
+  });
+  if ((s.whyPicks || []).length) out.push(["為什麼來", s.whyPicks.join("、")]);
+  if (s.note) out.push(["想說的話", s.note]);
+  return out;
+};
+
 const renderSignups = () => {
   const filter = $("signup-filter").value;
   const signups = filteredSignups();
@@ -412,26 +449,13 @@ const renderSignups = () => {
   const cardsBox = $("signup-cards");
   cardsBox.textContent = "";
 
-  // 表單問答攤平：答案配上該場 asks 的題目文字
-  const qaEntries = (s) => {
-    const ev = eventsCache.find((e) => e.id === s.eventId);
-    const asks = ev && Array.isArray(ev.asks) ? ev.asks : [];
-    const out = [];
-    if (s.answer) out.push(["帶書", s.answer]);
-    (s.answers || []).forEach((a, i) => {
-      if (a) out.push([(asks[i] && asks[i].label) || "問題 " + (i + 1), a]);
-    });
-    if ((s.whyPicks || []).length) out.push(["為什麼來", s.whyPicks.join("、")]);
-    if (s.note) out.push(["想說的話", s.note]);
-    return out;
-  };
-
   const removeSignup = async (s) => {
     if (!confirm(`確定刪除「${s.name}」這筆報名？`)) return;
     try {
       await api("/api/admin/signups/" + s.id, { method: "DELETE" });
       signupsCache = signupsCache.filter((x) => x.id !== s.id);
       renderSignups();
+      renderPeople();
     } catch (err) {
       alert("刪除失敗：" + err.message);
     }
@@ -566,11 +590,172 @@ const renderSignups = () => {
 
 };
 
+/* ---- 人脈網：報名紀錄歸戶成「人」＋私人註記 ---- */
+let peopleNotes = {};
+
+const loadPeople = async () => {
+  try {
+    const d = await api("/api/admin/people");
+    peopleNotes = d.people || {};
+  } catch (err) {
+    peopleNotes = {};
+  }
+  renderPeople();
+};
+
+// 歸戶：會員 ID／電話／IG／聯絡方式任一相同就視為同一人
+const buildPeople = () => {
+  const norm = (v) => String(v || "").trim().toLowerCase().replace(/^@/, "");
+  const idOwner = new Map();
+  const people = [];
+  signupsCache.slice().reverse().forEach((s) => { // 由舊到新，後面的資料較新
+    const ids = [];
+    if (s.memberSub) ids.push("m:" + s.memberSub);
+    if (norm(s.phone)) ids.push("p:" + norm(s.phone));
+    if (norm(s.igHandle)) ids.push("i:" + norm(s.igHandle));
+    if (norm(s.contact)) ids.push("c:" + norm(s.contact));
+    if (!ids.length) ids.push("x:" + s.id);
+    let person = ids.map((k) => idOwner.get(k)).find(Boolean);
+    if (!person) {
+      person = { ids: new Set(), signups: [] };
+      people.push(person);
+    }
+    ids.forEach((k) => { person.ids.add(k); idOwner.set(k, person); });
+    person.signups.push(s);
+  });
+  return people;
+};
+
+const renderPeople = () => {
+  const listBox = $("people-list");
+  if (!listBox) return;
+  const q = ($("pp-search").value || "").trim().toLowerCase();
+  const people = buildPeople();
+  people.sort(
+    (a, b) =>
+      b.signups.length - a.signups.length ||
+      String(b.signups[b.signups.length - 1].createdAt).localeCompare(String(a.signups[a.signups.length - 1].createdAt))
+  );
+  listBox.textContent = "";
+  let shown = 0;
+  people.forEach((person) => {
+    const sgs = person.signups;
+    const latest = sgs[sgs.length - 1];
+    const keys = [...person.ids];
+    const prefKey = keys.find((k) => k.startsWith("m:")) || keys[0];
+    const noteKey = keys.find((k) => peopleNotes[k] && peopleNotes[k].note) || prefKey;
+    const saved = (peopleNotes[noteKey] && peopleNotes[noteKey].note) || "";
+    const latestOf = (f) => { for (let i = sgs.length - 1; i >= 0; i--) { if (sgs[i][f]) return sgs[i][f]; } return ""; };
+    const name = latestOf("name");
+    const genderTxt = latestOf("gender") === "male" ? "男" : latestOf("gender") === "female" ? "女" : "";
+    const contacts = [...new Set(sgs.flatMap((s) => [s.contact, s.phone, s.igHandle && "IG " + s.igHandle]).filter(Boolean))];
+    const picks = [...new Set(sgs.flatMap((s) => s.picks || []))];
+    const evts = [...new Set(sgs.map((s) => { const ev = eventsCache.find((e) => e.id === s.eventId); return ev ? `${ev.date}｜${ev.title}` : "先加入名單"; }))];
+    const qa = qaEntries(latest);
+    const hay = [name, latestOf("job"), latestOf("city"), contacts.join(" "), picks.join(" "), qa.map((x) => x[1]).join(" "), saved]
+      .join(" ").toLowerCase();
+    if (q && !hay.includes(q)) return;
+    shown++;
+
+    const card = document.createElement("article");
+    card.className = "sg-card";
+    const head = document.createElement("div");
+    head.className = "sg-head";
+    const nm = document.createElement("strong");
+    nm.textContent = name;
+    head.appendChild(nm);
+    const sub = document.createElement("span");
+    sub.className = "sg-sub";
+    sub.textContent = [latestOf("age"), genderTxt, latestOf("job"), latestOf("city")].filter(Boolean).join("・");
+    head.appendChild(sub);
+    if (keys.some((k) => k.startsWith("m:"))) {
+      const b = document.createElement("span");
+      b.className = "sg-badge member";
+      b.textContent = "會員";
+      head.appendChild(b);
+    }
+    if (sgs.length > 1) {
+      const b = document.createElement("span");
+      b.className = "sg-badge times";
+      b.textContent = "來過 " + sgs.length + " 場";
+      head.appendChild(b);
+    }
+    card.appendChild(head);
+    if (picks.length) {
+      const chips = document.createElement("div");
+      chips.className = "sg-chips";
+      picks.forEach((p) => {
+        const c = document.createElement("span");
+        c.className = "sg-chip";
+        c.textContent = p;
+        chips.appendChild(c);
+      });
+      card.appendChild(chips);
+    }
+    const contact = document.createElement("div");
+    contact.className = "sg-meta";
+    contact.textContent = "聯絡：" + contacts.join("・");
+    card.appendChild(contact);
+    const evLine = document.createElement("div");
+    evLine.className = "pp-events";
+    evLine.textContent = "場次：" + evts.join("／");
+    card.appendChild(evLine);
+    if (qa.length) {
+      const box = document.createElement("div");
+      box.className = "sg-qa";
+      qa.forEach(([qq, a]) => {
+        const qd = document.createElement("div");
+        qd.className = "sg-q";
+        qd.textContent = qq;
+        const ad = document.createElement("div");
+        ad.className = "sg-a";
+        ad.textContent = a;
+        box.appendChild(qd);
+        box.appendChild(ad);
+      });
+      card.appendChild(box);
+    }
+    const ta = document.createElement("textarea");
+    ta.className = "pp-note";
+    ta.placeholder = "你的私人註記：這個人能幹嘛、聊過什麼、要不要再約…";
+    ta.value = saved;
+    card.appendChild(ta);
+    const saveRow = document.createElement("div");
+    saveRow.className = "pp-save-row";
+    const msg = document.createElement("span");
+    msg.className = "msg ok";
+    const btn = document.createElement("button");
+    btn.className = "ghost";
+    btn.textContent = "存註記";
+    btn.addEventListener("click", async () => {
+      try {
+        await api("/api/admin/people/" + encodeURIComponent(noteKey), {
+          method: "PUT",
+          body: JSON.stringify({ note: ta.value }),
+        });
+        peopleNotes[noteKey] = { ...(peopleNotes[noteKey] || {}), note: ta.value.trim() };
+        msg.textContent = "已存 ✓";
+        setTimeout(() => { msg.textContent = ""; }, 1800);
+      } catch (err) {
+        msg.className = "msg err";
+        msg.textContent = "存失敗：" + err.message;
+      }
+    });
+    saveRow.appendChild(msg);
+    saveRow.appendChild(btn);
+    card.appendChild(saveRow);
+    listBox.appendChild(card);
+  });
+  $("pp-count").textContent = shown;
+};
+
 const render = (data) => {
   eventsCache = data.events || [];
   signupsCache = (data.signups || []).slice().reverse();
   buildFilterOptions();
   renderSignups();
+  loadPeople();
+  $("pp-search").addEventListener("input", renderPeople);
   $("events-json").value = JSON.stringify(eventsCache, null, 2);
 
   const sel = $("n-audience");

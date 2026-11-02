@@ -32,6 +32,7 @@ const ADMIN_TOKEN = ENV.ADMIN_TOKEN || "";
 const LMU_APP_ID = ENV.LETMEUSE_APP_ID || "";
 const LMU_SECRET = ENV.LETMEUSE_APP_SECRET || "";
 const MEMBERS_PATH = path.join(DATA_DIR, "members.json");
+const PEOPLE_PATH = path.join(DATA_DIR, "people.json"); // 人脈網註記（admin 私人筆記）
 const POSTS_PATH = path.join(DATA_DIR, "posts.json");
 const NOTICES_PATH = path.join(DATA_DIR, "notices.json");
 const UPLOADS_DIR = path.join(DATA_DIR, "uploads");
@@ -141,6 +142,7 @@ const ensureData = () => {
   if (!fs.existsSync(EVENTS_PATH)) fs.writeFileSync(EVENTS_PATH, JSON.stringify(SEED_EVENTS, null, 2), "utf8");
   if (!fs.existsSync(SIGNUPS_PATH)) fs.writeFileSync(SIGNUPS_PATH, "[]", "utf8");
   if (!fs.existsSync(MEMBERS_PATH)) fs.writeFileSync(MEMBERS_PATH, "{}", "utf8");
+  if (!fs.existsSync(PEOPLE_PATH)) fs.writeFileSync(PEOPLE_PATH, "{}", "utf8");
   if (!fs.existsSync(NOTICES_PATH)) fs.writeFileSync(NOTICES_PATH, "[]", "utf8");
   if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 };
@@ -1000,6 +1002,27 @@ const handleAdmin = (req, res, pathname) => {
       else sendJson(res, 200, { success: true });
     });
     return true;
+  }
+
+  // 人脈網註記：personKey（歸戶鍵，前端算）→ 自由筆記；空筆記即刪除
+  if (req.method === "GET" && pathname === "/api/admin/people") {
+    sendJson(res, 200, { people: readJsonFile(PEOPLE_PATH, {}) });
+    return;
+  }
+  const mPerson = pathname.match(/^\/api\/admin\/people\/(.{1,160})$/);
+  if (req.method === "PUT" && mPerson) {
+    readJsonBody(req, res, (body) => {
+      const key = decodeURIComponent(mPerson[1]).slice(0, 120);
+      const people = readJsonFile(PEOPLE_PATH, {});
+      const note = cleanStr(body.note, 2000);
+      const next = { ...people, [key]: { note, updatedAt: new Date().toISOString() } };
+      if (!note) delete next[key];
+      writeJsonAtomic(PEOPLE_PATH, next, (err) => {
+        if (err) sendJson(res, 500, { error: "寫入失敗" });
+        else sendJson(res, 200, { success: true });
+      });
+    });
+    return;
   }
 
   if (req.method === "GET" && pathname === "/api/admin/overview") {
