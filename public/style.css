@@ -1390,34 +1390,8 @@ a { color: var(--fizz); }
 .scene-col .voice-heading { text-align: left; margin-bottom: 0.9rem; }
 .scene-col .scene-grid { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
 
-/* ---------- 蘋果風大字數據帶 ---------- */
-.big-stats { text-align: center; padding-block: clamp(2.6rem, 7vw, 5.5rem); }
-.big-stats-kicker {
-  font-size: clamp(0.88rem, 1.4vw, 1rem); letter-spacing: 0.12em;
-  color: var(--cola-soft); margin-bottom: clamp(1.4rem, 3vw, 2.4rem);
-}
-.big-stats-row {
-  display: flex; justify-content: center; align-items: baseline;
-  gap: clamp(2.2rem, 7vw, 6.5rem); flex-wrap: wrap; padding-inline: 1rem;
-}
-.big-stat { text-align: center; }
-.big-stat .num {
-  font-family: var(--font-display);
-  font-size: clamp(3.6rem, 10vw, 7.2rem);
-  line-height: 1; letter-spacing: -0.02em;
-  color: var(--cola);
-}
-.big-stat .num.counting { font-variant-numeric: tabular-nums; } /* 動畫中鎖字寬，結束換回比例字 */
-.big-stat.accent .num { color: var(--fizz); }
-.big-stat .unit { font-size: 0.34em; color: var(--cola-soft); margin-left: 0.12em; }
-.big-stat .lbl {
-  margin-top: 0.55rem; font-size: clamp(0.88rem, 1.3vw, 1rem);
-  color: var(--cola-soft); letter-spacing: 0.06em;
-}
-
 /* ---------- 成長數據 ---------- */
 .pulse-tiles { display: flex; justify-content: center; gap: clamp(2rem, 6vw, 4.5rem); flex-wrap: wrap; margin-bottom: 1.8rem; }
-.pulse-tiles:empty { display: none; } /* 數據改由大字帶呈現，舊容器留空自動收起 */
 .pulse-tile { text-align: center; }
 .pulse-num {
   font-family: var(--font-display);
