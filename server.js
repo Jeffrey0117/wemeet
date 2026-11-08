@@ -34,7 +34,7 @@ const LMU_APP_ID = ENV.LETMEUSE_APP_ID || "";
 // 進來、共享密鑰簽的），不是驗使用者 token 用的 —— token 自 2026-10-28 起只收
 // ES256，驗證只需要 JWKS 公鑰。別因為「ES256 之後不需要 app secret」就把它拿掉，
 // 拿掉的話 webhook 會全部驗不過。
-const LMU_SECRET = ENV.LETMEUSE_APP_SECRET || "";
+const LMU_SECRET = ENV.LETMEUSE_APP_SECRET || ""; // webhook HMAC 專用（見上）
 const MEMBERS_PATH = path.join(DATA_DIR, "members.json");
 const PEOPLE_PATH = path.join(DATA_DIR, "people.json"); // 人脈網註記（admin 私人筆記）
 const POSTS_PATH = path.join(DATA_DIR, "posts.json");
