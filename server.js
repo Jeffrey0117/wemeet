@@ -30,6 +30,10 @@ const ENV = { ...loadEnv(), ...process.env };
 const PORT = Number(ENV.PORT) || 4046;
 const ADMIN_TOKEN = ENV.ADMIN_TOKEN || "";
 const LMU_APP_ID = ENV.LETMEUSE_APP_ID || "";
+// ⚠️ 這把 secret **只給 /api/letmeuse-webhook 做 HMAC 驗章**（LetMeUse 主動打
+// 進來、共享密鑰簽的），不是驗使用者 token 用的 —— token 自 2026-10-28 起只收
+// ES256，驗證只需要 JWKS 公鑰。別因為「ES256 之後不需要 app secret」就把它拿掉，
+// 拿掉的話 webhook 會全部驗不過。
 const LMU_SECRET = ENV.LETMEUSE_APP_SECRET || "";
 const MEMBERS_PATH = path.join(DATA_DIR, "members.json");
 const PEOPLE_PATH = path.join(DATA_DIR, "people.json"); // 人脈網註記（admin 私人筆記）
