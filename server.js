@@ -148,84 +148,35 @@ const ensureData = () => {
 };
 
 /* ---------- LetMeUse JWT 驗簽（只收 ES256 via JWKS） ---------- */
-// ⚠️ 2026-10-28 資安:廢除 HS256（pokkit 事件：app secret 一洩就能自簽任意 sub 偽造任何用戶）。
-// LetMeUse 早已全面 ES256，真實 token 走 JWKS 公鑰（除非 LetMeUse 私鑰外洩，否則偽造不了）。
+// 2026-11-08：原本這裡內聯了一份 JWKS 快取 + 驗章（約 78 行），已改用
+// `jwks-verify-kit`。生態系原本有十份各自獨立的拷貝，每份踩到不同的一半坑；
+// 這份當時中的是：
+//   1. `if (!payload.exp || payload.exp * 1000 < Date.now())` —— 字串型 exp 兩
+//      邊都躲過（`!"abc"` 是 false、`"abc" < now` 的 NaN 比較也是 false）→
+//      **永不過期**。而 4h 的 exp 是這套設計唯一的撤銷機制（登出、停用帳號都
+//      靠它）。
+//   2. `if (LMU_APP_ID && ...)` —— 自己忘了設 LETMEUSE_APP_ID 就等於接受任何
+//      LetMeUse app 的任何使用者（JWKS 只有一把金鑰、簽發所有 app 的 token，
+//      所以 app claim 是唯一的租戶邊界）。
+//   3. `fetch(JWKS_URL)` 沒有逾時 —— node 的 fetch 沒有預設逾時，對方接了連線
+//      卻不回應會讓 promise 永不 settle → `jwksFetching` 旗標永遠卡住 → 快取
+//      再也不更新、每個請求都 401 直到重啟，而且零診斷。
+//   4. `if (m.size) { jwksKeys = m }` —— 格式正確的空回應不覆蓋快取，所以緊急
+//      撤銷金鑰（私鑰外洩後把金鑰下架）永遠不生效。
+//   5. 沒有 nbf 檢查、沒有簽章長度/字集檢查、kid 沒帶也往下走。
+// ⚠️ 2026-10-28 資安:廢除 HS256（pokkit 事件：app secret 一洩就能自簽任意 sub
+// 偽造任何用戶）。LetMeUse 早已全面 ES256，真實 token 走 JWKS 公鑰。
+// 接線在 src/lmu.js（抽出去才測得到：這個檔案一 require 就會起 HTTP server）。
+// appId 或網址缺一個就在啟動時 throw —— 刻意的，理由見那個檔案。
+const { createLmu } = require("./src/lmu");
 
-// JWKS 公鑰快取：背景抓、同步讀（照 quickky jwks-cache 模式）
 const LMU_BASE_URL = (ENV.LETMEUSE_BASE_URL || "").replace(/\/$/, "");
-const JWKS_URL = ENV.LETMEUSE_JWKS_URL || (LMU_BASE_URL ? LMU_BASE_URL + "/api/jwks" : "");
-let jwksKeys = new Map();
-let jwksLastFetch = 0;
-let jwksFetching = false;
-
-const refreshJwks = async () => {
-  if (jwksFetching || !JWKS_URL) return;
-  jwksFetching = true;
-  try {
-    const res = await fetch(JWKS_URL);
-    if (!res.ok) return;
-    const data = await res.json();
-    const m = new Map();
-    for (const jwk of data.keys || []) {
-      try {
-        if (jwk.kid) m.set(jwk.kid, crypto.createPublicKey({ key: jwk, format: "jwk" }));
-      } catch (err) {}
-    }
-    if (m.size) {
-      jwksKeys = m;
-      jwksLastFetch = Date.now();
-    }
-  } catch (err) {
-  } finally {
-    jwksFetching = false;
-  }
-};
-
-const getJwksKey = (kid) => {
-  const key = jwksKeys.get(kid);
-  if (!key && Date.now() - jwksLastFetch > 60 * 1000) void refreshJwks();
-  return key || null;
-};
-
-const verifyLmuToken = (token) => {
-  if (!token) return null;
-  try {
-    const parts = token.split(".");
-    if (parts.length !== 3) return null;
-    const [h, p, s] = parts;
-    const header = JSON.parse(Buffer.from(h, "base64url").toString("utf8"));
-
-    if (header.alg === "ES256") {
-      const pub = getJwksKey(header.kid);
-      if (!pub) return null;
-      const ok = crypto.verify(
-        "sha256",
-        Buffer.from(h + "." + p),
-        { key: pub, dsaEncoding: "ieee-p1363" },
-        Buffer.from(s, "base64url")
-      );
-      if (!ok) return null;
-    } else {
-      return null; // HS256 / none / 其他 → 一律擋
-    }
-
-    const payload = JSON.parse(Buffer.from(p, "base64url").toString("utf8"));
-    if (!payload) return null;
-    payload.sub = payload.sub || payload.userId;
-    if (!payload.sub) return null;
-    if (LMU_APP_ID && payload.app !== LMU_APP_ID) return null; // 別的 app 的 token 不準借用，沒帶 app 也擋
-    if (!payload.exp || payload.exp * 1000 < Date.now()) return null; // 沒有效期的 token 一律不收
-    return payload;
-  } catch (err) {
-    return null;
-  }
-};
-
-const lmuUser = (req) => verifyLmuToken(bearerToken(req));
-
-void refreshJwks();
-const jwksTimer = setInterval(() => void refreshJwks(), 60 * 60 * 1000);
-if (jwksTimer.unref) jwksTimer.unref();
+const lmuVerifier = createLmu({
+  appId: LMU_APP_ID,
+  jwksUrl: ENV.LETMEUSE_JWKS_URL || "",
+  baseUrl: LMU_BASE_URL,
+});
+const { verifyLmuToken, lmuUser } = lmuVerifier;
 
 /* ---------- 簡易 IP rate limit（POST /api/signup） ---------- */
 
@@ -1387,6 +1338,22 @@ const handleRequest = (req, res) => {
     return;
   }
 
+  // 健檢。刻意「一律回 200」:JWKS 抓不到時重啟這個服務救不了（問題在上游）,
+  // 而 cloudpipe 的 watchdog 探的就是這支 → 回 5xx 只會換來無用的重啟迴圈。
+  // 但依賴的狀態一定要露出來,否則就是 areyoubot 那種「全部 401 卻一片綠燈」。
+  //
+  // ⚠️ 公開版只給最小狀態。完整 stats() 會洩漏內部 JWKS 網址,而且 lastMissKid
+  // 是「呼叫端送來的 kid」—— 原樣回去等於反射式資訊外流（我在 selfize 犯過）。
+  if (req.method === "GET" && pathname === "/api/health") {
+    const s = lmuVerifier.stats();
+    sendJson(res, 200, {
+      ok: true,
+      service: "wemeet",
+      jwks: { ok: s.keys > 0, keys: s.keys, degraded: s.stale },
+    });
+    return;
+  }
+
   if (req.method === "GET" && pathname === "/api/events") {
     sendJson(res, 200, { events: publicEvents() });
     return;
@@ -1638,6 +1605,18 @@ process.on("uncaughtException", (err) => console.error("uncaught:", err));
 process.on("unhandledRejection", (err) => console.error("unhandled:", err));
 
 ensureData();
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
   process.stdout.write(`wemeet server listening on :${PORT}\n`);
+  // JWKS 開機預熱。必須做,因為 verifySync 在快取 miss 時一律 fail-closed ——
+  // 不預熱的話重啟後「第一個」請求就算帶完全有效的 token 也會 401,使用者看到
+  // 的是「我的登入壞了」。
+  //
+  // 而且一定要把結果印出來:LetMeUse 的 signAccessToken 在 env 掉了的時候會
+  // 無聲退回 HS256,那時候全生態同時 401 且零線索,這一行是唯一的早期訊號。
+  const s = await lmuVerifier.ready();
+  if (!s.keys) {
+    process.stderr.write(`[wemeet] JWKS 預熱沒拿到金鑰 — 所有登入會 401: ${s.lastError}\n`);
+  } else {
+    process.stdout.write(`[wemeet] JWKS ready (${s.keys} key(s), kid=${s.kids.join(",")})\n`);
+  }
 });

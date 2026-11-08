@@ -6,6 +6,10 @@
   "description": "Chill Club 揪可樂｜台中輕鬆小聚 官網 + 活動報名",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node --test test/lmu.test.js"
+  },
+  "dependencies": {
+    "jwks-verify-kit": "github:Jeffrey0117/jwks-verify-kit"
   }
 }
