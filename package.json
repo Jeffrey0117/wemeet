@@ -10,6 +10,6 @@
     "test": "node --test test/lmu.test.js"
   },
   "dependencies": {
-    "jwks-verify-kit": "github:Jeffrey0117/jwks-verify-kit"
+    "jwks-verify-kit": "github:Jeffrey0117/jwks-verify-kit#v0.4.5"
   }
 }
